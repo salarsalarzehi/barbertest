@@ -108,11 +108,15 @@
         const times = ["۱۰:۰۰ - ۱۱:۰۰", "۱۱:۰۰ - ۱۲:۰۰", "۱۶:۰۰ - ۱۷:۰۰", "۱۷:۰۰ - ۱۸:۰۰", "۱۸:۰۰ - ۱۹:۰۰"];
         let step = 1, service = "", date = "", time = "";
         let disabledSlots = [];
+        let userChatId = null;
 
         try {
             if (window.Bale && window.Bale.WebApp) {
                 window.Bale.WebApp.ready();
                 window.Bale.WebApp.expand();
+                if (window.Bale.WebApp.initDataUnsafe && window.Bale.WebApp.initDataUnsafe.user) {
+                    userChatId = window.Bale.WebApp.initDataUnsafe.user.id;
+                }
             }
         } catch(e){}
 
@@ -193,32 +197,32 @@
 
         async function sendNotification(bookingObj, adminText, customerText) {
             try {
-                // ۱. ثبت در پنل مدیریت دیتابیس
+                // ثبت در دیتابیس
                 await fetch(`${WORKER_URL}/bookings`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(bookingObj)
                 });
 
-                // ۲. ارسال مستقیم پیام به بات برای مدیریت (پیام شخصی شما)
+                // ارسال مجزای پیام مدیریت و پیام تشکر مشتری از طریق ورکر
                 await fetch(WORKER_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text: adminText })
+                    body: JSON.stringify({ 
+                        adminText: adminText,
+                        customerText: customerText,
+                        userChatId: userChatId
+                    })
                 });
 
-                // ۳. ارسال پیام تشکر کوتاه به چت خود مشتری
-                if (window.Bale && window.Bale.WebApp) {
-                    window.Bale.WebApp.sendData(customerText);
-                }
             } catch (err) {
-                console.error("خطا در ارسال اطلاعات:", err);
+                console.error("خطا:", err);
             } finally {
                 setTimeout(() => {
                     if (window.Bale && window.Bale.WebApp) {
                         window.Bale.WebApp.close();
                     }
-                }, 1000);
+                }, 1500);
             }
         }
 
@@ -250,7 +254,7 @@
 
                 const bookingObj = { name, phone, service, date, time, note, id: Date.now() };
                 
-                // متن رزرو کامل فقط جهت ارسال مستقیم به مدیریت
+                // پیام کامل رزرو برای شما (مدیر)
                 const adminText = `💈 **نوبت جدید در پیرایش سالار**\n\n` +
                                     `👤 مشتری: ${name}\n` +
                                     `📞 تلفن: ${phone}\n` +
@@ -258,8 +262,8 @@
                                     `⏰ زمان: ${date} (${time})\n` +
                                     `📝 توضیحات: ${note}`;
 
-                // متن تشکر و تأییدیه که در صفحه چت مشتری قرار می‌گیرد
-                const customerText = `با تشکر، وقت شما در روز ${date} ساعت ${time} در آرایشگاه سالار رزرو شد.`;
+                // پیام تشکر اختصاصی برای مشتری
+                const customerText = `سلام تشکر وقت شما در روز ${date} ساعت ${time} در آرایشگاه آرمین رزرو شد منتظرتان هستم تشکر`;
 
                 document.getElementById('step3').classList.add('hidden');
                 document.getElementById('bottomBar').classList.add('hidden');
