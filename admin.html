@@ -34,7 +34,7 @@
             <div class="flex gap-2 overflow-x-auto pb-2 custom-scrollbar" id="adminDateContainer"></div>
         </div>
 
-        <div>
+        <div class="pt-2">
             <label class="block text-xs text-slate-400 mb-2">ساعات کاری این روز (کلیک برای غیرفعال کردن):</label>
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="adminTimeContainer"></div>
         </div>
@@ -79,18 +79,23 @@
         function renderAdminCalendar() {
             const container = document.getElementById('adminDateContainer');
             container.innerHTML = '';
+            
+            // تولید کلید تاریخ استاندارد دقیقاً مشابه مینی‌اپ مشتری
             for (let i = 0; i < 7; i++) {
-                const d = new Date(); d.setDate(d.getDate() + i);
-                const str = d.toLocaleDateString('fa-IR', { weekday: 'short', month: 'short', day: 'numeric' });
-                if (i === 0 && !selectedAdminDate) selectedAdminDate = str;
+                const d = new Date(); 
+                d.setDate(d.getDate() + i);
+                const dateStr = d.toLocaleDateString('fa-IR', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '-');
+                const labelStr = d.toLocaleDateString('fa-IR', { weekday: 'short', month: 'short', day: 'numeric' });
+                
+                if (i === 0 && !selectedAdminDate) selectedAdminDate = dateStr;
 
                 const b = document.createElement('button');
-                b.className = `flex-shrink-0 p-2.5 rounded-xl border text-xs min-w-[75px] cursor-pointer ${
-                    selectedAdminDate === str ? 'border-emerald-500 text-emerald-400 bg-slate-800' : 'border-slate-700 bg-slate-800 text-white'
+                b.className = `flex-shrink-0 p-2.5 rounded-xl border text-xs min-w-[85px] cursor-pointer ${
+                    selectedAdminDate === dateStr ? 'border-emerald-500 text-emerald-400 bg-slate-800 font-bold' : 'border-slate-700 bg-slate-800 text-white'
                 }`;
-                b.innerText = str;
+                b.innerText = labelStr;
                 b.onclick = () => {
-                    selectedAdminDate = str;
+                    selectedAdminDate = dateStr;
                     renderAdminCalendar();
                     renderAdminTimes();
                 };
@@ -101,6 +106,7 @@
         function renderAdminTimes() {
             const container = document.getElementById('adminTimeContainer');
             container.innerHTML = '';
+            
             times.forEach(t => {
                 const key = `${selectedAdminDate}_${t}`;
                 const isDisabled = disabledSlots.includes(key);
@@ -128,7 +134,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ disabledSlots })
                 });
-                alert('تغییرات ساعات کاری برای تاریخ ' + selectedAdminDate + ' با موفقیت ذخیره شد.');
+                alert('تغییرات ساعات کاری با موفقیت ذخیره شد.');
             } catch (e) {
                 alert('خطا در ذخیره سازی!');
             }
