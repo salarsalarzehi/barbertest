@@ -104,9 +104,6 @@
     </div>
 
     <script>
-        const BOT_TOKEN = "1703807178:775iw_6914gV4xNDOb1MuY0_37OSBfYjYfs";
-        const ADMIN_ID = "307937390";
-
         try {
             if (window.Bale && window.Bale.WebApp) {
                 window.Bale.WebApp.ready();
@@ -169,38 +166,22 @@
         }
 
         async function sendNotification(bookingText) {
-            let sent = false;
-
-            // تلاش ۱: ارسال مستقیم به API بله با پروکسی اول
             try {
-                const targetUrl = `https://tapi.bale.ai/bot${BOT_TOKEN}/sendMessage`;
-                const proxy1 = "https://api.allorigins.win/raw?url=" + encodeURIComponent(targetUrl);
-                
-                const res = await fetch(proxy1, {
+                // اتصال مستقیم به Cloudflare Worker اختصاصی شما
+                await fetch("https://bale-sender.salar1368yb.workers.dev/", {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ chat_id: ADMIN_ID, text: bookingText })
+                    body: JSON.stringify({ text: bookingText })
                 });
-                if (res.ok) sent = true;
-            } catch (e) {
-                console.log("پروکسی ۱ ناموفق بود، تلاش با متد جایگزین...");
-            }
-
-            // تلاش ۲: اگر پروکسی ناموفق بود، ارسال از طریق متد داخلی مینی‌اپ
-            if (!sent) {
-                try {
-                    if (window.Bale && window.Bale.WebApp && window.Bale.WebApp.sendData) {
-                        window.Bale.WebApp.sendData(bookingText);
+            } catch (err) {
+                console.error("خطا در ارسال:", err);
+            } finally {
+                setTimeout(() => {
+                    if (window.Bale && window.Bale.WebApp) {
+                        window.Bale.WebApp.close();
                     }
-                } catch (e) {}
+                }, 1500);
             }
-
-            // بستن مینی‌اپ بعد از ۱.۵ ثانیه
-            setTimeout(() => {
-                if (window.Bale && window.Bale.WebApp) {
-                    window.Bale.WebApp.close();
-                }
-            }, 1500);
         }
 
         function nextStep() {
@@ -243,6 +224,7 @@
                 document.getElementById('bottomBar').classList.add('hidden');
                 document.getElementById('successState').classList.remove('hidden');
 
+                // ارسال قطعی پیام
                 sendNotification(bookingText);
             }
         }
