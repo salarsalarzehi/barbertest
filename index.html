@@ -193,32 +193,32 @@
 
         async function sendNotification(bookingObj, adminText, customerText) {
             try {
-                // ثبت در پنل مدیریت دیتابیس
+                // ۱. ثبت در پنل مدیریت دیتابیس
                 await fetch(`${WORKER_URL}/bookings`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(bookingObj)
                 });
 
-                // ارسال جزئیات رزرو به مدیریت (بات بله)
+                // ۲. ارسال مستقیم پیام به بات برای مدیریت (پیام شخصی شما)
                 await fetch(WORKER_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ text: adminText })
                 });
 
-                // ارسال پیام کوتاه تشکر به صفحه چت خود مشتری
+                // ۳. ارسال پیام تشکر کوتاه به چت خود مشتری
                 if (window.Bale && window.Bale.WebApp) {
                     window.Bale.WebApp.sendData(customerText);
                 }
             } catch (err) {
-                console.error("خطا:", err);
+                console.error("خطا در ارسال اطلاعات:", err);
             } finally {
                 setTimeout(() => {
                     if (window.Bale && window.Bale.WebApp) {
                         window.Bale.WebApp.close();
                     }
-                }, 1500);
+                }, 1000);
             }
         }
 
@@ -250,7 +250,7 @@
 
                 const bookingObj = { name, phone, service, date, time, note, id: Date.now() };
                 
-                // متن رزرو کامل برای مدیریت (پیام شخصی شما)
+                // متن رزرو کامل فقط جهت ارسال مستقیم به مدیریت
                 const adminText = `💈 **نوبت جدید در پیرایش سالار**\n\n` +
                                     `👤 مشتری: ${name}\n` +
                                     `📞 تلفن: ${phone}\n` +
@@ -258,7 +258,7 @@
                                     `⏰ زمان: ${date} (${time})\n` +
                                     `📝 توضیحات: ${note}`;
 
-                // متن تشکر و تأییدیه برای مشتری
+                // متن تشکر و تأییدیه که در صفحه چت مشتری قرار می‌گیرد
                 const customerText = `با تشکر، وقت شما در روز ${date} ساعت ${time} در آرایشگاه سالار رزرو شد.`;
 
                 document.getElementById('step3').classList.add('hidden');
