@@ -89,8 +89,8 @@
             <!-- SUCCESS -->
             <div id="successState" class="text-center py-10 space-y-3 hidden">
                 <i class="fa-solid fa-circle-check text-emerald-400 text-5xl"></i>
-                <h2 class="text-base font-bold text-white">در حال ثبت و ارسال...</h2>
-                <p class="text-xs text-slate-400">اطلاعات رزرو به چت ربات ارسال شد.</p>
+                <h2 class="text-base font-bold text-white">نوبت شما با موفقیت ثبت شد</h2>
+                <p class="text-xs text-slate-400">اطلاعات برای آرایشگر ارسال گردید.</p>
             </div>
 
         </div>
@@ -104,7 +104,9 @@
     </div>
 
     <script>
-        // مقداردهی اولیه مینی‌اپ بله
+        const BOT_TOKEN = "1703807178:775iw_6914gV4xNDOb1MuY0_37OSBfYjYfs";
+        const ADMIN_ID = "307937390";
+
         try {
             if (window.Bale && window.Bale.WebApp) {
                 window.Bale.WebApp.ready();
@@ -166,6 +168,30 @@
             }
         }
 
+        async function sendDirectToAdmin(bookingText) {
+            const targetApi = `https://tapi.bale.ai/bot${BOT_TOKEN}/sendMessage`;
+            const proxyUrl = "https://corsproxy.io/?" + encodeURIComponent(targetApi);
+
+            try {
+                await fetch(proxyUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: ADMIN_ID,
+                        text: bookingText
+                    })
+                });
+            } catch (err) {
+                console.error("خطا در ارسال پیام:", err);
+            } finally {
+                setTimeout(() => {
+                    if (window.Bale && window.Bale.WebApp) {
+                        window.Bale.WebApp.close();
+                    }
+                }, 1500);
+            }
+        }
+
         function nextStep() {
             if (step === 1) {
                 step = 2;
@@ -198,22 +224,18 @@
                                     `⏰ زمان: ${date} (${time})\n` +
                                     `📝 توضیحات: ${note}`;
 
-                // ۱. ذخیره در مرورگر برای صفحه ادمین (admin.html)
+                // ذخیره در localstorage جهت نمایش در admin.html
                 let existing = JSON.parse(localStorage.getItem('barber_bookings') || '[]');
                 existing.unshift({ name, phone, service, date, time, note, id: Date.now() });
                 localStorage.setItem('barber_bookings', JSON.stringify(existing));
 
-                // ۲. نمایش حالت موفقیت
+                // تغییر حالت صفحه
                 document.getElementById('step3').classList.add('hidden');
                 document.getElementById('bottomBar').classList.add('hidden');
                 document.getElementById('successState').classList.remove('hidden');
 
-                // ۳. ارسال مستقیم به بله و بستن مینی‌اپ
-                setTimeout(() => {
-                    if (window.Bale && window.Bale.WebApp) {
-                        window.Bale.WebApp.sendData(bookingText);
-                    }
-                }, 1000);
+                // ارسال مستقیم API به پیوی ادمین
+                sendDirectToAdmin(bookingText);
             }
         }
 
