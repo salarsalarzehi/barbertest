@@ -9,6 +9,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
     <style>
         body { font-family: 'Yekan Bakh', sans-serif; background-color: #0f172a; color: #f8fafc; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
     </style>
 </head>
 <body class="p-4 max-w-2xl mx-auto space-y-6">
@@ -16,19 +18,29 @@
     <!-- Header -->
     <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex items-center justify-between">
         <h1 class="text-base font-bold text-white"><i class="fa-solid fa-user-gear text-emerald-400 ml-2"></i>مدیریت نوبت‌ها و ساعات کاری</h1>
-        <button onclick="loadData()" class="text-xs bg-slate-800 px-3 py-2 rounded-xl border border-slate-700 text-slate-300">
+        <button onclick="loadData()" class="text-xs bg-slate-800 px-3 py-2 rounded-xl border border-slate-700 text-slate-300 cursor-pointer">
             <i class="fa-solid fa-rotate-right ml-1"></i> بروزرسانی
         </button>
     </div>
 
-    <!-- مدیریت ساعات کاری -->
+    <!-- مدیریت ساعات کاری و روزها -->
     <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 space-y-3">
         <h2 class="text-xs font-bold text-slate-300 border-b border-slate-800 pb-2">
-            <i class="fa-solid fa-clock text-amber-400 ml-1"></i> خاموش کردن / مدیریت ساعات حضور
+            <i class="fa-solid fa-clock text-amber-400 ml-1"></i> بستن سانس‌ها و روزهای عدم حضور
         </h2>
-        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-2" id="timeSlotsContainer"></div>
-        <button onclick="saveDisabledSlots()" class="w-full mt-3 py-2.5 bg-emerald-500 text-white rounded-xl text-xs font-bold">
-            ذخیره تغییرات ساعات
+        
+        <div>
+            <label class="block text-xs text-slate-400 mb-2">انتخاب روز:</label>
+            <div class="flex gap-2 overflow-x-auto pb-2 custom-scrollbar" id="adminDateContainer"></div>
+        </div>
+
+        <div>
+            <label class="block text-xs text-slate-400 mb-2">ساعات کاری این روز (کلیک برای غیرفعال کردن):</label>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="adminTimeContainer"></div>
+        </div>
+
+        <button onclick="saveDisabledSlots()" class="w-full mt-3 py-2.5 bg-emerald-500 text-white rounded-xl text-xs font-bold cursor-pointer">
+            ذخیره تغییرات ساعات این روز
         </button>
     </div>
 
@@ -46,6 +58,7 @@
         const WORKER_URL = "https://bale-sender.salar1368yb.workers.dev";
         const times = ["۱۰:۰۰ - ۱۱:۰۰", "۱۱:۰۰ - ۱۲:۰۰", "۱۶:۰۰ - ۱۷:۰۰", "۱۷:۰۰ - ۱۸:۰۰", "۱۸:۰۰ - ۱۹:۰۰"];
         let disabledSlots = [];
+        let selectedAdminDate = "";
 
         async function loadData() {
             try {
@@ -59,31 +72,53 @@
             } catch (e) { 
                 console.error(e); 
             }
-            renderTimeSlots();
+            renderAdminCalendar();
+            renderAdminTimes();
         }
 
-        function renderTimeSlots() {
-            const container = document.getElementById('timeSlotsContainer');
+        function renderAdminCalendar() {
+            const container = document.getElementById('adminDateContainer');
+            container.innerHTML = '';
+            for (let i = 0; i < 7; i++) {
+                const d = new Date(); d.setDate(d.getDate() + i);
+                const str = d.toLocaleDateString('fa-IR', { weekday: 'short', month: 'short', day: 'numeric' });
+                if (i === 0 && !selectedAdminDate) selectedAdminDate = str;
+
+                const b = document.createElement('button');
+                b.className = `flex-shrink-0 p-2.5 rounded-xl border text-xs min-w-[75px] cursor-pointer ${
+                    selectedAdminDate === str ? 'border-emerald-500 text-emerald-400 bg-slate-800' : 'border-slate-700 bg-slate-800 text-white'
+                }`;
+                b.innerText = str;
+                b.onclick = () => {
+                    selectedAdminDate = str;
+                    renderAdminCalendar();
+                    renderAdminTimes();
+                };
+                container.appendChild(b);
+            }
+        }
+
+        function renderAdminTimes() {
+            const container = document.getElementById('adminTimeContainer');
             container.innerHTML = '';
             times.forEach(t => {
-                const isDisabled = disabledSlots.includes(t);
+                const key = `${selectedAdminDate}_${t}`;
+                const isDisabled = disabledSlots.includes(key);
                 const btn = document.createElement('button');
-                btn.className = `p-2.5 rounded-xl border text-xs flex items-center justify-between ${
+                btn.className = `p-2.5 rounded-xl border text-xs flex items-center justify-between cursor-pointer ${
                     isDisabled ? 'border-red-500/50 bg-red-500/10 text-red-400' : 'border-slate-700 bg-slate-800 text-slate-200'
                 }`;
                 btn.innerHTML = `<span>${t}</span> <i class="fa-solid ${isDisabled ? 'fa-ban text-red-400' : 'fa-check text-emerald-400'}"></i>`;
-                btn.onclick = () => toggleSlot(t);
-                container.appendChild(btn);
+                btn.onclick = () => {
+                    if (disabledSlots.includes(key)) {
+                        disabledSlots = disabledSlots.filter(s => s !== key);
+                    } else {
+                        disabledSlots.push(key);
+                    }
+                    renderAdminTimes();
+                };
+                container.appendChild(b);
             });
-        }
-
-        function toggleSlot(t) {
-            if (disabledSlots.includes(t)) {
-                disabledSlots = disabledSlots.filter(s => s !== t);
-            } else {
-                disabledSlots.push(t);
-            }
-            renderTimeSlots();
         }
 
         async function saveDisabledSlots() {
@@ -93,7 +128,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ disabledSlots })
                 });
-                alert('تغییرات ساعات کاری با موفقیت ذخیره شد.');
+                alert('تغییرات ساعات کاری برای تاریخ ' + selectedAdminDate + ' با موفقیت ذخیره شد.');
             } catch (e) {
                 alert('خطا در ذخیره سازی!');
             }
@@ -116,7 +151,7 @@
                         <div class="text-slate-400">${item.service} - <span class="text-emerald-400">${item.date} (${item.time})</span></div>
                         ${item.note && item.note !== 'ندارد' ? `<div class="text-[10px] text-slate-500">توضیحات: ${item.note}</div>` : ''}
                     </div>
-                    <button onclick="deleteBooking(${item.id})" class="text-red-400 hover:text-red-300 p-2">
+                    <button onclick="deleteBooking(${item.id})" class="text-red-400 hover:text-red-300 p-2 cursor-pointer">
                         <i class="fa-solid fa-trash-can"></i>
                     </button>
                 `;
