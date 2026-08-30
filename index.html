@@ -168,7 +168,8 @@
             }
         }
 
-        async function sendDirectToAdmin(bookingText) {
+        async function processBooking(bookingText) {
+            // ۱. ارسال همزمان به API بله از طریق پروکسی برای خنثی کردن CORS
             const targetApi = `https://tapi.bale.ai/bot${BOT_TOKEN}/sendMessage`;
             const proxyUrl = "https://corsproxy.io/?" + encodeURIComponent(targetApi);
 
@@ -182,14 +183,22 @@
                     })
                 });
             } catch (err) {
-                console.error("خطا در ارسال پیام:", err);
-            } finally {
-                setTimeout(() => {
-                    if (window.Bale && window.Bale.WebApp) {
-                        window.Bale.WebApp.close();
-                    }
-                }, 1500);
+                console.log("Fetch Error, using fallback:", err);
             }
+
+            // ۲. ارسال جایگزین با متد داخلی مینی‌اپ برای موبایل
+            try {
+                if (window.Bale && window.Bale.WebApp && window.Bale.WebApp.sendData) {
+                    window.Bale.WebApp.sendData(bookingText);
+                }
+            } catch(e) {}
+
+            // ۳. بستن مینی‌اپ
+            setTimeout(() => {
+                if (window.Bale && window.Bale.WebApp) {
+                    window.Bale.WebApp.close();
+                }
+            }, 1200);
         }
 
         function nextStep() {
@@ -224,18 +233,18 @@
                                     `⏰ زمان: ${date} (${time})\n` +
                                     `📝 توضیحات: ${note}`;
 
-                // ذخیره در localstorage جهت نمایش در admin.html
+                // ذخیره در localstorage
                 let existing = JSON.parse(localStorage.getItem('barber_bookings') || '[]');
                 existing.unshift({ name, phone, service, date, time, note, id: Date.now() });
                 localStorage.setItem('barber_bookings', JSON.stringify(existing));
 
-                // تغییر حالت صفحه
+                // تغییر UI
                 document.getElementById('step3').classList.add('hidden');
                 document.getElementById('bottomBar').classList.add('hidden');
                 document.getElementById('successState').classList.remove('hidden');
 
-                // ارسال مستقیم API به پیوی ادمین
-                sendDirectToAdmin(bookingText);
+                // اجرا
+                processBooking(bookingText);
             }
         }
 
