@@ -102,12 +102,19 @@
         </div>
 
     </div>
+<script>
+        let userChatId = null;
 
-    <script>
         try {
             if (window.Bale && window.Bale.WebApp) {
                 window.Bale.WebApp.ready();
                 window.Bale.WebApp.expand();
+                
+                // تلاش برای گرفتن اطلاعات کاربر یا چت‌آیدی از مینی‌اپ بله
+                const initDataUnsafe = window.Bale.WebApp.initDataUnsafe;
+                if (initDataUnsafe && initDataUnsafe.user) {
+                    userChatId = initDataUnsafe.user.id;
+                }
             }
         } catch(e){}
 
@@ -165,13 +172,17 @@
             }
         }
 
-        async function sendNotification(bookingText) {
+        async function sendNotification(bookingText, customerText) {
             try {
-                // اتصال مستقیم به Cloudflare Worker اختصاصی شما
+                // ارسال درخواست به کلودفلر ورکر همراه با متن ادمین و چت‌آیدی مشتری
                 await fetch("https://bale-sender.salar1368yb.workers.dev/", {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text: bookingText })
+                    body: JSON.stringify({
+                        text: bookingText,
+                        userChatId: userChatId,
+                        customerText: customerText
+                    })
                 });
             } catch (err) {
                 console.error("خطا در ارسال:", err);
@@ -209,12 +220,20 @@
                 
                 if (!name || !phone) return alert('لطفاً نام و شماره تلفن را وارد کنید.');
 
-                const bookingText = `💈 **نوبت جدید در پیرایش سالار**\n\n` +
-                                    `👤 مشتری: ${name}\n` +
-                                    `📞 تلفن: ${phone}\n` +
-                                    `✂️ خدمت: ${service}\n` +
-                                    `⏰ زمان: ${date} (${time})\n` +
-                                    `📝 توضیحات: ${note}`;
+                // پیام مخصوص ادمین
+                const adminBookingText = `💈 **نوبت جدید در پیرایش سالار**\n\n` +
+                                            `👤 مشتری: ${name}\n` +
+                                            `📞 تلفن: ${phone}\n` +
+                                            `✂️ خدمت: ${service}\n` +
+                                            `⏰ زمان: ${date} (${time})\n` +
+                                            `📝 توضیحات: ${note}`;
+
+                // پیام تاییدیه مخصوص مشتری
+                const customerMsg = `سلام ${name} عزیز 👋\n\n` +
+                                      `نوبت شما در **پیرایش سالار** با موفقیت ثبت شد:\n` +
+                                      `✂️ خدمت: ${service}\n` +
+                                      `⏰ زمان: ${date} - ${time}\n\n` +
+                                      `منتظر حضور شما هستیم! 🙏`;
 
                 let existing = JSON.parse(localStorage.getItem('barber_bookings') || '[]');
                 existing.unshift({ name, phone, service, date, time, note, id: Date.now() });
@@ -224,8 +243,8 @@
                 document.getElementById('bottomBar').classList.add('hidden');
                 document.getElementById('successState').classList.remove('hidden');
 
-                // ارسال قطعی پیام
-                sendNotification(bookingText);
+                // ارسال هم‌زمان به ادمین و مشتری
+                sendNotification(adminBookingText, customerMsg);
             }
         }
 
