@@ -7,7 +7,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdn.jsdelivr.net/gh/rastikerdar/yekan-bakh@main/css/yekan-bakh.css" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
-  <!-- اسکریپت رسمی مینی‌اپ بله -->
   <script src="https://tapi.bale.ai/miniapp.js?3"></script>
   <style>
     body { font-family: 'Yekan Bakh', sans-serif; background-color: #0f172a; color: #f8fafc; }
@@ -107,7 +106,6 @@
     let disabledSlots = [];
     let userChatId = null;
 
-    // دریافت اطلاعات کاربر
     try {
       if (window.Bale && window.Bale.WebApp) {
         window.Bale.WebApp.ready();
@@ -115,12 +113,7 @@
         const webApp = window.Bale.WebApp;
         if (webApp.initDataUnsafe && webApp.initDataUnsafe.user) {
           userChatId = webApp.initDataUnsafe.user.id;
-          console.log("userChatId پیدا شد:", userChatId);
-        } else {
-          console.warn("user پیدا نشد در initDataUnsafe");
         }
-      } else {
-        console.warn("Bale.WebApp موجود نیست");
       }
     } catch(e) {
       console.error("Bale Init Error:", e);
@@ -210,23 +203,16 @@
           disabledSlots.push(currentSlotKey);
         }
 
-        const payload = {
-          adminText: adminText,
-          userChatId: userChatId,
-          userText: userText,
-          bookingInfo: bookingObj
-        };
-
-        console.log("ارسال به ورکر:", payload);
-
-        const res = await fetch(`${WORKER_URL}/`, {
+        await fetch(`${WORKER_URL}/`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+          body: JSON.stringify({
+            adminText: adminText,
+            userChatId: userChatId,
+            userText: userText,
+            bookingInfo: bookingObj
+          })
         });
-
-        const result = await res.json();
-        console.log("پاسخ ورکر:", result);
 
         await fetch(`${WORKER_URL}/disabled-slots`, {
           method: 'POST',
@@ -277,11 +263,6 @@
 
         if (!name || !phone) return alert('لطفاً نام و شماره تلفن را وارد کنید.');
 
-        // تست آیدی کاربر
-        console.log("userChatId در زمان ثبت:", userChatId);
-        // اگر می‌خوای موقتاً ببینی، این خط رو آنکامنت کن:
-        // alert("آیدی کاربر: " + (userChatId || "null"));
-
         const currentSlotKey = `${date}_${time}`;
         const bookingObj = { name, phone, service, date, time, note, id: Date.now() };
 
@@ -292,11 +273,11 @@
           `⏰ زمان: ${date} (${time})\n` +
           `📝 توضیحات: ${note}`;
 
-        const userText = `✅ **نوبت شما با موفقیت ثبت شد**\n\n` +
-          `✂️ خدمت: ${service}\n` +
-          `⏰ زمان: ${date} (${time})\n\n` +
-          `منتظر حضور شما هستیم ✂️\n` +
-          `پیرایش سالار`;
+        // پیام تأیید مشتری (متن جدید)
+        const userText = `✅ **رزرو شما با موفقیت ثبت شد!**\n\n` +
+          `سلام ${name} عزیز،\n` +
+          `نوبت شما برای خدمت **${service}** در تاریخ **${date} ساعت ${time}** ثبت گردید.\n\n` +
+          `منتظر حضور شما در پیرایش سالار هستیم! ✂️`;
 
         document.getElementById('step3').classList.add('hidden');
         document.getElementById('bottomBar').classList.add('hidden');
