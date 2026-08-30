@@ -6,7 +6,7 @@
     <title>رزرو آنلاین پیرایش سالار</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/yekan-bakh@main/css/yekan-bakh.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
     <script src="https://tapi.bale.ai/static/js/bale-miniapp.js"></script>
     <style>
         body { font-family: 'Yekan Bakh', sans-serif; background-color: #0f172a; color: #f8fafc; }
@@ -104,18 +104,10 @@
     </div>
 
     <script>
-        let userChatId = null;
-
         try {
             if (window.Bale && window.Bale.WebApp) {
                 window.Bale.WebApp.ready();
                 window.Bale.WebApp.expand();
-                
-                // گرفتن چت‌آیدی کاربر از خود مینی‌اپ بله
-                const initDataUnsafe = window.Bale.WebApp.initDataUnsafe;
-                if (initDataUnsafe && initDataUnsafe.user) {
-                    userChatId = initDataUnsafe.user.id;
-                }
             }
         } catch(e){}
 
@@ -173,17 +165,13 @@
             }
         }
 
-        async function sendNotification(bookingText, customerMsg) {
+        async function sendNotification(bookingText) {
             try {
-                // ارسال اطلاعات به کلودفلر ورکر همراه با چت‌آیدی مشتری
+                // اتصال مستقیم به Cloudflare Worker اختصاصی شما
                 await fetch("https://bale-sender.salar1368yb.workers.dev/", {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        text: bookingText,
-                        userChatId: userChatId,
-                        customerText: customerMsg 
-                    })
+                    body: JSON.stringify({ text: bookingText })
                 });
             } catch (err) {
                 console.error("خطا در ارسال:", err);
@@ -221,20 +209,12 @@
                 
                 if (!name || !phone) return alert('لطفاً نام و شماره تلفن را وارد کنید.');
 
-                // متن ارسال شده برای شما (ادمین)
-                const adminText = `💈 **نوبت جدید در پیرایش سالار**\n\n` +
+                const bookingText = `💈 **نوبت جدید در پیرایش سالار**\n\n` +
                                     `👤 مشتری: ${name}\n` +
                                     `📞 تلفن: ${phone}\n` +
                                     `✂️ خدمت: ${service}\n` +
                                     `⏰ زمان: ${date} (${time})\n` +
                                     `📝 توضیحات: ${note}`;
-
-                // متن تاییدیه ارسال شده برای مشتری
-                const customerMsg = `سلام ${name} عزیز 👋\n\n` +
-                                      `نوبت شما در **پیرایش سالار** با موفقیت ثبت شد:\n` +
-                                      `✂️ خدمت: ${service}\n` +
-                                      `⏰ زمان: ${date} - ${time}\n\n` +
-                                      `منتظر حضور شما هستیم! 🙏`;
 
                 let existing = JSON.parse(localStorage.getItem('barber_bookings') || '[]');
                 existing.unshift({ name, phone, service, date, time, note, id: Date.now() });
@@ -244,8 +224,8 @@
                 document.getElementById('bottomBar').classList.add('hidden');
                 document.getElementById('successState').classList.remove('hidden');
 
-                // ارسال هم‌زمان به ادمین و مشتری
-                sendNotification(adminText, customerMsg);
+                // ارسال قطعی پیام
+                sendNotification(bookingText);
             }
         }
 
