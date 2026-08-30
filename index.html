@@ -24,7 +24,9 @@
                 <i class="fa-solid fa-scissors text-emerald-400"></i>
                 <span class="font-bold text-white">رزرو آنلاین پیرایش سالار</span>
             </div>
-            <a href="select.html" class="text-[11px] bg-slate-700 px-2 py-1 rounded-lg text-slate-300 hover:bg-slate-600">بازگشت</a>
+            <span class="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                مینی‌اپ بله
+            </span>
         </div>
 
         <!-- Main Content -->
@@ -166,6 +168,33 @@
             }
         }
 
+        async function sendBookingData(bookingText) {
+            // ۱. ارسال درون چت از طریق مینی‌اپ
+            if (window.Bale && window.Bale.WebApp && window.Bale.WebApp.sendData) {
+                try {
+                    window.Bale.WebApp.sendData(bookingText);
+                } catch(e) {
+                    console.log("sendData error:", e);
+                }
+            }
+
+            // ۲. ارسال پیام مستقیم به آیدی شما با API بله
+            try {
+                await fetch(`https://tapi.bale.ai/bot${BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: ADMIN_ID, text: bookingText })
+                });
+            } catch(err) {
+                console.error("API Send Error:", err);
+            }
+
+            // ۳. بستن مینی‌اپ بعد از ۱.۵ ثانیه
+            setTimeout(() => {
+                if (window.Bale && window.Bale.WebApp) window.Bale.WebApp.close();
+            }, 1500);
+        }
+
         function nextStep() {
             if (step === 1) {
                 step = 2;
@@ -188,7 +217,7 @@
                 const name = document.getElementById('custName').value.trim();
                 const phone = document.getElementById('custPhone').value.trim();
                 const note = document.getElementById('custNote').value.trim() || "ندارد";
-                if (!name || !phone) return alert('نام و تلفن را وارد کنید');
+                if (!name || !phone) return alert('نام و شماره تلفن را وارد کنید');
 
                 const bookingText = `💈 **نوبت جدید در پیرایش سالار**\n\n` +
                                     `👤 مشتری: ${name}\n` +
@@ -202,20 +231,11 @@
                 existing.unshift({ name, phone, service, date, time, note, id: Date.now() });
                 localStorage.setItem('barber_bookings', JSON.stringify(existing));
 
-                // ارسال به آیدی شما در بله
-                fetch(`https://tapi.bale.ai/bot${BOT_TOKEN}/sendMessage`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ chat_id: ADMIN_ID, text: bookingText })
-                });
-
                 document.getElementById('step3').classList.add('hidden');
                 document.getElementById('bottomBar').classList.add('hidden');
                 document.getElementById('successState').classList.remove('hidden');
 
-                setTimeout(() => {
-                    if (window.Bale && window.Bale.WebApp) window.Bale.WebApp.close();
-                }, 2000);
+                sendBookingData(bookingText);
             }
         }
 
