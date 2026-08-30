@@ -106,7 +106,7 @@
         let step = 1, service = "", date = "", time = "";
         let disabledSlots = [];
 
-        // 🎯 گرفتن آیدی مستقیم از لینک مینی‌اپ که ربات فرستاده است
+        // 🎯 گرفتن آیدی مستقیم از پارامتر URL که ربات برای ما فرستاده است
         const urlParams = new URLSearchParams(window.location.search);
         let userChatId = urlParams.get('chat_id');
         console.log("آیدی گرفته شده از لینک:", userChatId);
