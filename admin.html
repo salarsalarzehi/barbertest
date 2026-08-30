@@ -3,30 +3,200 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>پنل مدیریت - تست</title>
+    <title>پنل مدیریت رزروها - پیرایش سالار</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/yekan-bakh@main/css/yekan-bakh.css" rel="stylesheet" />
-    <style> body { font-family: 'Yekan Bakh', sans-serif; background-color: #0f172a; color: #f8fafc; } </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <style>
+        body { font-family: 'Yekan Bakh', sans-serif; background-color: #0f172a; color: #f8fafc; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    </style>
 </head>
-<body class="p-6 max-w-lg mx-auto text-center space-y-4">
-    <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800">
-        <h1 class="text-lg font-bold text-emerald-400">پنل مدیریت پیرایش سالار</h1>
-        <p class="text-sm text-slate-400 mt-2">صفحه با موفقیت بارگذاری شد!</p>
-        <button onclick="loadWorkerData()" class="mt-4 px-4 py-2 bg-emerald-500 text-white rounded-xl text-xs font-bold">تست اتصال به کلادفلر ورکر</button>
-        <div id="result" class="mt-4 text-xs text-slate-300"></div>
+<body class="p-4 max-w-2xl mx-auto space-y-6">
+
+    <!-- Header -->
+    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex items-center justify-between">
+        <h1 class="text-base font-bold text-white"><i class="fa-solid fa-user-gear text-emerald-400 ml-2"></i>مدیریت نوبت‌ها و ساعات کاری</h1>
+        <button onclick="loadData()" class="text-xs bg-slate-800 px-3 py-2 rounded-xl border border-slate-700 text-slate-300 cursor-pointer">
+            <i class="fa-solid fa-rotate-right ml-1"></i> بروزرسانی
+        </button>
+    </div>
+
+    <!-- مدیریت ساعات کاری و روزها -->
+    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 space-y-3">
+        <h2 class="text-xs font-bold text-slate-300 border-b border-slate-800 pb-2">
+            <i class="fa-solid fa-clock text-amber-400 ml-1"></i> بستن سانس‌ها و روزهای عدم حضور
+        </h2>
+        
+        <div>
+            <label class="block text-xs text-slate-400 mb-2">انتخاب روز:</label>
+            <div class="flex gap-2 overflow-x-auto pb-2 custom-scrollbar" id="adminDateContainer"></div>
+        </div>
+
+        <div class="pt-2">
+            <label class="block text-xs text-slate-400 mb-2">ساعات کاری این روز (کلیک برای غیرفعال کردن):</label>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="adminTimeContainer"></div>
+        </div>
+
+        <button onclick="saveDisabledSlots()" class="w-full mt-3 py-2.5 bg-emerald-500 text-white rounded-xl text-xs font-bold cursor-pointer">
+            ذخیره تغییرات ساعات این روز
+        </button>
+    </div>
+
+    <!-- لیست رزروهای ثبت‌شده -->
+    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 space-y-3">
+        <h2 class="text-xs font-bold text-slate-300 border-b border-slate-800 pb-2">
+            <i class="fa-solid fa-list-check text-emerald-400 ml-1"></i> رزروهای اخیر مشتریان
+        </h2>
+        <div id="bookingList" class="space-y-2">
+            <p class="text-xs text-slate-500 text-center py-4">در حال دریافت رزروها...</p>
+        </div>
     </div>
 
     <script>
         const WORKER_URL = "https://bale-sender.salar1368yb.workers.dev";
-        async function loadWorkerData() {
+        const times = ["۱۰:۰۰ - ۱۱:۰۰", "۱۱:۰۰ - ۱۲:۰۰", "۱۶:۰۰ - ۱۷:۰۰", "۱۷:۰۰ - ۱۸:۰۰", "۱۸:۰۰ - ۱۹:۰۰"];
+        let disabledSlots = [];
+        let selectedAdminDate = "";
+
+        async function loadData() {
+            // تعیین تاریخ پیش‌فرض روز جاری
+            const d = new Date();
+            selectedAdminDate = d.toLocaleDateString('fa-IR', { weekday: 'short', month: 'short', day: 'numeric' });
+
+            renderAdminCalendar();
+            renderAdminTimes();
+
             try {
-                const res = await fetch(`${WORKER_URL}/bookings`);
-                const data = await res.json();
-                document.getElementById('result').innerText = "تصال موفق! تعداد رزروها: " + (data.bookings ? data.bookings.length : 0);
-            } catch(e) {
-                document.getElementById('result').innerText = "خطا در اتصال به ورکر: " + e.message;
+                // دریافت سانس‌های غیرفعال از ورکر
+                const resSlots = await fetch(`${WORKER_URL}/disabled-slots`);
+                const dataSlots = await resSlots.json();
+                disabledSlots = dataSlots.disabledSlots || [];
+                renderAdminTimes();
+            } catch (e) { 
+                console.error("Error loading slots:", e); 
+            }
+
+            try {
+                // دریافت لیست رزروها از ورکر
+                const resBookings = await fetch(`${WORKER_URL}/bookings`);
+                const dataBookings = await resBookings.json();
+                renderBookings(dataBookings.bookings || []);
+            } catch (e) { 
+                console.error("Error loading bookings:", e);
+                document.getElementById('bookingList').innerHTML = '<p class="text-xs text-red-400 text-center py-4">خطا در دریافت لیست رزروها</p>';
             }
         }
+
+        function renderAdminCalendar() {
+            const container = document.getElementById('adminDateContainer');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < 7; i++) {
+                const d = new Date(); 
+                d.setDate(d.getDate() + i);
+                const labelStr = d.toLocaleDateString('fa-IR', { weekday: 'short', month: 'short', day: 'numeric' });
+                
+                if (i === 0 && !selectedAdminDate) selectedAdminDate = labelStr;
+
+                const b = document.createElement('button');
+                b.className = `flex-shrink-0 p-2.5 rounded-xl border text-xs min-w-[85px] cursor-pointer transition-all ${
+                    selectedAdminDate === labelStr ? 'border-emerald-500 text-emerald-400 bg-slate-800 font-bold' : 'border-slate-700 bg-slate-800 text-white'
+                }`;
+                b.innerText = labelStr;
+                b.onclick = () => {
+                    selectedAdminDate = labelStr;
+                    renderAdminCalendar();
+                    renderAdminTimes();
+                };
+                container.appendChild(b);
+            }
+        }
+
+        function renderAdminTimes() {
+            const container = document.getElementById('adminTimeContainer');
+            container.innerHTML = '';
+            
+            times.forEach(t => {
+                const key = `${selectedAdminDate}_${t}`;
+                const isDisabled = disabledSlots.includes(key);
+                const btn = document.createElement('button');
+                btn.type = "button";
+                btn.className = `p-2.5 rounded-xl border text-xs flex items-center justify-between cursor-pointer transition-all ${
+                    isDisabled ? 'border-red-500/50 bg-red-500/10 text-red-400' : 'border-slate-700 bg-slate-800 text-slate-200'
+                }`;
+                btn.innerHTML = `<span>${t}</span> <i class="fa-solid ${isDisabled ? 'fa-ban text-red-400' : 'fa-check text-emerald-400'}"></i>`;
+                btn.onclick = () => {
+                    if (disabledSlots.includes(key)) {
+                        disabledSlots = disabledSlots.filter(s => s !== key);
+                    } else {
+                        disabledSlots.push(key);
+                    }
+                    renderAdminTimes();
+                };
+                container.appendChild(b);
+            });
+        }
+
+        async function saveDisabledSlots() {
+            try {
+                const res = await fetch(`${WORKER_URL}/disabled-slots`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ disabledSlots })
+                });
+                const result = await res.json();
+                if(result.success) {
+                    alert('تغییرات ساعات کاری با موفقیت ذخیره شد.');
+                } else {
+                    alert('خطا در ذخیره‌سازی!');
+                }
+            } catch (e) {
+                alert('خطا در ارتباط با سرور!');
+            }
+        }
+
+        function renderBookings(bookings) {
+            const list = document.getElementById('bookingList');
+            if (!bookings || bookings.length === 0) {
+                list.innerHTML = '<p class="text-xs text-slate-500 text-center py-4">رزروی موجود نیست.</p>';
+                return;
+            }
+
+            list.innerHTML = '';
+            bookings.forEach(item => {
+                const div = document.createElement('div');
+                div.className = "bg-slate-800 border border-slate-700 p-3 rounded-xl flex items-center justify-between text-xs";
+                div.innerHTML = `
+                    <div class="space-y-1">
+                        <div class="font-bold text-white">${item.name} (<a href="tel:${item.phone}" class="text-emerald-400">${item.phone}</a>)</div>
+                        <div class="text-slate-400">${item.service} - <span class="text-emerald-400">${item.date} (${item.time})</span></div>
+                        ${item.note && item.note !== 'ندارد' ? `<div class="text-[10px] text-slate-500">توضیحات: ${item.note}</div>` : ''}
+                    </div>
+                    <button onclick="deleteBooking(${item.id})" class="text-red-400 hover:text-red-300 p-2 cursor-pointer">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        async function deleteBooking(id) {
+            if (!confirm('آیا از حذف این رزرو مطمئن هستید؟')) return;
+            try {
+                await fetch(`${WORKER_URL}/delete-booking`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id })
+                });
+                loadData();
+            } catch(e) {
+                alert('خطا در حذف رزرو');
+            }
+        }
+
+        loadData();
     </script>
 </body>
 </html>
