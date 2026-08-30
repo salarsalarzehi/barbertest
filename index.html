@@ -197,14 +197,14 @@
 
         async function sendNotification(bookingObj, adminText, customerText) {
             try {
-                // ثبت در دیتابیس
-                await fetch(`${WORKER_URL}/bookings`, {
+                // ۱. ثبت نوبت در دیتابیس
+                fetch(`${WORKER_URL}/bookings`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(bookingObj)
-                });
+                }).catch(() => {});
 
-                // ارسال مجزای پیام مدیریت و پیام تشکر مشتری از طریق ورکر
+                // ۲. ارسال پیام به ورکر
                 await fetch(WORKER_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -254,7 +254,6 @@
 
                 const bookingObj = { name, phone, service, date, time, note, id: Date.now() };
                 
-                // پیام کامل رزرو برای شما (مدیر)
                 const adminText = `💈 **نوبت جدید در پیرایش سالار**\n\n` +
                                     `👤 مشتری: ${name}\n` +
                                     `📞 تلفن: ${phone}\n` +
@@ -262,7 +261,6 @@
                                     `⏰ زمان: ${date} (${time})\n` +
                                     `📝 توضیحات: ${note}`;
 
-                // پیام تشکر اختصاصی برای مشتری
                 const customerText = `سلام تشکر وقت شما در روز ${date} ساعت ${time} در آرایشگاه آرمین رزرو شد منتظرتان هستم تشکر`;
 
                 document.getElementById('step3').classList.add('hidden');
