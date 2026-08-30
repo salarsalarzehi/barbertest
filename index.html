@@ -103,19 +103,39 @@
         let disabledSlots = [];
         let userChatId = null;
 
-        // دریافت اطلاعات کاربر در بله
+        // دریافت دقیق اطلاعات کاربر از محیط مینی‌اپ بله
         try {
             if (window.Bale && window.Bale.WebApp) {
                 window.Bale.WebApp.ready();
                 window.Bale.WebApp.expand();
                 const webApp = window.Bale.WebApp;
-                if (webApp.initDataUnsafe && webApp.initDataUnsafe.user) {
-                    userChatId = webApp.initDataUnsafe.user.id;
+
+                // روش اول
+                if (webApp.initDataUnsafe) {
+                    if (webApp.initDataUnsafe.user && webApp.initDataUnsafe.user.id) {
+                        userChatId = webApp.initDataUnsafe.user.id;
+                    } else if (webApp.initDataUnsafe.chat && webApp.initDataUnsafe.chat.id) {
+                        userChatId = webApp.initDataUnsafe.chat.id;
+                    }
+                }
+
+                // روش دوم (استخراج از رشته initData)
+                if (!userChatId && webApp.initData) {
+                    const urlParams = new URLSearchParams(webApp.initData);
+                    const userStr = urlParams.get('user');
+                    if (userStr) {
+                        const userObj = JSON.parse(decodeURIComponent(userStr));
+                        if (userObj && userObj.id) {
+                            userChatId = userObj.id;
+                        }
+                    }
                 }
             }
         } catch(e) {
             console.error("Bale Init Error:", e);
         }
+        
+        console.log("User Chat ID:", userChatId);
 
         // دریافت سانس‌های غیرفعال (قفل‌شده) از کلادفلر در ابتدا
         async function fetchDisabledSlots() {
@@ -152,7 +172,7 @@
                 b.innerText = str;
                 b.onclick = () => {
                     date = str;
-                    time = ""; // ریست کردن ساعت با تغییر روز
+                    time = ""; 
                     renderCalendar();
                     renderTimes();
                     document.getElementById('nextBtn').disabled = true;
@@ -197,10 +217,8 @@
             }
         }
 
-        // ثبت رزرو، ارسال پیام به ادمین و مشتری، و قفل ساعت در سرور
-        async function finalizeBooking(bookingObj, adminText, userText, currentSlotKey) {
+        async function finalizeBooking(bookingObj, adminText, userText) {
             try {
-                // ارسال اطلاعات رزرو، پیام ادمین، پیام مشتری و آیدی کاربر به ورکر
                 await fetch(`${WORKER_URL}/`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -211,7 +229,6 @@
                         bookingInfo: bookingObj
                     })
                 });
-
             } catch (err) {
                 console.error("خطا در ثبت نهایی:", err);
             } finally {
@@ -253,10 +270,8 @@
                 
                 if (!name || !phone) return alert('لطفاً نام و شماره تلفن را وارد کنید.');
 
-                const currentSlotKey = `${date}_${time}`;
                 const bookingObj = { name, phone, service, date, time, note, id: Date.now() };
                 
-                // پیام ارسالی به شما (ادمین)
                 const adminText = `💈 **نوبت جدید در پیرایش سالار**\n\n` +
                                   `👤 مشتری: ${name}\n` +
                                   `📞 تلفن: ${phone}\n` +
@@ -264,7 +279,6 @@
                                   `⏰ زمان: ${date} (${time})\n` +
                                   `📝 توضیحات: ${note}`;
 
-                // پیام تاییدیه ارسالی به چت مشتری
                 const userText = `✅ **رزرو شما با موفقیت ثبت شد!**\n\n` +
                                  `سلام ${name} عزیز،\n` +
                                  `نوبت شما برای خدمت **${service}** در تاریخ **${date} ساعت ${time}** ثبت گردید.\n\n` +
@@ -274,7 +288,7 @@
                 document.getElementById('bottomBar').classList.add('hidden');
                 document.getElementById('successState').classList.remove('hidden');
 
-                finalizeBooking(bookingObj, adminText, userText, currentSlotKey);
+                finalizeBooking(bookingObj, adminText, userText);
             }
         }
 
