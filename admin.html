@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پنل مدیریت پیرایش سالار</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/yekan-bakh@main/css/yekan-bakh.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <style>body { font-family: 'Yekan Bakh', sans-serif; background-color: #0f172a; color: #f8fafc; }</style>
+</head>
+<body class="min-h-screen p-4 flex justify-center">
+
+    <div class="w-full max-w-md bg-slate-900 rounded-3xl p-5 border border-slate-800 space-y-4 shadow-2xl h-[750px] flex flex-col">
+        
+        <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-user-shield text-amber-400"></i>
+                <h1 class="font-bold text-sm text-white">لیست رزروهای دریافت شده</h1>
+            </div>
+            <a href="select.html" class="text-xs text-slate-400 hover:text-white"><i class="fa-solid fa-arrow-left"></i></a>
+        </div>
+
+        <div class="flex-1 overflow-y-auto space-y-3 custom-scrollbar" id="bookingsList">
+            <!-- لیست رزروها با جاوا اسکریپت رندر می‌شود -->
+        </div>
+
+        <button onclick="clearAll()" class="w-full py-2.5 rounded-xl bg-red-500/10 text-red-400 border border-red-500/20 text-xs font-bold hover:bg-red-500/20 transition-all">
+            پاکسازی لیست رزروها
+        </button>
+    </div>
+
+    <script>
+        function loadBookings() {
+            const container = document.getElementById('bookingsList');
+            const bookings = JSON.parse(localStorage.getItem('barber_bookings') || '[]');
+
+            if (bookings.length === 0) {
+                container.innerHTML = `<div class="text-center py-20 text-xs text-slate-500">هیچ نوبتی ثبت نشده است.</div>`;
+                return;
+            }
+
+            container.innerHTML = bookings.map(b => `
+                <div class="p-3 bg-slate-800/70 border border-slate-700/60 rounded-2xl space-y-1 text-xs">
+                    <div class="flex justify-between font-bold text-white">
+                        <span>👤 ${b.name}</span>
+                        <span class="text-emerald-400">${b.service}</span>
+                    </div>
+                    <div class="text-slate-400">📞 ${b.phone}</div>
+                    <div class="text-slate-400">⏰ ${b.date} (${b.time})</div>
+                    ${b.note !== 'ندارد' ? `<div class="text-slate-400">📝 ${b.note}</div>` : ''}
+                </div>
+            `).join('');
+        }
+
+        function clearAll() {
+            if (confirm('آیا از پاک کردن کامل لیست مطمئن هستید؟')) {
+                localStorage.removeItem('barber_bookings');
+                loadBookings();
+            }
+        }
+
+        loadBookings();
+    </script>
+</body>
+</html>
