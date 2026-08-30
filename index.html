@@ -139,13 +139,18 @@
             for (let i = 0; i < 7; i++) {
                 const d = new Date(); d.setDate(d.getDate() + i);
                 const str = d.toLocaleDateString('fa-IR', { weekday: 'short', month: 'short', day: 'numeric' });
+                if (i === 0 && !date) date = str;
+
                 const b = document.createElement('button');
-                b.className = "date-btn flex-shrink-0 p-2.5 rounded-xl border border-slate-700 bg-slate-800 text-xs text-white min-w-[75px]";
+                b.className = `date-btn flex-shrink-0 p-2.5 rounded-xl border text-xs min-w-[75px] ${
+                    date === str ? 'border-emerald-500 text-emerald-400 bg-slate-800' : 'border-slate-700 bg-slate-800 text-white'
+                }`;
                 b.innerText = str;
                 b.onclick = () => {
-                    document.querySelectorAll('.date-btn').forEach(x => x.classList.remove('border-emerald-500', 'text-emerald-400'));
-                    b.classList.add('border-emerald-500', 'text-emerald-400');
-                    date = str; checkStep2();
+                    date = str;
+                    renderCalendar();
+                    renderTimes();
+                    checkStep2();
                 };
                 container.appendChild(b);
             }
@@ -155,7 +160,8 @@
             const container = document.getElementById('timeContainer');
             container.innerHTML = '';
             times.forEach(t => {
-                const isDisabled = disabledSlots.includes(t);
+                const key = `${date}_${t}`;
+                const isDisabled = disabledSlots.includes(key);
                 const b = document.createElement('button');
                 
                 if (isDisabled) {
@@ -163,12 +169,14 @@
                     b.innerText = `${t} (تکمیل)`;
                     b.disabled = true;
                 } else {
-                    b.className = "time-btn p-2.5 rounded-xl border border-slate-700 bg-slate-800 text-xs text-white";
+                    b.className = `time-btn p-2.5 rounded-xl border text-xs ${
+                        time === t ? 'border-emerald-500 text-emerald-400 bg-slate-800' : 'border-slate-700 bg-slate-800 text-white'
+                    }`;
                     b.innerText = t;
                     b.onclick = () => {
-                        document.querySelectorAll('.time-btn').forEach(x => x.classList.remove('border-emerald-500', 'text-emerald-400'));
-                        b.classList.add('border-emerald-500', 'text-emerald-400');
-                        time = t; checkStep2();
+                        time = t;
+                        renderTimes();
+                        checkStep2();
                     };
                 }
                 container.appendChild(b);
@@ -183,15 +191,23 @@
             }
         }
 
-        async function sendNotification(bookingText) {
+        async function sendNotification(bookingObj, bookingText) {
             try {
+                // ارسال اطلاعات به پنل مدیریت
+                await fetch(`${WORKER_URL}/bookings`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(bookingObj)
+                });
+
+                // ارسال پیام به پیام‌رسان بله
                 await fetch(WORKER_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ text: bookingText })
                 });
             } catch (err) {
-                console.error("خطا در ارسال:", err);
+                console.error("خطا:", err);
             } finally {
                 setTimeout(() => {
                     if (window.Bale && window.Bale.WebApp) {
@@ -227,6 +243,7 @@
                 
                 if (!name || !phone) return alert('لطفاً نام و شماره تلفن را وارد کنید.');
 
+                const bookingObj = { name, phone, service, date, time, note, id: Date.now() };
                 const bookingText = `💈 **نوبت جدید در پیرایش سالار**\n\n` +
                                     `👤 مشتری: ${name}\n` +
                                     `📞 تلفن: ${phone}\n` +
@@ -234,15 +251,11 @@
                                     `⏰ زمان: ${date} (${time})\n` +
                                     `📝 توضیحات: ${note}`;
 
-                let existing = JSON.parse(localStorage.getItem('barber_bookings') || '[]');
-                existing.unshift({ name, phone, service, date, time, note, id: Date.now() });
-                localStorage.setItem('barber_bookings', JSON.stringify(existing));
-
                 document.getElementById('step3').classList.add('hidden');
                 document.getElementById('bottomBar').classList.add('hidden');
                 document.getElementById('successState').classList.remove('hidden');
 
-                sendNotification(bookingText);
+                sendNotification(bookingObj, bookingText);
             }
         }
 
