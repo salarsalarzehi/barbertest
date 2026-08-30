@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/yekan-bakh@main/css/yekan-bakh.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://tapi.bale.ai/static/js/bale-miniapp.js"></script>
     <style>
         body { font-family: 'Yekan Bakh', sans-serif; background-color: #0f172a; color: #f8fafc; }
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
@@ -25,7 +25,7 @@
                 <span class="font-bold text-white">رزرو آنلاین پیرایش سالار</span>
             </div>
             <span class="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                مینی‌اپ رزرو
+                مینی‌اپ بله
             </span>
         </div>
 
@@ -90,7 +90,7 @@
             <div id="successState" class="text-center py-10 space-y-3 hidden">
                 <i class="fa-solid fa-circle-check text-emerald-400 text-5xl"></i>
                 <h2 class="text-base font-bold text-white">نوبت شما با موفقیت ثبت شد</h2>
-                <p class="text-xs text-slate-400">پیام تأیید نوبت برای شما ارسال گردید.</p>
+                <p class="text-xs text-slate-400">اطلاعات برای آرایشگر ارسال گردید.</p>
             </div>
 
         </div>
@@ -104,31 +104,15 @@
     </div>
 
     <script>
-        const WORKER_URL = "https://bale-sender.salar1368yb.workers.dev";
+        try {
+            if (window.Bale && window.Bale.WebApp) {
+                window.Bale.WebApp.ready();
+                window.Bale.WebApp.expand();
+            }
+        } catch(e){}
+
         const times = ["۱۰:۰۰ - ۱۱:۰۰", "۱۱:۰۰ - ۱۲:۰۰", "۱۶:۰۰ - ۱۷:۰۰", "۱۷:۰۰ - ۱۸:۰۰", "۱۸:۰۰ - ۱۹:۰۰"];
         let step = 1, service = "", date = "", time = "";
-        let disabledSlots = [];
-        let userChatId = null;
-
-        // استخراج آیدی کاربر از مینی اپ
-        try {
-            const tg = window.Telegram?.WebApp || window.Bale?.WebApp;
-            if (tg) {
-                tg.ready();
-                tg.expand();
-                if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-                    userChatId = tg.initDataUnsafe.user.id;
-                }
-            }
-        } catch(e) {}
-
-        async function fetchDisabledSlots() {
-            try {
-                const res = await fetch(`${WORKER_URL}/disabled-slots`);
-                const data = await res.json();
-                disabledSlots = data.disabledSlots || [];
-            } catch(e){}
-        }
 
         function selectService(el, sName) {
             document.querySelectorAll('.service-card').forEach(e => e.classList.remove('border-emerald-500', 'bg-emerald-500/10'));
@@ -145,18 +129,13 @@
             for (let i = 0; i < 7; i++) {
                 const d = new Date(); d.setDate(d.getDate() + i);
                 const str = d.toLocaleDateString('fa-IR', { weekday: 'short', month: 'short', day: 'numeric' });
-                if (i === 0 && !date) date = str;
-
                 const b = document.createElement('button');
-                b.className = `date-btn flex-shrink-0 p-2.5 rounded-xl border text-xs min-w-[75px] ${
-                    date === str ? 'border-emerald-500 text-emerald-400 bg-slate-800' : 'border-slate-700 bg-slate-800 text-white'
-                }`;
+                b.className = "date-btn flex-shrink-0 p-2.5 rounded-xl border border-slate-700 bg-slate-800 text-xs text-white min-w-[75px]";
                 b.innerText = str;
                 b.onclick = () => {
-                    date = str;
-                    renderCalendar();
-                    renderTimes();
-                    checkStep2();
+                    document.querySelectorAll('.date-btn').forEach(x => x.classList.remove('border-emerald-500', 'text-emerald-400'));
+                    b.classList.add('border-emerald-500', 'text-emerald-400');
+                    date = str; checkStep2();
                 };
                 container.appendChild(b);
             }
@@ -166,25 +145,14 @@
             const container = document.getElementById('timeContainer');
             container.innerHTML = '';
             times.forEach(t => {
-                const key = `${date}_${t}`;
-                const isDisabled = disabledSlots.includes(key);
                 const b = document.createElement('button');
-                
-                if (isDisabled) {
-                    b.className = "time-btn p-2.5 rounded-xl border border-slate-800 bg-slate-900/50 text-xs text-slate-600 cursor-not-allowed";
-                    b.innerText = `${t} (تکمیل)`;
-                    b.disabled = true;
-                } else {
-                    b.className = `time-btn p-2.5 rounded-xl border text-xs ${
-                        time === t ? 'border-emerald-500 text-emerald-400 bg-slate-800' : 'border-slate-700 bg-slate-800 text-white'
-                    }`;
-                    b.innerText = t;
-                    b.onclick = () => {
-                        time = t;
-                        renderTimes();
-                        checkStep2();
-                    };
-                }
+                b.className = "time-btn p-2.5 rounded-xl border border-slate-700 bg-slate-800 text-xs text-white";
+                b.innerText = t;
+                b.onclick = () => {
+                    document.querySelectorAll('.time-btn').forEach(x => x.classList.remove('border-emerald-500', 'text-emerald-400'));
+                    b.classList.add('border-emerald-500', 'text-emerald-400');
+                    time = t; checkStep2();
+                };
                 container.appendChild(b);
             });
         }
@@ -197,42 +165,28 @@
             }
         }
 
-        async function sendNotification(bookingObj, adminText, customerText) {
+        async function sendNotification(bookingText) {
             try {
-                // ۱. ثبت در دیتابیس (KV)
-                fetch(`${WORKER_URL}/bookings`, {
+                // اتصال مستقیم به Cloudflare Worker اختصاصی شما
+                await fetch("https://bale-sender.salar1368yb.workers.dev/", {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(bookingObj)
-                }).catch(() => {});
-
-                // ۲. ارسال هم‌زمان پیام به ادمین و مشتری از طریق ورکر
-                await fetch(WORKER_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        adminText: adminText,
-                        customerText: customerText,
-                        userChatId: userChatId
-                    })
+                    body: JSON.stringify({ text: bookingText })
                 });
-
             } catch (err) {
-                console.error("خطا:", err);
+                console.error("خطا در ارسال:", err);
             } finally {
                 setTimeout(() => {
-                    const tg = window.Telegram?.WebApp || window.Bale?.WebApp;
-                    if (tg && tg.close) {
-                        tg.close();
+                    if (window.Bale && window.Bale.WebApp) {
+                        window.Bale.WebApp.close();
                     }
                 }, 1500);
             }
         }
 
-        async function nextStep() {
+        function nextStep() {
             if (step === 1) {
                 step = 2;
-                await fetchDisabledSlots();
                 document.getElementById('step1').classList.add('hidden');
                 document.getElementById('step2').classList.remove('hidden');
                 document.getElementById('backBtn').classList.remove('hidden');
@@ -255,24 +209,23 @@
                 
                 if (!name || !phone) return alert('لطفاً نام و شماره تلفن را وارد کنید.');
 
-                const bookingObj = { name, phone, service, date, time, note, id: Date.now() };
-                
-                // پیام کامل رزرو برای مدیر (شما)
-                const adminText = `💈 **نوبت جدید در پیرایش سالار**\n\n` +
+                const bookingText = `💈 **نوبت جدید در پیرایش سالار**\n\n` +
                                     `👤 مشتری: ${name}\n` +
                                     `📞 تلفن: ${phone}\n` +
                                     `✂️ خدمت: ${service}\n` +
                                     `⏰ زمان: ${date} (${time})\n` +
                                     `📝 توضیحات: ${note}`;
 
-                // پیام اختصاصی برای مشتری
-                const customerText = `سلام تشکر وقت شما در روز ${date} ساعت ${time} در پیرایش سالار رزرو شد منتظرتان هستم تشکر`;
+                let existing = JSON.parse(localStorage.getItem('barber_bookings') || '[]');
+                existing.unshift({ name, phone, service, date, time, note, id: Date.now() });
+                localStorage.setItem('barber_bookings', JSON.stringify(existing));
 
                 document.getElementById('step3').classList.add('hidden');
                 document.getElementById('bottomBar').classList.add('hidden');
                 document.getElementById('successState').classList.remove('hidden');
 
-                sendNotification(bookingObj, adminText, customerText);
+                // ارسال قطعی پیام
+                sendNotification(bookingText);
             }
         }
 
