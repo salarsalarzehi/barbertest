@@ -97,7 +97,7 @@
 
         <!-- Bottom Bar -->
         <div id="bottomBar" class="p-4 bg-slate-900 border-t border-slate-800 flex gap-2">
-            <button id="backBtn" onclick="prevStep()" class="px-4 py-3 rounded-xl bg-slate-800 text-slate-400 text-xs font-semibold hidden">بازگشت</button>
+            <button id="backBtn" onclick="prevStep()" class="px-4 py-3 rounded-xl bg-slate-800 text-slate-400 text-xs font-semibold hidden cursor-pointer">بازگشت</button>
             <button id="nextBtn" onclick="nextStep()" disabled class="w-full py-3 rounded-xl bg-slate-800 text-slate-500 text-xs font-bold">ادامه</button>
         </div>
 
@@ -110,17 +110,32 @@
         let disabledSlots = [];
         let userChatId = null;
 
+        // دریافت امن اطلاعات کاربر از مینی‌اپ بله
         try {
             if (window.Bale && window.Bale.WebApp) {
                 window.Bale.WebApp.ready();
                 window.Bale.WebApp.expand();
-                // استخراج آیدی کاربر از مینی‌اپ بله
+                
                 const initData = window.Bale.WebApp.initDataUnsafe;
-                if (initData && initData.user && initData.user.id) {
-                    userChatId = initData.user.id;
+                if (initData) {
+                    if (initData.user && initData.user.id) {
+                        userChatId = initData.user.id;
+                    } else if (initData.chat && initData.chat.id) {
+                        userChatId = initData.chat.id;
+                    }
+                }
+                
+                // روش جایگزین برای استخراج از پارامترهای لینک (در صورت وجود)
+                if (!userChatId) {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    if (urlParams.get('chat_id')) {
+                        userChatId = urlParams.get('chat_id');
+                    }
                 }
             }
-        } catch(e){}
+        } catch(e) {
+            console.error("Bale WebApp Init Error:", e);
+        }
 
         async function fetchDisabledSlots() {
             try {
@@ -144,11 +159,12 @@
             container.innerHTML = '';
             for (let i = 0; i < 7; i++) {
                 const d = new Date(); d.setDate(d.getDate() + i);
+                // اصلاح فرمت تاریخ دقیقاً مطابق با پنل مدیریت
                 const str = d.toLocaleDateString('fa-IR', { weekday: 'short', month: 'short', day: 'numeric' });
                 if (i === 0 && !date) date = str;
 
                 const b = document.createElement('button');
-                b.className = `date-btn flex-shrink-0 p-2.5 rounded-xl border text-xs min-w-[75px] ${
+                b.className = `date-btn flex-shrink-0 p-2.5 rounded-xl border text-xs min-w-[75px] cursor-pointer ${
                     date === str ? 'border-emerald-500 text-emerald-400 bg-slate-800' : 'border-slate-700 bg-slate-800 text-white'
                 }`;
                 b.innerText = str;
@@ -175,7 +191,7 @@
                     b.innerText = `${t} (تکمیل)`;
                     b.disabled = true;
                 } else {
-                    b.className = `time-btn p-2.5 rounded-xl border text-xs ${
+                    b.className = `time-btn p-2.5 rounded-xl border text-xs cursor-pointer ${
                         time === t ? 'border-emerald-500 text-emerald-400 bg-slate-800' : 'border-slate-700 bg-slate-800 text-white'
                     }`;
                     b.innerText = t;
@@ -205,7 +221,7 @@
                     body: JSON.stringify({
                         adminText: adminText,
                         userText: userText,
-                        userChatId: userChatId,
+                        userChatId: userChatId, // ارسال صحیح آیدی چت کاربر به ورکر
                         bookingInfo: bookingObj
                     })
                 });
