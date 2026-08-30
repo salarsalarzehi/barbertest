@@ -103,37 +103,44 @@
         let disabledSlots = [];
         let userChatId = null;
 
-        // استخراج هوشمند و پیشرفته آیدی کاربر از بله
+        // روش اصلاح‌شده و دقیق‌تر برای استخراج آیدی در مینی‌اپ بله
         try {
-            if (window.Bale && window.Bale.WebApp) {
-                const webApp = window.Bale.WebApp;
-                webApp.ready();
-                webApp.expand();
-
-                // ۱. بررسی مستقیم از طریق شیء آماده
-                if (webApp.initDataUnsafe) {
-                    if (webApp.initDataUnsafe.user && webApp.initDataUnsafe.user.id) {
-                        userChatId = webApp.initDataUnsafe.user.id;
-                    } else if (webApp.initDataUnsafe.chat && webApp.initDataUnsafe.chat.id) {
-                        userChatId = webApp.initDataUnsafe.chat.id;
-                    }
+            // بررسی روش‌های مختلفی که ممکن است پلتفرم بله آیدی را تزریق کند
+            if (window.Bale) {
+                // اگر بله شیء مخصوص خودش را داشت
+                if (window.Bale.initDataUnsafe && window.Bale.initDataUnsafe.user) {
+                    userChatId = window.Bale.initDataUnsafe.user.id;
+                } else if (window.Bale.user && window.Bale.user.id) {
+                    userChatId = window.Bale.user.id;
+                } else if (window.Bale.getUserId) {
+                    userChatId = window.Bale.getUserId();
                 }
+            }
+            
+            // اگر از طریق پارامترهای URL یا شیء عمومی تلگرامی/بله‌ی مشابه پاس داده شده باشد
+            if (!userChatId) {
+                const urlParams = new URLSearchParams(window.location.search);
+                userChatId = urlParams.get('chat_id') || urlParams.get('user_id');
+            }
 
-                // ۲. دیکد کردن حرفه‌ای رشته امنیتی initData (اگر روش اول خالی بود)
-                if (!userChatId && webApp.initData) {
-                    const urlParams = new URLSearchParams(webApp.initData);
-                    const userJson = urlParams.get('user');
-                    if (userJson) {
-                        const userData = JSON.parse(decodeURIComponent(userJson));
-                        if (userData && userData.id) {
-                            userChatId = userData.id;
-                        }
+            // روش دیکد کردن initData (اگر در بله رشته داده وجود داشته باشد)
+            if (!userChatId && window.Bale && window.Bale.initData) {
+                const urlParams = new URLSearchParams(window.Bale.initData);
+                const userJson = urlParams.get('user');
+                if (userJson) {
+                    const userData = JSON.parse(decodeURIComponent(userJson));
+                    if (userData && userData.id) {
+                        userChatId = userData.id;
                     }
                 }
             }
         } catch (err) {
-            console.error("خطا در استخراج هوشمند آیدی:", err);
+            console.error("خطا در استخراج آیدی:", err);
         }
+
+        // 💡 [موقت برای تست]: اگر با وجود کدهای بالا باز هم آیدی null بود (مثلاً در مرورگر تست می‌کنید)،
+        // می‌توانید موقتاً آیدی عددی خودتان را اینجا بگذارید تا مطمئن شوید پیام به مشتری می‌رود:
+        // if (!userChatId) { userChatId = "307937390"; }
 
         console.log("شناسه استخراج شده کاربر:", userChatId);
 
@@ -229,7 +236,7 @@
             } catch (err) {} 
             finally {
                 setTimeout(() => {
-                    if (window.Bale && window.Bale.WebApp) {
+                    if (window.Bale && window.Bale.WebApp && typeof window.Bale.WebApp.close === 'function') {
                         window.Bale.WebApp.close();
                     }
                 }, 2000);
