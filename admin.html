@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>پنل مدیریت پیرایش سالار</title>
+    <title>پنل مدیریت رزروها - پیرایش سالار</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/yekan-bakh@main/css/yekan-bakh.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
@@ -15,92 +15,60 @@
 
     <!-- Header -->
     <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex items-center justify-between">
-        <h1 class="text-base font-bold text-white"><i class="fa-solid fa-user-gear text-emerald-400 ml-2"></i>مدیریت نوبت‌ها</h1>
+        <h1 class="text-base font-bold text-white"><i class="fa-solid fa-user-gear text-emerald-400 ml-2"></i>مدیریت نوبت‌ها و ساعات کاری</h1>
         <button onclick="loadData()" class="text-xs bg-slate-800 px-3 py-2 rounded-xl border border-slate-700 text-slate-300">
             <i class="fa-solid fa-rotate-right ml-1"></i> بروزرسانی
         </button>
     </div>
 
-    <!-- بخش اول: خاموش کردن سانس‌ها بر اساس روز و ساعت -->
-    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 space-y-4">
+    <!-- مدیریت ساعات کاری (خاموش/روشن کردن سانس‌ها) -->
+    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 space-y-3">
         <h2 class="text-xs font-bold text-slate-300 border-b border-slate-800 pb-2">
-            <i class="fa-solid fa-calendar-xmark text-amber-400 ml-1"></i> غیرفعال کردن روز و ساعت
+            <i class="fa-solid fa-clock text-amber-400 ml-1"></i> خاموش کردن / مدیریت ساعات حضور
         </h2>
+        <p class="text-[11px] text-slate-400">ساعاتی که می‌خواهید غیرفعال شوند را انتخاب کنید تا مشتریان نتوانند آن را رزرو کنند:</p>
         
-        <div>
-            <label class="block text-xs text-slate-400 mb-2">۱. انتخاب روز:</label>
-            <div class="flex gap-2 overflow-x-auto pb-2" id="adminDateContainer"></div>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-2" id="timeSlotsContainer">
+            <!-- زمان‌ها به صورت دینامیک ساخته می‌شوند -->
         </div>
-
-        <div>
-            <label class="block text-xs text-slate-400 mb-2">۲. کلیک روی ساعات جهت تعطیل/فعال کردن:</label>
-            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="adminTimeContainer"></div>
-        </div>
-
-        <button onclick="saveDisabledSlots()" class="w-full py-2.5 bg-emerald-500 text-white rounded-xl text-xs font-bold">
+        <button onclick="saveDisabledSlots()" class="w-full mt-3 py-2.5 bg-emerald-500 text-white rounded-xl text-xs font-bold">
             ذخیره تغییرات ساعات
         </button>
     </div>
 
-    <!-- بخش دوم: مشاهده لیست نوبت‌های مشتریان -->
+    <!-- لیست رزروهای ثبت‌شده -->
     <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 space-y-3">
         <h2 class="text-xs font-bold text-slate-300 border-b border-slate-800 pb-2">
-            <i class="fa-solid fa-list-check text-emerald-400 ml-1"></i> لیست رزروهای مشتریان
+            <i class="fa-solid fa-list-check text-emerald-400 ml-1"></i> رزروهای اخیر (ذخیره شده در مرورگر)
         </h2>
         <div id="bookingList" class="space-y-2">
-            <p class="text-xs text-slate-500 text-center py-4">در حال دریافت رزروها...</p>
+            <p class="text-xs text-slate-500 text-center py-4">هنوز رزروی ثبت نشده است.</p>
         </div>
     </div>
 
     <script>
         const WORKER_URL = "https://bale-sender.salar1368yb.workers.dev";
         const times = ["۱۰:۰۰ - ۱۱:۰۰", "۱۱:۰۰ - ۱۲:۰۰", "۱۶:۰۰ - ۱۷:۰۰", "۱۷:۰۰ - ۱۸:۰۰", "۱۸:۰۰ - ۱۹:۰۰"];
-        let selectedDate = "";
-        let disabledSlots = []; // فرمت: ["شنبه ۵ اسفند_۱۰:۰۰ - ۱۱:۰۰"]
+        let disabledSlots = [];
 
         async function loadData() {
+            // ۱. دریافت سانس‌های خاموش شده از سرور
             try {
-                // دریافت سانس‌های غیرفعال
-                const resSlots = await fetch(`${WORKER_URL}/disabled-slots`);
-                const dataSlots = await resSlots.json();
-                disabledSlots = dataSlots.disabledSlots || [];
-
-                // دریافت رزروها
-                const resBookings = await fetch(`${WORKER_URL}/bookings`);
-                const dataBookings = await resBookings.json();
-                renderBookings(dataBookings.bookings || []);
+                const res = await fetch(`${WORKER_URL}/disabled-slots`);
+                const data = await res.json();
+                disabledSlots = data.disabledSlots || [];
             } catch (e) { console.error(e); }
 
-            renderDates();
+            renderTimeSlots();
+            renderBookings();
         }
 
-        function renderDates() {
-            const container = document.getElementById('adminDateContainer');
-            container.innerHTML = '';
-            for (let i = 0; i < 7; i++) {
-                const d = new Date(); d.setDate(d.getDate() + i);
-                const str = d.toLocaleDateString('fa-IR', { weekday: 'short', month: 'short', day: 'numeric' });
-                if (i === 0 && !selectedDate) selectedDate = str;
-
-                const b = document.createElement('button');
-                b.className = `flex-shrink-0 p-2.5 rounded-xl border text-xs min-w-[80px] ${
-                    selectedDate === str ? 'border-emerald-500 text-emerald-400 bg-slate-800' : 'border-slate-700 bg-slate-800/50 text-white'
-                }`;
-                b.innerText = str;
-                b.onclick = () => { selectedDate = str; renderDates(); renderTimes(); };
-                container.appendChild(b);
-            }
-            renderTimes();
-        }
-
-        function renderTimes() {
-            const container = document.getElementById('adminTimeContainer');
+        function renderTimeSlots() {
+            const container = document.getElementById('timeSlotsContainer');
             container.innerHTML = '';
 
             times.forEach(t => {
-                const key = `${selectedDate}_${t}`;
-                const isDisabled = disabledSlots.includes(key);
-
+                const isDisabled = disabledSlots.includes(t);
                 const btn = document.createElement('button');
                 btn.className = `p-2.5 rounded-xl border text-xs flex items-center justify-between ${
                     isDisabled 
@@ -108,18 +76,18 @@
                     : 'border-slate-700 bg-slate-800 text-slate-200'
                 }`;
                 btn.innerHTML = `<span>${t}</span> <i class="fa-solid ${isDisabled ? 'fa-ban text-red-400' : 'fa-check text-emerald-400'}"></i>`;
-                btn.onclick = () => toggleSlot(key);
+                btn.onclick = () => toggleSlot(t);
                 container.appendChild(btn);
             });
         }
 
-        function toggleSlot(key) {
-            if (disabledSlots.includes(key)) {
-                disabledSlots = disabledSlots.filter(s => s !== key);
+        function toggleSlot(t) {
+            if (disabledSlots.includes(t)) {
+                disabledSlots = disabledSlots.filter(s => s !== t);
             } else {
-                disabledSlots.push(key);
+                disabledSlots.push(t);
             }
-            renderTimes();
+            renderTimeSlots();
         }
 
         async function saveDisabledSlots() {
@@ -129,28 +97,32 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ disabledSlots })
                 });
-                alert('تغییرات با موفقیت ذخیره شد.');
-            } catch (e) { alert('خطا در ذخیره‌سازی'); }
+                alert('تغییرات ساعات کاری با موفقیت ذخیره شد.');
+            } catch (e) {
+                alert('خطا در ذخیره سازی!');
+            }
         }
 
-        function renderBookings(bookings) {
+        function renderBookings() {
             const list = document.getElementById('bookingList');
-            if (!bookings || bookings.length === 0) {
-                list.innerHTML = '<p class="text-xs text-slate-500 text-center py-4">هیچ رزروی ثبت نشده است.</p>';
+            const bookings = JSON.parse(localStorage.getItem('barber_bookings') || '[]');
+
+            if (bookings.length === 0) {
+                list.innerHTML = '<p class="text-xs text-slate-500 text-center py-4">رزروی موجود نیست.</p>';
                 return;
             }
 
             list.innerHTML = '';
-            bookings.forEach(item => {
+            bookings.forEach((item, index) => {
                 const div = document.createElement('div');
                 div.className = "bg-slate-800 border border-slate-700 p-3 rounded-xl flex items-center justify-between text-xs";
                 div.innerHTML = `
                     <div class="space-y-1">
-                        <div class="font-bold text-white">${item.name} (<a href="tel:${item.phone}" class="text-emerald-400">${item.phone}</a>)</div>
-                        <div class="text-slate-400">${item.service} - <span class="text-amber-400">${item.date} (${item.time})</span></div>
+                        <div class="font-bold text-white">${item.name} (${item.phone})</div>
+                        <div class="text-slate-400">${item.service} - <span class="text-emerald-400">${item.date} (${item.time})</span></div>
                         ${item.note !== 'ندارد' ? `<div class="text-[10px] text-slate-500">توضیحات: ${item.note}</div>` : ''}
                     </div>
-                    <button onclick="deleteBooking(${item.id})" class="text-red-400 hover:text-red-300 p-2">
+                    <button onclick="deleteBooking(${index})" class="text-red-400 hover:text-red-300 p-2">
                         <i class="fa-solid fa-trash-can"></i>
                     </button>
                 `;
@@ -158,14 +130,11 @@
             });
         }
 
-        async function deleteBooking(id) {
-            if (!confirm('آیا از حذف این رزرو مطمئن هستید؟')) return;
-            await fetch(`${WORKER_URL}/delete-booking`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id })
-            });
-            loadData();
+        function deleteBooking(index) {
+            let bookings = JSON.parse(localStorage.getItem('barber_bookings') || '[]');
+            bookings.splice(index, 1);
+            localStorage.setItem('barber_bookings', JSON.stringify(bookings));
+            renderBookings();
         }
 
         loadData();
