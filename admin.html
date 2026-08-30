@@ -53,44 +53,53 @@
             <p class="text-xs text-slate-500 text-center py-4">در حال دریافت رزروها...</p>
         </div>
     </div>
-
-    <script>
+<script>
         const WORKER_URL = "https://bale-sender.salar1368yb.workers.dev";
         const times = ["۱۰:۰۰ - ۱۱:۰۰", "۱۱:۰۰ - ۱۲:۰۰", "۱۶:۰۰ - ۱۷:۰۰", "۱۷:۰۰ - ۱۸:۰۰", "۱۸:۰۰ - ۱۹:۰۰"];
         let disabledSlots = [];
         let selectedAdminDate = "";
 
         async function loadData() {
+            // ابتدا تاریخ پیش‌فرض را تعیین می‌کنیم تا رندر روز و ساعت‌ها معطل دریافت از سرور نماند
+            const d = new Date();
+            selectedAdminDate = d.toLocaleDateString('fa-IR', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '-');
+
+            renderAdminCalendar();
+            renderAdminTimes();
+
             try {
+                // دریافت سانس‌های غیرفعال
                 const resSlots = await fetch(`${WORKER_URL}/disabled-slots`);
                 const dataSlots = await resSlots.json();
                 disabledSlots = dataSlots.disabledSlots || [];
+                renderAdminTimes(); // رندر مجدد جهت اعمال سانس‌های غیرفعال از سرور
+            } catch (e) { 
+                console.error("Error loading slots:", e); 
+            }
 
+            try {
+                // دریافت لیست رزروها
                 const resBookings = await fetch(`${WORKER_URL}/bookings`);
                 const dataBookings = await resBookings.json();
                 renderBookings(dataBookings.bookings || []);
             } catch (e) { 
-                console.error(e); 
+                console.error("Error loading bookings:", e);
+                document.getElementById('bookingList').innerHTML = '<p class="text-xs text-red-400 text-center py-4">خطا در دریافت لیست رزروها</p>';
             }
-            renderAdminCalendar();
-            renderAdminTimes();
         }
 
         function renderAdminCalendar() {
             const container = document.getElementById('adminDateContainer');
             container.innerHTML = '';
             
-            // تولید کلید تاریخ استاندارد دقیقاً مشابه مینی‌اپ مشتری
             for (let i = 0; i < 7; i++) {
                 const d = new Date(); 
                 d.setDate(d.getDate() + i);
                 const dateStr = d.toLocaleDateString('fa-IR', { year: 'numeric', month: '2-digit', day: '2-digit' }).replace(/\//g, '-');
                 const labelStr = d.toLocaleDateString('fa-IR', { weekday: 'short', month: 'short', day: 'numeric' });
                 
-                if (i === 0 && !selectedAdminDate) selectedAdminDate = dateStr;
-
                 const b = document.createElement('button');
-                b.className = `flex-shrink-0 p-2.5 rounded-xl border text-xs min-w-[85px] cursor-pointer ${
+                b.className = `flex-shrink-0 p-2.5 rounded-xl border text-xs min-w-[85px] cursor-pointer transition-all ${
                     selectedAdminDate === dateStr ? 'border-emerald-500 text-emerald-400 bg-slate-800 font-bold' : 'border-slate-700 bg-slate-800 text-white'
                 }`;
                 b.innerText = labelStr;
@@ -111,7 +120,8 @@
                 const key = `${selectedAdminDate}_${t}`;
                 const isDisabled = disabledSlots.includes(key);
                 const btn = document.createElement('button');
-                btn.className = `p-2.5 rounded-xl border text-xs flex items-center justify-between cursor-pointer ${
+                btn.type = "button";
+                btn.className = `p-2.5 rounded-xl border text-xs flex items-center justify-between cursor-pointer transition-all ${
                     isDisabled ? 'border-red-500/50 bg-red-500/10 text-red-400' : 'border-slate-700 bg-slate-800 text-slate-200'
                 }`;
                 btn.innerHTML = `<span>${t}</span> <i class="fa-solid ${isDisabled ? 'fa-ban text-red-400' : 'fa-check text-emerald-400'}"></i>`;
@@ -129,14 +139,19 @@
 
         async function saveDisabledSlots() {
             try {
-                await fetch(`${WORKER_URL}/disabled-slots`, {
+                const res = await fetch(`${WORKER_URL}/disabled-slots`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ disabledSlots })
                 });
-                alert('تغییرات ساعات کاری با موفقیت ذخیره شد.');
+                const result = await res.json();
+                if(result.success) {
+                    alert('تغییرات ساعات کاری با موفقیت ذخیره شد.');
+                } else {
+                    alert('خطا در ذخیره‌سازی!');
+                }
             } catch (e) {
-                alert('خطا در ذخیره سازی!');
+                alert('خطا در ارتباط با سرور!');
             }
         }
 
@@ -179,6 +194,7 @@
             }
         }
 
+        // اجرای اولیه هنگام لود صفحه
         loadData();
     </script>
 </body>
