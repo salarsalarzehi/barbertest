@@ -90,7 +90,7 @@
             <div id="successState" class="text-center py-10 space-y-3 hidden">
                 <i class="fa-solid fa-circle-check text-emerald-400 text-5xl"></i>
                 <h2 class="text-base font-bold text-white">نوبت شما با موفقیت ثبت شد</h2>
-                <p class="text-xs text-slate-400">اطلاعات برای آرایشگر ارسال گردید.</p>
+                <p class="text-xs text-slate-400">اطلاعات برای آرایشگر ارسال گردید و تاییدیه به چت شما آمد.</p>
             </div>
 
         </div>
@@ -108,11 +108,17 @@
         const times = ["۱۰:۰۰ - ۱۱:۰۰", "۱۱:۰۰ - ۱۲:۰۰", "۱۶:۰۰ - ۱۷:۰۰", "۱۷:۰۰ - ۱۸:۰۰", "۱۸:۰۰ - ۱۹:۰۰"];
         let step = 1, service = "", date = "", time = "";
         let disabledSlots = [];
+        let userChatId = null;
 
         try {
             if (window.Bale && window.Bale.WebApp) {
                 window.Bale.WebApp.ready();
                 window.Bale.WebApp.expand();
+                // استخراج آیدی کاربر از مینی‌اپ بله
+                const initData = window.Bale.WebApp.initDataUnsafe;
+                if (initData && initData.user && initData.user.id) {
+                    userChatId = initData.user.id;
+                }
             }
         } catch(e){}
 
@@ -191,20 +197,17 @@
             }
         }
 
-        async function sendNotification(bookingObj, bookingText) {
+        async function sendNotification(bookingObj, adminText, userText) {
             try {
-                // ارسال اطلاعات به پنل مدیریت
-                await fetch(`${WORKER_URL}/bookings`, {
+                await fetch(`${WORKER_URL}/`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(bookingObj)
-                });
-
-                // ارسال پیام به پیام‌رسان بله
-                await fetch(WORKER_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text: bookingText })
+                    body: JSON.stringify({
+                        adminText: adminText,
+                        userText: userText,
+                        userChatId: userChatId,
+                        bookingInfo: bookingObj
+                    })
                 });
             } catch (err) {
                 console.error("خطا:", err);
@@ -213,7 +216,7 @@
                     if (window.Bale && window.Bale.WebApp) {
                         window.Bale.WebApp.close();
                     }
-                }, 1500);
+                }, 2000);
             }
         }
 
@@ -244,18 +247,24 @@
                 if (!name || !phone) return alert('لطفاً نام و شماره تلفن را وارد کنید.');
 
                 const bookingObj = { name, phone, service, date, time, note, id: Date.now() };
-                const bookingText = `💈 **نوبت جدید در پیرایش سالار**\n\n` +
-                                    `👤 مشتری: ${name}\n` +
-                                    `📞 تلفن: ${phone}\n` +
-                                    `✂️ خدمت: ${service}\n` +
-                                    `⏰ زمان: ${date} (${time})\n` +
-                                    `📝 توضیحات: ${note}`;
+                
+                const adminText = `💈 **نوبت جدید در پیرایش سالار**\n\n` +
+                                  `👤 مشتری: ${name}\n` +
+                                  `📞 تلفن: ${phone}\n` +
+                                  `✂️ خدمت: ${service}\n` +
+                                  `⏰ زمان: ${date} (${time})\n` +
+                                  `📝 توضیحات: ${note}`;
+
+                const userText = `✅ **رزرو شما با موفقیت ثبت شد!**\n\n` +
+                                 `سلام ${name} عزیز،\n` +
+                                 `نوبت شما برای خدمت **${service}** در تاریخ **${date} ساعت ${time}** ثبت گردید.\n\n` +
+                                 `منتظر حضور شما در پیرایش سالار هستیم! ✂️`;
 
                 document.getElementById('step3').classList.add('hidden');
                 document.getElementById('bottomBar').classList.add('hidden');
                 document.getElementById('successState').classList.remove('hidden');
 
-                sendNotification(bookingObj, bookingText);
+                sendNotification(bookingObj, adminText, userText);
             }
         }
 
