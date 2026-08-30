@@ -39,7 +39,7 @@
                 </div>
             </div>
 
-            <!-- STEP 1 -->
+            <!-- STEP 1: Services -->
             <div id="step1" class="space-y-3">
                 <div onclick="selectService(this, 'اصلاح و استایل مو')" class="service-card p-3.5 rounded-xl bg-slate-800 border border-slate-700 hover:border-emerald-500 cursor-pointer flex items-center justify-between">
                     <div>
@@ -58,19 +58,19 @@
                 </div>
             </div>
 
-            <!-- STEP 2 -->
+            <!-- STEP 2: Date & Time -->
             <div id="step2" class="space-y-4 hidden">
                 <div>
                     <label class="block text-xs text-slate-400 mb-2">روز مراجعه:</label>
                     <div class="flex gap-2 overflow-x-auto pb-2 custom-scrollbar" id="dateContainer"></div>
                 </div>
                 <div>
-                    <label class="block text-xs text-slate-400 mb-2">ساعت حضور:</label>
+                    <label class="block text-xs text-slate-400 mb-2">ساعت حضور (ساعت‌های تکمیل‌شده قفل هستند):</label>
                     <div class="grid grid-cols-2 gap-2" id="timeContainer"></div>
                 </div>
             </div>
 
-            <!-- STEP 3 -->
+            <!-- STEP 3: Contact Info -->
             <div id="step3" class="space-y-3 hidden">
                 <div>
                     <label class="block text-xs text-slate-300 mb-1">نام و نام خانوادگی:</label>
@@ -86,11 +86,11 @@
                 </div>
             </div>
 
-            <!-- SUCCESS -->
+            <!-- SUCCESS STATE -->
             <div id="successState" class="text-center py-10 space-y-3 hidden">
                 <i class="fa-solid fa-circle-check text-emerald-400 text-5xl"></i>
                 <h2 class="text-base font-bold text-white">نوبت شما با موفقیت ثبت شد</h2>
-                <p class="text-xs text-slate-400">اطلاعات برای آرایشگر ارسال گردید و تاییدیه به چت شما آمد.</p>
+                <p class="text-xs text-slate-400">اطلاعات برای آرایشگر ارسال گردید و ساعت مورد نظر قفل شد.</p>
             </div>
 
         </div>
@@ -110,38 +110,29 @@
         let disabledSlots = [];
         let userChatId = null;
 
-        // استخراج ایمن آیدی کاربر از مینی‌اپ بله
+        // دریافت اطلاعات کاربر در بله
         try {
             if (window.Bale && window.Bale.WebApp) {
                 window.Bale.WebApp.ready();
                 window.Bale.WebApp.expand();
-                
-                // بررسی روش استاندارد initDataUnsafe
                 const webApp = window.Bale.WebApp;
                 if (webApp.initDataUnsafe && webApp.initDataUnsafe.user) {
                     userChatId = webApp.initDataUnsafe.user.id;
-                } else if (webApp.initDataUnsafe && webApp.initDataUnsafe.chat) {
-                    userChatId = webApp.initDataUnsafe.chat.id;
                 }
             }
         } catch(e) {
-            console.error("Bale WebApp Init Error:", e);
+            console.error("Bale Init Error:", e);
         }
 
-        // اگر از طریق SDK پیدا نشد، بررسی پارامترهای URL یا حافظه موقت
-        if (!userChatId) {
-            const urlParams = new URLSearchParams(window.location.search);
-            userChatId = urlParams.get('chat_id') || urlParams.get('user_id');
-        }
-
-        console.log("Detected User Chat ID:", userChatId);
-
+        // دریافت سانس‌های غیرفعال (قفل‌شده) از کلادفلر در ابتدا
         async function fetchDisabledSlots() {
             try {
                 const res = await fetch(`${WORKER_URL}/disabled-slots`);
                 const data = await res.json();
                 disabledSlots = data.disabledSlots || [];
-            } catch(e){}
+            } catch(e) {
+                console.error("خطا در دریافت سانس‌ها:", e);
+            }
         }
 
         function selectService(el, sName) {
@@ -168,9 +159,11 @@
                 b.innerText = str;
                 b.onclick = () => {
                     date = str;
+                    time = ""; // ریست کردن ساعت با تغییر روز
                     renderCalendar();
                     renderTimes();
-                    checkStep2();
+                    document.getElementById('nextBtn').disabled = true;
+                    document.getElementById('nextBtn').className = "w-full py-3 rounded-xl bg-slate-800 text-slate-500 text-xs font-bold";
                 };
                 container.appendChild(b);
             }
@@ -211,23 +204,34 @@
             }
         }
 
-        async function sendNotification(bookingObj, adminText, userText) {
+        // ثبت رزرو و ذخیره ساعت قفل‌شده در سرور
+        async function finalizeBooking(bookingObj, adminText, currentSlotKey) {
             try {
-                // اگر کاربر روی وب یا گوشی بود و آیدی نداشت، یک مقدار موقت یا شماره تلفن به عنوان شناسه جایگزین می‌فرستیم تا سرور خطا ندهد
-                const finalChatId = userChatId ? userChatId : bookingObj.phone;
+                // ۱. اضافه کردن ساعت به لیست محلی
+                if (!disabledSlots.includes(currentSlotKey)) {
+                    disabledSlots.push(currentSlotKey);
+                }
 
+                // ۲. ارسال اطلاعات رزرو و پیام به ادمین
                 await fetch(`${WORKER_URL}/`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         adminText: adminText,
-                        userText: userText,
-                        userChatId: finalChatId, 
+                        userChatId: userChatId,
                         bookingInfo: bookingObj
                     })
                 });
+
+                // ۳. آپدیت کردن لیست سانس‌های قفل‌شده در کلادفلر KV
+                await fetch(`${WORKER_URL}/disabled-slots`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ disabledSlots })
+                });
+
             } catch (err) {
-                console.error("خطا:", err);
+                console.error("خطا در ثبت نهایی:", err);
             } finally {
                 setTimeout(() => {
                     if (window.Bale && window.Bale.WebApp) {
@@ -240,15 +244,17 @@
         async function nextStep() {
             if (step === 1) {
                 step = 2;
-                await fetchDisabledSlots();
+                await fetchDisabledSlots(); // دریافت آخرین وضعیت قفل‌ها از سرور قبل از نمایش ساعت‌ها
                 document.getElementById('step1').classList.add('hidden');
                 document.getElementById('step2').classList.remove('hidden');
                 document.getElementById('backBtn').classList.remove('hidden');
                 document.getElementById('stepBadge').innerText = '۲';
                 document.getElementById('stepTitle').innerText = 'انتخاب زمان';
-                renderCalendar(); renderTimes();
+                renderCalendar(); 
+                renderTimes();
                 const btn = document.getElementById('nextBtn');
-                btn.disabled = true; btn.className = "w-full py-3 rounded-xl bg-slate-800 text-slate-500 text-xs font-bold";
+                btn.disabled = true; 
+                btn.className = "w-full py-3 rounded-xl bg-slate-800 text-slate-500 text-xs font-bold";
             } else if (step === 2) {
                 step = 3;
                 document.getElementById('step2').classList.add('hidden');
@@ -256,6 +262,8 @@
                 document.getElementById('stepBadge').innerText = '۳';
                 document.getElementById('stepTitle').innerText = 'اطلاعات تماس';
                 document.getElementById('nextBtn').innerText = 'ثبت نهایی رزرو';
+                document.getElementById('nextBtn').disabled = false;
+                document.getElementById('nextBtn').className = "w-full py-3 rounded-xl bg-emerald-500 text-white text-xs font-bold cursor-pointer";
             } else if (step === 3) {
                 const name = document.getElementById('custName').value.trim();
                 const phone = document.getElementById('custPhone').value.trim();
@@ -263,6 +271,7 @@
                 
                 if (!name || !phone) return alert('لطفاً نام و شماره تلفن را وارد کنید.');
 
+                const currentSlotKey = `${date}_${time}`;
                 const bookingObj = { name, phone, service, date, time, note, id: Date.now() };
                 
                 const adminText = `💈 **نوبت جدید در پیرایش سالار**\n\n` +
@@ -272,16 +281,11 @@
                                   `⏰ زمان: ${date} (${time})\n` +
                                   `📝 توضیحات: ${note}`;
 
-                const userText = `✅ **رزرو شما با موفقیت ثبت شد!**\n\n` +
-                                 `سلام ${name} عزیز،\n` +
-                                 `نوبت شما برای خدمت **${service}** در تاریخ **${date} ساعت ${time}** ثبت گردید.\n\n` +
-                                 `منتظر حضور شما در پیرایش سالار هستیم! ✂️`;
-
                 document.getElementById('step3').classList.add('hidden');
                 document.getElementById('bottomBar').classList.add('hidden');
                 document.getElementById('successState').classList.remove('hidden');
 
-                sendNotification(bookingObj, adminText, userText);
+                finalizeBooking(bookingObj, adminText, currentSlotKey);
             }
         }
 
@@ -292,11 +296,14 @@
                 document.getElementById('step1').classList.remove('hidden');
                 document.getElementById('backBtn').classList.add('hidden');
                 document.getElementById('stepBadge').innerText = '۱';
+                document.getElementById('stepTitle').innerText = 'انتخاب خدمت مورد نظر';
+                document.getElementById('nextBtn').innerText = 'ادامه';
             } else if (step === 3) {
                 step = 2;
                 document.getElementById('step3').classList.add('hidden');
                 document.getElementById('step2').classList.remove('hidden');
                 document.getElementById('stepBadge').innerText = '۲';
+                document.getElementById('stepTitle').innerText = 'انتخاب زمان';
                 document.getElementById('nextBtn').innerText = 'ادامه';
             }
         }
