@@ -6,7 +6,7 @@
     <title>رزرو آنلاین پیرایش سالار</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/yekan-bakh@main/css/yekan-bakh.css" rel="stylesheet" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://tapi.bale.ai/static/js/bale-miniapp.js"></script>
     <style>
         body { font-family: 'Yekan Bakh', sans-serif; background-color: #0f172a; color: #f8fafc; }
@@ -102,7 +102,8 @@
         </div>
 
     </div>
-<script>
+
+    <script>
         let userChatId = null;
 
         try {
@@ -110,7 +111,7 @@
                 window.Bale.WebApp.ready();
                 window.Bale.WebApp.expand();
                 
-                // تلاش برای گرفتن اطلاعات کاربر یا چت‌آیدی از مینی‌اپ بله
+                // گرفتن چت‌آیدی کاربر از خود مینی‌اپ بله
                 const initDataUnsafe = window.Bale.WebApp.initDataUnsafe;
                 if (initDataUnsafe && initDataUnsafe.user) {
                     userChatId = initDataUnsafe.user.id;
@@ -172,16 +173,16 @@
             }
         }
 
-        async function sendNotification(bookingText, customerText) {
+        async function sendNotification(bookingText, customerMsg) {
             try {
-                // ارسال درخواست به کلودفلر ورکر همراه با متن ادمین و چت‌آیدی مشتری
+                // ارسال اطلاعات به کلودفلر ورکر همراه با چت‌آیدی مشتری
                 await fetch("https://bale-sender.salar1368yb.workers.dev/", {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
+                    body: JSON.stringify({ 
                         text: bookingText,
                         userChatId: userChatId,
-                        customerText: customerText
+                        customerText: customerMsg 
                     })
                 });
             } catch (err) {
@@ -220,15 +221,15 @@
                 
                 if (!name || !phone) return alert('لطفاً نام و شماره تلفن را وارد کنید.');
 
-                // پیام مخصوص ادمین
-                const adminBookingText = `💈 **نوبت جدید در پیرایش سالار**\n\n` +
-                                            `👤 مشتری: ${name}\n` +
-                                            `📞 تلفن: ${phone}\n` +
-                                            `✂️ خدمت: ${service}\n` +
-                                            `⏰ زمان: ${date} (${time})\n` +
-                                            `📝 توضیحات: ${note}`;
+                // متن ارسال شده برای شما (ادمین)
+                const adminText = `💈 **نوبت جدید در پیرایش سالار**\n\n` +
+                                    `👤 مشتری: ${name}\n` +
+                                    `📞 تلفن: ${phone}\n` +
+                                    `✂️ خدمت: ${service}\n` +
+                                    `⏰ زمان: ${date} (${time})\n` +
+                                    `📝 توضیحات: ${note}`;
 
-                // پیام تاییدیه مخصوص مشتری
+                // متن تاییدیه ارسال شده برای مشتری
                 const customerMsg = `سلام ${name} عزیز 👋\n\n` +
                                       `نوبت شما در **پیرایش سالار** با موفقیت ثبت شد:\n` +
                                       `✂️ خدمت: ${service}\n` +
@@ -244,7 +245,7 @@
                 document.getElementById('successState').classList.remove('hidden');
 
                 // ارسال هم‌زمان به ادمین و مشتری
-                sendNotification(adminBookingText, customerMsg);
+                sendNotification(adminText, customerMsg);
             }
         }
 
