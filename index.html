@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مینی‌اپ رزرو پیرایش سالار</title>
+    <title>رزرو آنلاین پیرایش سالار</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/yekan-bakh@main/css/yekan-bakh.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
@@ -16,7 +16,7 @@
 </head>
 <body class="min-h-screen flex items-center justify-center p-2 sm:p-4">
 
-    <div class="w-full max-w-md bg-slate-900 rounded-3xl overflow-hidden shadow-2xl border border-slate-800 flex flex-col h-[800px] relative">
+    <div class="w-full max-w-md bg-slate-900 rounded-3xl overflow-hidden shadow-2xl border border-slate-800 flex flex-col h-[750px] relative">
         
         <!-- Header -->
         <div class="bg-slate-800 px-4 py-3 flex items-center justify-between border-b border-slate-700 text-xs text-slate-300">
@@ -41,7 +41,7 @@
 
             <!-- STEP 1 -->
             <div id="step1" class="space-y-3">
-                <div onclick="selectService(this, 'اصلاح و استایل مو', 250000)" class="service-card p-3 rounded-xl bg-slate-800 border border-slate-700 hover:border-emerald-500 cursor-pointer flex items-center justify-between">
+                <div onclick="selectService(this, 'اصلاح و استایل مو')" class="service-card p-3.5 rounded-xl bg-slate-800 border border-slate-700 hover:border-emerald-500 cursor-pointer flex items-center justify-between">
                     <div>
                         <h3 class="text-sm font-semibold text-white">اصلاح و استایل مو</h3>
                         <p class="text-[11px] text-slate-400 mt-1">مدت زمان: ۴۵ دقیقه</p>
@@ -49,7 +49,7 @@
                     <span class="text-xs font-bold text-emerald-400">۲۵۰,۰۰۰ تومان</span>
                 </div>
 
-                <div onclick="selectService(this, 'اصلاح کامل سر و صورت', 350000)" class="service-card p-3 rounded-xl bg-slate-800 border border-slate-700 hover:border-emerald-500 cursor-pointer flex items-center justify-between">
+                <div onclick="selectService(this, 'اصلاح کامل سر و صورت')" class="service-card p-3.5 rounded-xl bg-slate-800 border border-slate-700 hover:border-emerald-500 cursor-pointer flex items-center justify-between">
                     <div>
                         <h3 class="text-sm font-semibold text-white">اصلاح کامل سر و صورت</h3>
                         <p class="text-[11px] text-slate-400 mt-1">مدت زمان: ۶۰ دقیقه</p>
@@ -74,11 +74,11 @@
             <div id="step3" class="space-y-3 hidden">
                 <div>
                     <label class="block text-xs text-slate-300 mb-1">نام و نام خانوادگی:</label>
-                    <input type="text" id="custName" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-emerald-500">
+                    <input type="text" id="custName" placeholder="مثلا: علی محمدی" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-emerald-500">
                 </div>
                 <div>
                     <label class="block text-xs text-slate-300 mb-1">شماره همراه:</label>
-                    <input type="tel" id="custPhone" dir="ltr" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-white text-right focus:outline-none focus:border-emerald-500">
+                    <input type="tel" id="custPhone" dir="ltr" placeholder="09123456789" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-white text-right focus:outline-none focus:border-emerald-500">
                 </div>
                 <div>
                     <label class="block text-xs text-slate-300 mb-1">توضیحات (اختیاری):</label>
@@ -89,8 +89,8 @@
             <!-- SUCCESS -->
             <div id="successState" class="text-center py-10 space-y-3 hidden">
                 <i class="fa-solid fa-circle-check text-emerald-400 text-5xl"></i>
-                <h2 class="text-base font-bold text-white">نوبت با موفقیت ثبت شد</h2>
-                <p class="text-xs text-slate-400">اطلاعات برای آرایشگر ارسال گردید.</p>
+                <h2 class="text-base font-bold text-white">در حال ثبت و ارسال...</h2>
+                <p class="text-xs text-slate-400">اطلاعات رزرو به چت ربات ارسال شد.</p>
             </div>
 
         </div>
@@ -104,9 +104,7 @@
     </div>
 
     <script>
-        const BOT_TOKEN = "1703807178:775iw_6914gV4xNDOb1MuY0_37OSBfYjYfs";
-        const ADMIN_ID = "307937390";
-
+        // مقداردهی اولیه مینی‌اپ بله
         try {
             if (window.Bale && window.Bale.WebApp) {
                 window.Bale.WebApp.ready();
@@ -117,7 +115,7 @@
         const times = ["۱۰:۰۰ - ۱۱:۰۰", "۱۱:۰۰ - ۱۲:۰۰", "۱۶:۰۰ - ۱۷:۰۰", "۱۷:۰۰ - ۱۸:۰۰", "۱۸:۰۰ - ۱۹:۰۰"];
         let step = 1, service = "", date = "", time = "";
 
-        function selectService(el, sName, price) {
+        function selectService(el, sName) {
             document.querySelectorAll('.service-card').forEach(e => e.classList.remove('border-emerald-500', 'bg-emerald-500/10'));
             el.classList.add('border-emerald-500', 'bg-emerald-500/10');
             service = sName;
@@ -168,33 +166,6 @@
             }
         }
 
-        async function sendBookingData(bookingText) {
-            // ۱. ارسال درون چت از طریق مینی‌اپ
-            if (window.Bale && window.Bale.WebApp && window.Bale.WebApp.sendData) {
-                try {
-                    window.Bale.WebApp.sendData(bookingText);
-                } catch(e) {
-                    console.log("sendData error:", e);
-                }
-            }
-
-            // ۲. ارسال پیام مستقیم به آیدی شما با API بله
-            try {
-                await fetch(`https://tapi.bale.ai/bot${BOT_TOKEN}/sendMessage`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ chat_id: ADMIN_ID, text: bookingText })
-                });
-            } catch(err) {
-                console.error("API Send Error:", err);
-            }
-
-            // ۳. بستن مینی‌اپ بعد از ۱.۵ ثانیه
-            setTimeout(() => {
-                if (window.Bale && window.Bale.WebApp) window.Bale.WebApp.close();
-            }, 1500);
-        }
-
         function nextStep() {
             if (step === 1) {
                 step = 2;
@@ -217,7 +188,8 @@
                 const name = document.getElementById('custName').value.trim();
                 const phone = document.getElementById('custPhone').value.trim();
                 const note = document.getElementById('custNote').value.trim() || "ندارد";
-                if (!name || !phone) return alert('نام و شماره تلفن را وارد کنید');
+                
+                if (!name || !phone) return alert('لطفاً نام و شماره تلفن را وارد کنید.');
 
                 const bookingText = `💈 **نوبت جدید در پیرایش سالار**\n\n` +
                                     `👤 مشتری: ${name}\n` +
@@ -226,16 +198,22 @@
                                     `⏰ زمان: ${date} (${time})\n` +
                                     `📝 توضیحات: ${note}`;
 
-                // ذخیره در LocalStorage برای صفحه ادمین
+                // ۱. ذخیره در مرورگر برای صفحه ادمین (admin.html)
                 let existing = JSON.parse(localStorage.getItem('barber_bookings') || '[]');
                 existing.unshift({ name, phone, service, date, time, note, id: Date.now() });
                 localStorage.setItem('barber_bookings', JSON.stringify(existing));
 
+                // ۲. نمایش حالت موفقیت
                 document.getElementById('step3').classList.add('hidden');
                 document.getElementById('bottomBar').classList.add('hidden');
                 document.getElementById('successState').classList.remove('hidden');
 
-                sendBookingData(bookingText);
+                // ۳. ارسال مستقیم به بله و بستن مینی‌اپ
+                setTimeout(() => {
+                    if (window.Bale && window.Bale.WebApp) {
+                        window.Bale.WebApp.sendData(bookingText);
+                    }
+                }, 1000);
             }
         }
 
