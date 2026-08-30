@@ -7,7 +7,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdn.jsdelivr.net/gh/rastikerdar/yekan-bakh@main/css/yekan-bakh.css" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
-  <script src="https://tapi.bale.ai/static/js/bale-miniapp.js"></script>
+  <!-- اسکریپت رسمی مینی‌اپ بله -->
+  <script src="https://tapi.bale.ai/miniapp.js?3"></script>
   <style>
     body { font-family: 'Yekan Bakh', sans-serif; background-color: #0f172a; color: #f8fafc; }
     .custom-scrollbar::-webkit-scrollbar { width: 4px; }
@@ -18,7 +19,6 @@
 
   <div class="w-full max-w-md bg-slate-900 rounded-3xl overflow-hidden shadow-2xl border border-slate-800 flex flex-col h-[750px] relative">
 
-    <!-- Header -->
     <div class="bg-slate-800 px-4 py-3 flex items-center justify-between border-b border-slate-700 text-xs text-slate-300">
       <div class="flex items-center space-x-2 space-x-reverse">
         <i class="fa-solid fa-scissors text-emerald-400"></i>
@@ -29,7 +29,6 @@
       </span>
     </div>
 
-    <!-- Main Content -->
     <div class="flex-1 overflow-y-auto p-4 space-y-5 custom-scrollbar" id="mainContainer">
 
       <div class="flex items-center justify-between px-2 bg-slate-800/40 p-3 rounded-2xl border border-slate-800">
@@ -39,7 +38,7 @@
         </div>
       </div>
 
-      <!-- STEP 1: Services -->
+      <!-- STEP 1 -->
       <div id="step1" class="space-y-3">
         <div onclick="selectService(this, 'اصلاح و استایل مو')" class="service-card p-3.5 rounded-xl bg-slate-800 border border-slate-700 hover:border-emerald-500 cursor-pointer flex items-center justify-between">
           <div>
@@ -48,7 +47,6 @@
           </div>
           <span class="text-xs font-bold text-emerald-400">۲۵۰,۰۰۰ تومان</span>
         </div>
-
         <div onclick="selectService(this, 'اصلاح کامل سر و صورت')" class="service-card p-3.5 rounded-xl bg-slate-800 border border-slate-700 hover:border-emerald-500 cursor-pointer flex items-center justify-between">
           <div>
             <h3 class="text-sm font-semibold text-white">اصلاح کامل سر و صورت</h3>
@@ -58,7 +56,7 @@
         </div>
       </div>
 
-      <!-- STEP 2: Date & Time -->
+      <!-- STEP 2 -->
       <div id="step2" class="space-y-4 hidden">
         <div>
           <label class="block text-xs text-slate-400 mb-2">روز مراجعه:</label>
@@ -70,7 +68,7 @@
         </div>
       </div>
 
-      <!-- STEP 3: Contact Info -->
+      <!-- STEP 3 -->
       <div id="step3" class="space-y-3 hidden">
         <div>
           <label class="block text-xs text-slate-300 mb-1">نام و نام خانوادگی:</label>
@@ -86,7 +84,7 @@
         </div>
       </div>
 
-      <!-- SUCCESS STATE -->
+      <!-- SUCCESS -->
       <div id="successState" class="text-center py-10 space-y-3 hidden">
         <i class="fa-solid fa-circle-check text-emerald-400 text-5xl"></i>
         <h2 class="text-base font-bold text-white">نوبت شما با موفقیت ثبت شد</h2>
@@ -95,7 +93,6 @@
 
     </div>
 
-    <!-- Bottom Bar -->
     <div id="bottomBar" class="p-4 bg-slate-900 border-t border-slate-800 flex gap-2">
       <button id="backBtn" onclick="prevStep()" class="px-4 py-3 rounded-xl bg-slate-800 text-slate-400 text-xs font-semibold hidden cursor-pointer">بازگشت</button>
       <button id="nextBtn" onclick="nextStep()" disabled class="w-full py-3 rounded-xl bg-slate-800 text-slate-500 text-xs font-bold">ادامه</button>
@@ -110,7 +107,7 @@
     let disabledSlots = [];
     let userChatId = null;
 
-    // دریافت اطلاعات کاربر در بله
+    // دریافت اطلاعات کاربر
     try {
       if (window.Bale && window.Bale.WebApp) {
         window.Bale.WebApp.ready();
@@ -118,13 +115,17 @@
         const webApp = window.Bale.WebApp;
         if (webApp.initDataUnsafe && webApp.initDataUnsafe.user) {
           userChatId = webApp.initDataUnsafe.user.id;
+          console.log("userChatId پیدا شد:", userChatId);
+        } else {
+          console.warn("user پیدا نشد در initDataUnsafe");
         }
+      } else {
+        console.warn("Bale.WebApp موجود نیست");
       }
     } catch(e) {
       console.error("Bale Init Error:", e);
     }
 
-    // دریافت سانس‌های غیرفعال (قفل‌شده) از کلادفلر
     async function fetchDisabledSlots() {
       try {
         const res = await fetch(`${WORKER_URL}/disabled-slots`);
@@ -203,27 +204,30 @@
       }
     }
 
-    // ثبت رزرو و ارسال پیام تأیید به مشتری
     async function finalizeBooking(bookingObj, adminText, userText, currentSlotKey) {
       try {
-        // ۱. اضافه کردن ساعت به لیست محلی
         if (!disabledSlots.includes(currentSlotKey)) {
           disabledSlots.push(currentSlotKey);
         }
 
-        // ۲. ارسال اطلاعات رزرو + پیام ادمین + پیام مشتری
-        await fetch(`${WORKER_URL}/`, {
+        const payload = {
+          adminText: adminText,
+          userChatId: userChatId,
+          userText: userText,
+          bookingInfo: bookingObj
+        };
+
+        console.log("ارسال به ورکر:", payload);
+
+        const res = await fetch(`${WORKER_URL}/`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            adminText: adminText,
-            userChatId: userChatId,
-            userText: userText,          // ← پیام تأیید مشتری
-            bookingInfo: bookingObj
-          })
+          body: JSON.stringify(payload)
         });
 
-        // ۳. آپدیت کردن لیست سانس‌های قفل‌شده در کلادفلر
+        const result = await res.json();
+        console.log("پاسخ ورکر:", result);
+
         await fetch(`${WORKER_URL}/disabled-slots`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -237,7 +241,7 @@
           if (window.Bale && window.Bale.WebApp) {
             window.Bale.WebApp.close();
           }
-        }, 2000);
+        }, 2500);
       }
     }
 
@@ -273,10 +277,14 @@
 
         if (!name || !phone) return alert('لطفاً نام و شماره تلفن را وارد کنید.');
 
+        // تست آیدی کاربر
+        console.log("userChatId در زمان ثبت:", userChatId);
+        // اگر می‌خوای موقتاً ببینی، این خط رو آنکامنت کن:
+        // alert("آیدی کاربر: " + (userChatId || "null"));
+
         const currentSlotKey = `${date}_${time}`;
         const bookingObj = { name, phone, service, date, time, note, id: Date.now() };
 
-        // پیام برای ادمین
         const adminText = `💈 **نوبت جدید در پیرایش سالار**\n\n` +
           `👤 مشتری: ${name}\n` +
           `📞 تلفن: ${phone}\n` +
@@ -284,7 +292,6 @@
           `⏰ زمان: ${date} (${time})\n` +
           `📝 توضیحات: ${note}`;
 
-        // پیام تأیید برای مشتری
         const userText = `✅ **نوبت شما با موفقیت ثبت شد**\n\n` +
           `✂️ خدمت: ${service}\n` +
           `⏰ زمان: ${date} (${time})\n\n` +
