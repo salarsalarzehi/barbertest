@@ -53,150 +53,153 @@
             <p class="text-xs text-slate-500 text-center py-4">در حال دریافت رزروها...</p>
         </div>
     </div>
+<script>
+    const WORKER_URL = "https://bale-sender.salar1368yb.workers.dev";
+    const times = ["۱۰:۰۰ - ۱۱:۰۰", "۱۱:۰۰ - ۱۲:۰۰", "۱۶:۰۰ - ۱۷:۰۰", "۱۷:۰۰ - ۱۸:۰۰", "۱۸:۰۰ - ۱۹:۰۰"];
+    let disabledSlots = [];
+    let selectedAdminDate = "";
 
-    <script>
-        const WORKER_URL = "https://bale-sender.salar1368yb.workers.dev";
-        const times = ["۱۰:۰۰ - ۱۱:۰۰", "۱۱:۰۰ - ۱۲:۰۰", "۱۶:۰۰ - ۱۷:۰۰", "۱۷:۰۰ - ۱۸:۰۰", "۱۸:۰۰ - ۱۹:۰۰"];
-        let disabledSlots = [];
-        let selectedAdminDate = "";
+    async function loadData() {
+        const d = new Date();
+        selectedAdminDate = d.toLocaleDateString('fa-IR', { weekday: 'short', month: 'short', day: 'numeric' });
 
-        async function loadData() {
-            // تعیین تاریخ پیش‌فرض روز جاری
-            const d = new Date();
-            selectedAdminDate = d.toLocaleDateString('fa-IR', { weekday: 'short', month: 'short', day: 'numeric' });
+        renderAdminCalendar();
+        renderAdminTimes();
 
-            renderAdminCalendar();
+        try {
+            const resSlots = await fetch(`${WORKER_URL}/disabled-slots`);
+            const dataSlots = await resSlots.json();
+            disabledSlots = dataSlots.disabledSlots || [];
             renderAdminTimes();
+        } catch (e) { 
+            console.error("Error loading slots:", e); 
+        }
 
-            try {
-                // دریافت سانس‌های غیرفعال از ورکر
-                const resSlots = await fetch(`${WORKER_URL}/disabled-slots`);
-                const dataSlots = await resSlots.json();
-                disabledSlots = dataSlots.disabledSlots || [];
+        try {
+            const resBookings = await fetch(`${WORKER_URL}/bookings`);
+            const dataBookings = await resBookings.json();
+            renderBookings(dataBookings.bookings || []);
+        } catch (e) { 
+            console.error("Error loading bookings:", e);
+            document.getElementById('bookingList').innerHTML = '<p class="text-xs text-red-400 text-center py-4">خطا در دریافت لیست رزروها</p>';
+        }
+    }
+
+    function renderAdminCalendar() {
+        const container = document.getElementById('adminDateContainer');
+        if (!container) return;
+        container.innerHTML = '';
+        
+        for (let i = 0; i < 7; i++) {
+            const d = new Date(); 
+            d.setDate(d.getDate() + i);
+            const labelStr = d.toLocaleDateString('fa-IR', { weekday: 'short', month: 'short', day: 'numeric' });
+            
+            if (i === 0 && !selectedAdminDate) selectedAdminDate = labelStr;
+
+            const buttonEl = document.createElement('button');
+            buttonEl.type = "button";
+            buttonEl.className = `flex-shrink-0 p-2.5 rounded-xl border text-xs min-w-[85px] cursor-pointer transition-all ${
+                selectedAdminDate === labelStr ? 'border-emerald-500 text-emerald-400 bg-slate-800 font-bold' : 'border-slate-700 bg-slate-800 text-white'
+            }`;
+            buttonEl.innerText = labelStr;
+            buttonEl.onclick = () => {
+                selectedAdminDate = labelStr;
+                renderAdminCalendar();
                 renderAdminTimes();
-            } catch (e) { 
-                console.error("Error loading slots:", e); 
-            }
-
-            try {
-                // دریافت لیست رزروها از ورکر
-                const resBookings = await fetch(`${WORKER_URL}/bookings`);
-                const dataBookings = await resBookings.json();
-                renderBookings(dataBookings.bookings || []);
-            } catch (e) { 
-                console.error("Error loading bookings:", e);
-                document.getElementById('bookingList').innerHTML = '<p class="text-xs text-red-400 text-center py-4">خطا در دریافت لیست رزروها</p>';
-            }
+            };
+            container.appendChild(buttonEl);
         }
+    }
 
-        function renderAdminCalendar() {
-            const container = document.getElementById('adminDateContainer');
-            container.innerHTML = '';
+    function renderAdminTimes() {
+        const container = document.getElementById('adminTimeContainer');
+        if (!container) return;
+        container.innerHTML = '';
+        
+        times.forEach(t => {
+            const key = `${selectedAdminDate}_${t}`;
+            const isDisabled = disabledSlots.includes(key);
             
-            for (let i = 0; i < 7; i++) {
-                const d = new Date(); 
-                d.setDate(d.getDate() + i);
-                const labelStr = d.toLocaleDateString('fa-IR', { weekday: 'short', month: 'short', day: 'numeric' });
-                
-                if (i === 0 && !selectedAdminDate) selectedAdminDate = labelStr;
-
-                const b = document.createElement('button');
-                b.className = `flex-shrink-0 p-2.5 rounded-xl border text-xs min-w-[85px] cursor-pointer transition-all ${
-                    selectedAdminDate === labelStr ? 'border-emerald-500 text-emerald-400 bg-slate-800 font-bold' : 'border-slate-700 bg-slate-800 text-white'
-                }`;
-                b.innerText = labelStr;
-                b.onclick = () => {
-                    selectedAdminDate = labelStr;
-                    renderAdminCalendar();
-                    renderAdminTimes();
-                };
-                container.appendChild(b);
-            }
-        }
-
-        function renderAdminTimes() {
-            const container = document.getElementById('adminTimeContainer');
-            container.innerHTML = '';
+            const timeBtn = document.createElement('button');
+            timeBtn.type = "button";
+            timeBtn.className = `p-2.5 rounded-xl border text-xs flex items-center justify-between cursor-pointer transition-all ${
+                isDisabled ? 'border-red-500/50 bg-red-500/10 text-red-400' : 'border-slate-700 bg-slate-800 text-slate-200'
+            }`;
+            timeBtn.innerHTML = `<span>${t}</span> <i class="fa-solid ${isDisabled ? 'fa-ban text-red-400' : 'fa-check text-emerald-400'}"></i>`;
             
-            times.forEach(t => {
-                const key = `${selectedAdminDate}_${t}`;
-                const isDisabled = disabledSlots.includes(key);
-                const btn = document.createElement('button');
-                btn.type = "button";
-                btn.className = `p-2.5 rounded-xl border text-xs flex items-center justify-between cursor-pointer transition-all ${
-                    isDisabled ? 'border-red-500/50 bg-red-500/10 text-red-400' : 'border-slate-700 bg-slate-800 text-slate-200'
-                }`;
-                btn.innerHTML = `<span>${t}</span> <i class="fa-solid ${isDisabled ? 'fa-ban text-red-400' : 'fa-check text-emerald-400'}"></i>`;
-                btn.onclick = () => {
-                    if (disabledSlots.includes(key)) {
-                        disabledSlots = disabledSlots.filter(s => s !== key);
-                    } else {
-                        disabledSlots.push(key);
-                    }
-                    renderAdminTimes();
-                };
-                container.appendChild(b);
-            });
-        }
-
-        async function saveDisabledSlots() {
-            try {
-                const res = await fetch(`${WORKER_URL}/disabled-slots`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ disabledSlots })
-                });
-                const result = await res.json();
-                if(result.success) {
-                    alert('تغییرات ساعات کاری با موفقیت ذخیره شد.');
+            timeBtn.onclick = () => {
+                if (disabledSlots.includes(key)) {
+                    disabledSlots = disabledSlots.filter(s => s !== key);
                 } else {
-                    alert('خطا در ذخیره‌سازی!');
+                    disabledSlots.push(key);
                 }
-            } catch (e) {
-                alert('خطا در ارتباط با سرور!');
-            }
-        }
+                renderAdminTimes();
+            };
+            container.appendChild(timeBtn);
+        });
+    }
 
-        function renderBookings(bookings) {
-            const list = document.getElementById('bookingList');
-            if (!bookings || bookings.length === 0) {
-                list.innerHTML = '<p class="text-xs text-slate-500 text-center py-4">رزروی موجود نیست.</p>';
-                return;
-            }
-
-            list.innerHTML = '';
-            bookings.forEach(item => {
-                const div = document.createElement('div');
-                div.className = "bg-slate-800 border border-slate-700 p-3 rounded-xl flex items-center justify-between text-xs";
-                div.innerHTML = `
-                    <div class="space-y-1">
-                        <div class="font-bold text-white">${item.name} (<a href="tel:${item.phone}" class="text-emerald-400">${item.phone}</a>)</div>
-                        <div class="text-slate-400">${item.service} - <span class="text-emerald-400">${item.date} (${item.time})</span></div>
-                        ${item.note && item.note !== 'ندارد' ? `<div class="text-[10px] text-slate-500">توضیحات: ${item.note}</div>` : ''}
-                    </div>
-                    <button onclick="deleteBooking(${item.id})" class="text-red-400 hover:text-red-300 p-2 cursor-pointer">
-                        <i class="fa-solid fa-trash-can"></i>
-                    </button>
-                `;
-                list.appendChild(div);
+    async function saveDisabledSlots() {
+        try {
+            const res = await fetch(`${WORKER_URL}/disabled-slots`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ disabledSlots })
             });
-        }
-
-        async function deleteBooking(id) {
-            if (!confirm('آیا از حذف این رزرو مطمئن هستید؟')) return;
-            try {
-                await fetch(`${WORKER_URL}/delete-booking`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id })
-                });
-                loadData();
-            } catch(e) {
-                alert('خطا در حذف رزرو');
+            const result = await res.json();
+            if(result.success) {
+                alert('تغییرات ساعات کاری با موفقیت ذخیره شد.');
+            } else {
+                alert('خطا در ذخیره‌سازی!');
             }
+        } catch (e) {
+            alert('خطا در ارتباط با سرور!');
+        }
+    }
+
+    function renderBookings(bookings) {
+        const list = document.getElementById('bookingList');
+        if (!list) return;
+        
+        if (!bookings || bookings.length === 0) {
+            list.innerHTML = '<p class="text-xs text-slate-500 text-center py-4">رزروی موجود نیست.</p>';
+            return;
         }
 
-        loadData();
-    </script>
+        list.innerHTML = '';
+        bookings.forEach(item => {
+            const div = document.createElement('div');
+            div.className = "bg-slate-800 border border-slate-700 p-3 rounded-xl flex items-center justify-between text-xs";
+            div.innerHTML = `
+                <div class="space-y-1">
+                    <div class="font-bold text-white">${item.name} (<a href="tel:${item.phone}" class="text-emerald-400">${item.phone}</a>)</div>
+                    <div class="text-slate-400">${item.service} - <span class="text-emerald-400">${item.date} (${item.time})</span></div>
+                    ${item.note && item.note !== 'ندارد' ? `<div class="text-[10px] text-slate-500">توضیحات: ${item.note}</div>` : ''}
+                </div>
+                <button type="button" onclick="deleteBooking(${item.id})" class="text-red-400 hover:text-red-300 p-2 cursor-pointer">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+            `;
+            list.appendChild(div);
+        });
+    }
+
+    async function deleteBooking(id) {
+        if (!confirm('آیا از حذف این رزرو مطمئن هستید؟')) return;
+        try {
+            await fetch(`${WORKER_URL}/delete-booking`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id })
+            });
+            loadData();
+        } catch(e) {
+            alert('خطا در حذف رزرو');
+        }
+    }
+
+    loadData();
+</script>
 </body>
 </html>
