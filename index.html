@@ -3,136 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>رزرو آنلاین پیرایش سالار</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/yekan-bakh@main/css/yekan-bakh.css" rel="stylesheet" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
-    <script src="https://tapi.bale.ai/static/js/bale-miniapp.js"></script>
+    <title>رزرو نوبت پیرایش سالار</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Yekan Bakh', sans-serif; background-color: #0f172a; color: #f8fafc; }
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        body { font-family: 'Vazirmatn', sans-serif; }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-2 sm:p-4">
+<body class="bg-slate-950 text-white min-h-screen flex flex-col justify-between max-w-md mx-auto p-4">
 
-    <div class="w-full max-w-md bg-slate-900 rounded-3xl overflow-hidden shadow-2xl border border-slate-800 flex flex-col h-[750px] relative">
-        
-        <!-- Header -->
-        <div class="bg-slate-800 px-4 py-3 flex items-center justify-between border-b border-slate-700 text-xs text-slate-300">
-            <div class="flex items-center space-x-2 space-x-reverse">
-                <i class="fa-solid fa-scissors text-emerald-400"></i>
-                <span class="font-bold text-white">رزرو آنلاین پیرایش سالار</span>
+    <!-- Top Header -->
+    <header class="flex items-center justify-between border-b border-slate-800 pb-4 mb-4">
+        <div class="flex items-center gap-3">
+            <button id="backBtn" onclick="prevStep()" class="hidden text-slate-400 hover:text-white cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                </svg>
+            </button>
+            <div>
+                <h1 class="text-sm font-bold">پیرایش سالار</h1>
+                <p class="text-xs text-slate-400" id="stepTitle">انتخاب خدمت مورد نظر</p>
             </div>
-            <span class="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                مینی‌اپ بله
-            </span>
+        </div>
+        <span class="bg-emerald-500/10 text-emerald-400 text-xs px-2.5 py-1 rounded-full border border-emerald-500/20">مرحله <span id="stepBadge">۱</span> از ۳</span>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1">
+        <!-- Step 1: Services -->
+        <div id="step1" class="space-y-3">
+            <div onclick="selectService(this, 'کوتاهی مو')" class="service-card p-4 rounded-2xl border border-slate-800 bg-slate-900 flex justify-between items-center cursor-pointer transition">
+                <div>
+                    <h3 class="text-sm font-bold">کوتاهی مو</h3>
+                    <p class="text-xs text-slate-400 mt-1">اصلاح تخصصی به همراه استایل</p>
+                </div>
+                <span class="text-xs font-bold text-emerald-400">انتخاب</span>
+            </div>
+            <div onclick="selectService(this, 'اصلاح ریش')" class="service-card p-4 rounded-2xl border border-slate-800 bg-slate-900 flex justify-between items-center cursor-pointer transition">
+                <div>
+                    <h3 class="text-sm font-bold">اصلاح ریش</h3>
+                    <p class="text-xs text-slate-400 mt-1">فرم‌دهی و اصلاح با تیغ</p>
+                </div>
+                <span class="text-xs font-bold text-emerald-400">انتخاب</span>
+            </div>
+            <div onclick="selectService(this, 'پکیج کامل (مو و ریش)')" class="service-card p-4 rounded-2xl border border-slate-800 bg-slate-900 flex justify-between items-center cursor-pointer transition">
+                <div>
+                    <h3 class="text-sm font-bold">پکیج کامل (مو و ریش)</h3>
+                    <p class="text-xs text-slate-400 mt-1">کوتاهی مو + اصلاح ریش</p>
+                </div>
+                <span class="text-xs font-bold text-emerald-400">انتخاب</span>
+            </div>
         </div>
 
-        <!-- Main Content -->
-        <div class="flex-1 overflow-y-auto p-4 space-y-5 custom-scrollbar" id="mainContainer">
-            
-            <div class="flex items-center justify-between px-2 bg-slate-800/40 p-3 rounded-2xl border border-slate-800">
-                <div class="flex items-center gap-2">
-                    <div id="stepBadge" class="w-6 h-6 rounded-full bg-emerald-500 text-white font-bold flex items-center justify-center text-xs">۱</div>
-                    <span id="stepTitle" class="text-xs font-bold text-slate-200">انتخاب خدمت مورد نظر</span>
-                </div>
+        <!-- Step 2: Date & Time -->
+        <div id="step2" class="hidden space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-slate-400 mb-2">انتخاب روز:</label>
+                <div id="dateContainer" class="flex gap-2 overflow-x-auto pb-2 scrollbar-none"></div>
             </div>
-
-            <!-- STEP 1: Services -->
-            <div id="step1" class="space-y-3">
-                <div onclick="selectService(this, 'اصلاح و استایل مو')" class="service-card p-3.5 rounded-xl bg-slate-800 border border-slate-700 hover:border-emerald-500 cursor-pointer flex items-center justify-between">
-                    <div>
-                        <h3 class="text-sm font-semibold text-white">اصلاح و استایل مو</h3>
-                        <p class="text-[11px] text-slate-400 mt-1">مدت زمان: ۴۵ دقیقه</p>
-                    </div>
-                    <span class="text-xs font-bold text-emerald-400">۲۵۰,۰۰۰ تومان</span>
-                </div>
-
-                <div onclick="selectService(this, 'اصلاح کامل سر و صورت')" class="service-card p-3.5 rounded-xl bg-slate-800 border border-slate-700 hover:border-emerald-500 cursor-pointer flex items-center justify-between">
-                    <div>
-                        <h3 class="text-sm font-semibold text-white">اصلاح کامل سر و صورت</h3>
-                        <p class="text-[11px] text-slate-400 mt-1">مدت زمان: ۶۰ دقیقه</p>
-                    </div>
-                    <span class="text-xs font-bold text-emerald-400">۳۵۰,۰۰۰ تومان</span>
-                </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-400 mb-2">انتخاب ساعت:</label>
+                <div id="timeContainer" class="grid grid-cols-2 gap-2"></div>
             </div>
-
-            <!-- STEP 2: Date & Time -->
-            <div id="step2" class="space-y-4 hidden">
-                <div>
-                    <label class="block text-xs text-slate-400 mb-2">روز مراجعه:</label>
-                    <div class="flex gap-2 overflow-x-auto pb-2 custom-scrollbar" id="dateContainer"></div>
-                </div>
-                <div>
-                    <label class="block text-xs text-slate-400 mb-2">ساعت حضور (ساعت‌های تکمیل‌شده قفل هستند):</label>
-                    <div class="grid grid-cols-2 gap-2" id="timeContainer"></div>
-                </div>
-            </div>
-
-            <!-- STEP 3: Contact Info -->
-            <div id="step3" class="space-y-3 hidden">
-                <div>
-                    <label class="block text-xs text-slate-300 mb-1">نام و نام خانوادگی:</label>
-                    <input type="text" id="custName" placeholder="مثلا: علی محمدی" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-emerald-500">
-                </div>
-                <div>
-                    <label class="block text-xs text-slate-300 mb-1">شماره همراه:</label>
-                    <input type="tel" id="custPhone" dir="ltr" placeholder="09123456789" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-white text-right focus:outline-none focus:border-emerald-500">
-                </div>
-                <div>
-                    <label class="block text-xs text-slate-300 mb-1">توضیحات (اختیاری):</label>
-                    <textarea id="custNote" rows="2" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-emerald-500"></textarea>
-                </div>
-            </div>
-
-            <!-- SUCCESS STATE -->
-            <div id="successState" class="text-center py-10 space-y-3 hidden">
-                <i class="fa-solid fa-circle-check text-emerald-400 text-5xl"></i>
-                <h2 class="text-base font-bold text-white">نوبت شما با موفقیت ثبت شد</h2>
-                <p class="text-xs text-slate-400">اطلاعات برای آرایشگر ارسال گردید و ساعت مورد نظر قفل شد.</p>
-            </div>
-
         </div>
 
-        <!-- Bottom Bar -->
-        <div id="bottomBar" class="p-4 bg-slate-900 border-t border-slate-800 flex gap-2">
-            <button id="backBtn" onclick="prevStep()" class="px-4 py-3 rounded-xl bg-slate-800 text-slate-400 text-xs font-semibold hidden cursor-pointer">بازگشت</button>
-            <button id="nextBtn" onclick="nextStep()" disabled class="w-full py-3 rounded-xl bg-slate-800 text-slate-500 text-xs font-bold">ادامه</button>
+        <!-- Step 3: User Info -->
+        <div id="step3" class="hidden space-y-3">
+            <div>
+                <label class="block text-xs font-bold text-slate-400 mb-1">نام و نام خانوادگی:</label>
+                <input type="text" id="custName" placeholder="مثال: علی رضایی" class="w-full p-3 rounded-xl bg-slate-900 border border-slate-800 text-xs text-white focus:outline-none focus:border-emerald-500">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-400 mb-1">شماره تماس:</label>
+                <input type="tel" id="custPhone" placeholder="مثال: 09123456789" class="w-full p-3 rounded-xl bg-slate-900 border border-slate-800 text-xs text-white focus:outline-none focus:border-emerald-500">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-400 mb-1">توضیحات یا مدل دلخواه (اختیاری):</label>
+                <textarea id="custNote" placeholder="مدل کوتاهی یا نکات خاص..." class="w-full p-3 rounded-xl bg-slate-900 border border-slate-800 text-xs text-white focus:outline-none focus:border-emerald-500 h-20 resize-none"></textarea>
+            </div>
         </div>
 
-    </div>
+        <!-- Success State -->
+        <div id="successState" class="hidden text-center py-10 space-y-4">
+            <div class="w-16 h-16 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full flex items-center justify-center mx-auto text-2xl font-bold">✓</div>
+            <h2 class="text-base font-bold">رزرو شما با موفقیت ثبت شد!</h2>
+            <p class="text-xs text-slate-400">جزئیات نوبت از طریق ربات بله برای شما ارسال شد.</p>
+        </div>
+    </main>
 
+    <!-- Bottom Action Bar -->
+    <footer id="bottomBar" class="pt-4 border-t border-slate-800 mt-4">
+        <button id="nextBtn" onclick="nextStep()" disabled class="w-full py-3 rounded-xl bg-slate-800 text-slate-500 text-xs font-bold cursor-not-allowed">
+            ادامه با سرویس انتخابی
+        </button>
+    </footer>
+
+    <!-- JavaScript Code -->
     <script>
         const WORKER_URL = "https://bale-sender.salar1368yb.workers.dev";
         const times = ["۱۰:۰۰ - ۱۱:۰۰", "۱۱:۰۰ - ۱۲:۰۰", "۱۶:۰۰ - ۱۷:۰۰", "۱۷:۰۰ - ۱۸:۰۰", "۱۸:۰۰ - ۱۹:۰۰"];
         let step = 1, service = "", date = "", time = "";
         let disabledSlots = [];
-        let userChatId = null;
 
-        // دریافت اطلاعات کاربر در بله
-        try {
-            if (window.Bale && window.Bale.WebApp) {
-                window.Bale.WebApp.ready();
-                window.Bale.WebApp.expand();
-                const webApp = window.Bale.WebApp;
-                if (webApp.initDataUnsafe && webApp.initDataUnsafe.user) {
-                    userChatId = webApp.initDataUnsafe.user.id;
-                }
+        // 🎯 گرفتن آیدی مستقیم از پارامتر URL که ربات فرستاده است
+        const urlParams = new URLSearchParams(window.location.search);
+        let userChatId = urlParams.get('chat_id');
+        console.log("آیدی گرفته شده از لینک:", userChatId);
+
+        // اگر از طریق WebApp بله باز شده بود و آیدی در URL نبود، یکبار هم از ترفند زیر تست می‌کنیم
+        if (!userChatId && window.Bale && window.Bale.WebApp) {
+            window.Bale.WebApp.ready();
+            window.Bale.WebApp.expand();
+            if (window.Bale.WebApp.initDataUnsafe && window.Bale.WebApp.initDataUnsafe.user) {
+                userChatId = window.Bale.WebApp.initDataUnsafe.user.id;
             }
-        } catch(e) {
-            console.error("Bale Init Error:", e);
         }
 
-        // دریافت سانس‌های غیرفعال (قفل‌شده) از کلادفلر در ابتدا
         async function fetchDisabledSlots() {
             try {
                 const res = await fetch(`${WORKER_URL}/disabled-slots`);
                 const data = await res.json();
                 disabledSlots = data.disabledSlots || [];
-            } catch(e) {
-                console.error("خطا در دریافت سانس‌ها:", e);
-            }
+            } catch(e) {}
         }
 
         function selectService(el, sName) {
@@ -159,7 +152,7 @@
                 b.innerText = str;
                 b.onclick = () => {
                     date = str;
-                    time = ""; // ریست کردن ساعت با تغییر روز
+                    time = ""; 
                     renderCalendar();
                     renderTimes();
                     document.getElementById('nextBtn').disabled = true;
@@ -204,37 +197,43 @@
             }
         }
 
-        // ثبت رزرو و ذخیره ساعت قفل‌شده در سرور
         async function finalizeBooking(bookingObj, adminText, currentSlotKey) {
             try {
-                // ۱. اضافه کردن ساعت به لیست محلی
                 if (!disabledSlots.includes(currentSlotKey)) {
                     disabledSlots.push(currentSlotKey);
                 }
 
-                // ۲. ارسال اطلاعات رزرو و پیام به ادمین
-                await fetch(`${WORKER_URL}/`, {
+                // متن تاییدیه مجهز و کامل برای مشتری
+                const userText = 
+                    `✅ **رزرو شما با موفقیت ثبت شد**\n\n` +
+                    `💈 پیرایش سالار\n\n` +
+                    `✂️ خدمت: ${bookingObj.service}\n` +
+                    `📅 تاریخ: ${bookingObj.date}\n` +
+                    `⏰ ساعت: ${bookingObj.time}\n\n` +
+                    `مشتری گرامی، نوبت شما با موفقیت ثبت شد.\n` +
+                    `لطفاً در زمان تعیین‌شده در آرایشگاه حضور داشته باشید.`;
+
+                // ارسال اطلاعات به ورکر کلادفلر
+                const response = await fetch(`${WORKER_URL}/`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         adminText: adminText,
                         userChatId: userChatId,
-                        bookingInfo: bookingObj
+                        userText: userText,
+                        bookingInfo: bookingObj,
+                        disabledSlots: disabledSlots
                     })
                 });
 
-                // ۳. آپدیت کردن لیست سانس‌های قفل‌شده در کلادفلر KV
-                await fetch(`${WORKER_URL}/disabled-slots`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ disabledSlots })
-                });
+                const result = await response.json();
+                console.log("نتیجه ثبت رزرو:", result);
 
             } catch (err) {
                 console.error("خطا در ثبت نهایی:", err);
             } finally {
                 setTimeout(() => {
-                    if (window.Bale && window.Bale.WebApp) {
+                    if (window.Bale && window.Bale.WebApp && typeof window.Bale.WebApp.close === 'function') {
                         window.Bale.WebApp.close();
                     }
                 }, 2000);
@@ -244,7 +243,7 @@
         async function nextStep() {
             if (step === 1) {
                 step = 2;
-                await fetchDisabledSlots(); // دریافت آخرین وضعیت قفل‌ها از سرور قبل از نمایش ساعت‌ها
+                await fetchDisabledSlots(); 
                 document.getElementById('step1').classList.add('hidden');
                 document.getElementById('step2').classList.remove('hidden');
                 document.getElementById('backBtn').classList.remove('hidden');
@@ -271,8 +270,8 @@
                 
                 if (!name || !phone) return alert('لطفاً نام و شماره تلفن را وارد کنید.');
 
-                const currentSlotKey = `${date}_${time}`;
                 const bookingObj = { name, phone, service, date, time, note, id: Date.now() };
+                const currentSlotKey = `${date}_${time}`;
                 
                 const adminText = `💈 **نوبت جدید در پیرایش سالار**\n\n` +
                                   `👤 مشتری: ${name}\n` +
@@ -297,7 +296,7 @@
                 document.getElementById('backBtn').classList.add('hidden');
                 document.getElementById('stepBadge').innerText = '۱';
                 document.getElementById('stepTitle').innerText = 'انتخاب خدمت مورد نظر';
-                document.getElementById('nextBtn').innerText = 'ادامه';
+                document.getElementById('nextBtn').innerText = 'ادامه با سرویس انتخابی';
             } else if (step === 3) {
                 step = 2;
                 document.getElementById('step3').classList.add('hidden');
