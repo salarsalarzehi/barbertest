@@ -103,14 +103,14 @@
         let disabledSlots = [];
         let userChatId = null;
 
-        // دریافت دقیق اطلاعات کاربر از محیط مینی‌اپ بله
+        // استخراج خودکار آیدی کاربر از مینی‌اپ بله (بدون نیاز به ورود دستی کاربر)
         try {
             if (window.Bale && window.Bale.WebApp) {
                 window.Bale.WebApp.ready();
                 window.Bale.WebApp.expand();
                 const webApp = window.Bale.WebApp;
 
-                // روش اول
+                // حالت اول: از طریق initDataUnsafe
                 if (webApp.initDataUnsafe) {
                     if (webApp.initDataUnsafe.user && webApp.initDataUnsafe.user.id) {
                         userChatId = webApp.initDataUnsafe.user.id;
@@ -119,7 +119,7 @@
                     }
                 }
 
-                // روش دوم (استخراج از رشته initData)
+                // حالت دوم: استخراج از پارامترهای رشته‌ای initData
                 if (!userChatId && webApp.initData) {
                     const urlParams = new URLSearchParams(webApp.initData);
                     const userStr = urlParams.get('user');
@@ -132,12 +132,11 @@
                 }
             }
         } catch(e) {
-            console.error("Bale Init Error:", e);
+            console.error("خطا در استخراج خودکار آیدی از بله:", e);
         }
-        
-        console.log("User Chat ID:", userChatId);
 
-        // دریافت سانس‌های غیرفعال (قفل‌شده) از کلادفلر در ابتدا
+        console.log("Auto-Detected User Chat ID:", userChatId);
+
         async function fetchDisabledSlots() {
             try {
                 const res = await fetch(`${WORKER_URL}/disabled-slots`);
