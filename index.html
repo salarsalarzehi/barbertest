@@ -110,32 +110,31 @@
         let disabledSlots = [];
         let userChatId = null;
 
-        // دریافت امن اطلاعات کاربر از مینی‌اپ بله
+        // استخراج ایمن آیدی کاربر از مینی‌اپ بله
         try {
             if (window.Bale && window.Bale.WebApp) {
                 window.Bale.WebApp.ready();
                 window.Bale.WebApp.expand();
                 
-                const initData = window.Bale.WebApp.initDataUnsafe;
-                if (initData) {
-                    if (initData.user && initData.user.id) {
-                        userChatId = initData.user.id;
-                    } else if (initData.chat && initData.chat.id) {
-                        userChatId = initData.chat.id;
-                    }
-                }
-                
-                // روش جایگزین برای استخراج از پارامترهای لینک (در صورت وجود)
-                if (!userChatId) {
-                    const urlParams = new URLSearchParams(window.location.search);
-                    if (urlParams.get('chat_id')) {
-                        userChatId = urlParams.get('chat_id');
-                    }
+                // بررسی روش استاندارد initDataUnsafe
+                const webApp = window.Bale.WebApp;
+                if (webApp.initDataUnsafe && webApp.initDataUnsafe.user) {
+                    userChatId = webApp.initDataUnsafe.user.id;
+                } else if (webApp.initDataUnsafe && webApp.initDataUnsafe.chat) {
+                    userChatId = webApp.initDataUnsafe.chat.id;
                 }
             }
         } catch(e) {
             console.error("Bale WebApp Init Error:", e);
         }
+
+        // اگر از طریق SDK پیدا نشد، بررسی پارامترهای URL یا حافظه موقت
+        if (!userChatId) {
+            const urlParams = new URLSearchParams(window.location.search);
+            userChatId = urlParams.get('chat_id') || urlParams.get('user_id');
+        }
+
+        console.log("Detected User Chat ID:", userChatId);
 
         async function fetchDisabledSlots() {
             try {
@@ -159,7 +158,6 @@
             container.innerHTML = '';
             for (let i = 0; i < 7; i++) {
                 const d = new Date(); d.setDate(d.getDate() + i);
-                // اصلاح فرمت تاریخ دقیقاً مطابق با پنل مدیریت
                 const str = d.toLocaleDateString('fa-IR', { weekday: 'short', month: 'short', day: 'numeric' });
                 if (i === 0 && !date) date = str;
 
@@ -215,13 +213,16 @@
 
         async function sendNotification(bookingObj, adminText, userText) {
             try {
+                // اگر کاربر روی وب یا گوشی بود و آیدی نداشت، یک مقدار موقت یا شماره تلفن به عنوان شناسه جایگزین می‌فرستیم تا سرور خطا ندهد
+                const finalChatId = userChatId ? userChatId : bookingObj.phone;
+
                 await fetch(`${WORKER_URL}/`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         adminText: adminText,
                         userText: userText,
-                        userChatId: userChatId, // ارسال صحیح آیدی چت کاربر به ورکر
+                        userChatId: finalChatId, 
                         bookingInfo: bookingObj
                     })
                 });
