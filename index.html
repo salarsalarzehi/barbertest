@@ -61,7 +61,7 @@
                     <div class="flex gap-2 overflow-x-auto pb-2 custom-scrollbar" id="dateContainer"></div>
                 </div>
                 <div>
-                    <label class="block text-xs text-slate-400 mb-2">ساعت حضور (ساعت‌های تکمیل‌شده قفل هستند):</label>
+                    <label class="block text-xs text-slate-400 mb-2">ساعت حضور:</label>
                     <div class="grid grid-cols-2 gap-2" id="timeContainer"></div>
                 </div>
             </div>
@@ -84,7 +84,7 @@
             <div id="successState" class="text-center py-10 space-y-3 hidden">
                 <i class="fa-solid fa-circle-check text-emerald-400 text-5xl"></i>
                 <h2 class="text-base font-bold text-white">نوبت شما با موفقیت ثبت شد</h2>
-                <p class="text-xs text-slate-400">اطلاعات برای آرایشگر ارسال گردید و تاییدیه به چت شما آمد.</p>
+                <p class="text-xs text-slate-400">اطلاعات ثبت شد و تاییدیه به چت شما ارسال گردید.</p>
             </div>
 
         </div>
@@ -103,14 +103,14 @@
         let disabledSlots = [];
         let userChatId = null;
 
-        // استخراج خودکار آیدی کاربر از مینی‌اپ بله (بدون نیاز به ورود دستی کاربر)
+        // استخراج هوشمند و پیشرفته آیدی کاربر از بله
         try {
             if (window.Bale && window.Bale.WebApp) {
-                window.Bale.WebApp.ready();
-                window.Bale.WebApp.expand();
                 const webApp = window.Bale.WebApp;
+                webApp.ready();
+                webApp.expand();
 
-                // حالت اول: از طریق initDataUnsafe
+                // ۱. بررسی مستقیم از طریق شیء آماده
                 if (webApp.initDataUnsafe) {
                     if (webApp.initDataUnsafe.user && webApp.initDataUnsafe.user.id) {
                         userChatId = webApp.initDataUnsafe.user.id;
@@ -119,32 +119,30 @@
                     }
                 }
 
-                // حالت دوم: استخراج از پارامترهای رشته‌ای initData
+                // ۲. دیکد کردن حرفه‌ای رشته امنیتی initData (اگر روش اول خالی بود)
                 if (!userChatId && webApp.initData) {
                     const urlParams = new URLSearchParams(webApp.initData);
-                    const userStr = urlParams.get('user');
-                    if (userStr) {
-                        const userObj = JSON.parse(decodeURIComponent(userStr));
-                        if (userObj && userObj.id) {
-                            userChatId = userObj.id;
+                    const userJson = urlParams.get('user');
+                    if (userJson) {
+                        const userData = JSON.parse(decodeURIComponent(userJson));
+                        if (userData && userData.id) {
+                            userChatId = userData.id;
                         }
                     }
                 }
             }
-        } catch(e) {
-            console.error("خطا در استخراج خودکار آیدی از بله:", e);
+        } catch (err) {
+            console.error("خطا در استخراج هوشمند آیدی:", err);
         }
 
-        console.log("Auto-Detected User Chat ID:", userChatId);
+        console.log("شناسه استخراج شده کاربر:", userChatId);
 
         async function fetchDisabledSlots() {
             try {
                 const res = await fetch(`${WORKER_URL}/disabled-slots`);
                 const data = await res.json();
                 disabledSlots = data.disabledSlots || [];
-            } catch(e) {
-                console.error("خطا در دریافت سانس‌ها:", e);
-            }
+            } catch(e) {}
         }
 
         function selectService(el, sName) {
@@ -228,9 +226,8 @@
                         bookingInfo: bookingObj
                     })
                 });
-            } catch (err) {
-                console.error("خطا در ثبت نهایی:", err);
-            } finally {
+            } catch (err) {} 
+            finally {
                 setTimeout(() => {
                     if (window.Bale && window.Bale.WebApp) {
                         window.Bale.WebApp.close();
@@ -299,7 +296,7 @@
                 document.getElementById('backBtn').classList.add('hidden');
                 document.getElementById('stepBadge').innerText = '۱';
                 document.getElementById('stepTitle').innerText = 'انتخاب خدمت مورد نظر';
-                document.getElementById('nextBtn').innerText = 'ادامه';
+                document.getElementById('nextBtn').innerText = 'ادامه با سرویس انتخابی';
             } else if (step === 3) {
                 step = 2;
                 document.getElementById('step3').classList.add('hidden');
