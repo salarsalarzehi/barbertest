@@ -104,6 +104,11 @@
     </div>
 
     <script>
+        const WORKER_URL = "https://bale-sender.salar1368yb.workers.dev";
+        const times = ["۱۰:۰۰ - ۱۱:۰۰", "۱۱:۰۰ - ۱۲:۰۰", "۱۶:۰۰ - ۱۷:۰۰", "۱۷:۰۰ - ۱۸:۰۰", "۱۸:۰۰ - ۱۹:۰۰"];
+        let step = 1, service = "", date = "", time = "";
+        let disabledSlots = [];
+
         try {
             if (window.Bale && window.Bale.WebApp) {
                 window.Bale.WebApp.ready();
@@ -111,8 +116,13 @@
             }
         } catch(e){}
 
-        const times = ["۱۰:۰۰ - ۱۱:۰۰", "۱۱:۰۰ - ۱۲:۰۰", "۱۶:۰۰ - ۱۷:۰۰", "۱۷:۰۰ - ۱۸:۰۰", "۱۸:۰۰ - ۱۹:۰۰"];
-        let step = 1, service = "", date = "", time = "";
+        async function fetchDisabledSlots() {
+            try {
+                const res = await fetch(`${WORKER_URL}/disabled-slots`);
+                const data = await res.json();
+                disabledSlots = data.disabledSlots || [];
+            } catch(e){}
+        }
 
         function selectService(el, sName) {
             document.querySelectorAll('.service-card').forEach(e => e.classList.remove('border-emerald-500', 'bg-emerald-500/10'));
@@ -145,14 +155,22 @@
             const container = document.getElementById('timeContainer');
             container.innerHTML = '';
             times.forEach(t => {
+                const isDisabled = disabledSlots.includes(t);
                 const b = document.createElement('button');
-                b.className = "time-btn p-2.5 rounded-xl border border-slate-700 bg-slate-800 text-xs text-white";
-                b.innerText = t;
-                b.onclick = () => {
-                    document.querySelectorAll('.time-btn').forEach(x => x.classList.remove('border-emerald-500', 'text-emerald-400'));
-                    b.classList.add('border-emerald-500', 'text-emerald-400');
-                    time = t; checkStep2();
-                };
+                
+                if (isDisabled) {
+                    b.className = "time-btn p-2.5 rounded-xl border border-slate-800 bg-slate-900/50 text-xs text-slate-600 cursor-not-allowed";
+                    b.innerText = `${t} (تکمیل)`;
+                    b.disabled = true;
+                } else {
+                    b.className = "time-btn p-2.5 rounded-xl border border-slate-700 bg-slate-800 text-xs text-white";
+                    b.innerText = t;
+                    b.onclick = () => {
+                        document.querySelectorAll('.time-btn').forEach(x => x.classList.remove('border-emerald-500', 'text-emerald-400'));
+                        b.classList.add('border-emerald-500', 'text-emerald-400');
+                        time = t; checkStep2();
+                    };
+                }
                 container.appendChild(b);
             });
         }
@@ -167,8 +185,7 @@
 
         async function sendNotification(bookingText) {
             try {
-                // اتصال مستقیم به Cloudflare Worker اختصاصی شما
-                await fetch("https://bale-sender.salar1368yb.workers.dev/", {
+                await fetch(WORKER_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ text: bookingText })
@@ -184,9 +201,10 @@
             }
         }
 
-        function nextStep() {
+        async function nextStep() {
             if (step === 1) {
                 step = 2;
+                await fetchDisabledSlots();
                 document.getElementById('step1').classList.add('hidden');
                 document.getElementById('step2').classList.remove('hidden');
                 document.getElementById('backBtn').classList.remove('hidden');
@@ -224,7 +242,6 @@
                 document.getElementById('bottomBar').classList.add('hidden');
                 document.getElementById('successState').classList.remove('hidden');
 
-                // ارسال قطعی پیام
                 sendNotification(bookingText);
             }
         }
