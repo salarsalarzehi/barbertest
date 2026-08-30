@@ -3,172 +3,277 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>پنل مدیریت پیرایش سالار</title>
+    <title>رزرو آنلاین پیرایش سالار</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/gh/rastikerdar/yekan-bakh@main/css/yekan-bakh.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script src="https://tapi.bale.ai/static/js/bale-miniapp.js"></script>
     <style>
         body { font-family: 'Yekan Bakh', sans-serif; background-color: #0f172a; color: #f8fafc; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
     </style>
 </head>
-<body class="p-4 max-w-2xl mx-auto space-y-6">
+<body class="min-h-screen flex items-center justify-center p-2 sm:p-4">
 
-    <!-- Header -->
-    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex items-center justify-between">
-        <h1 class="text-base font-bold text-white"><i class="fa-solid fa-user-gear text-emerald-400 ml-2"></i>مدیریت نوبت‌ها</h1>
-        <button onclick="loadData()" class="text-xs bg-slate-800 px-3 py-2 rounded-xl border border-slate-700 text-slate-300">
-            <i class="fa-solid fa-rotate-right ml-1"></i> بروزرسانی
-        </button>
-    </div>
-
-    <!-- بخش اول: خاموش کردن سانس‌ها بر اساس روز و ساعت -->
-    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 space-y-4">
-        <h2 class="text-xs font-bold text-slate-300 border-b border-slate-800 pb-2">
-            <i class="fa-solid fa-calendar-xmark text-amber-400 ml-1"></i> غیرفعال کردن روز و ساعت
-        </h2>
+    <div class="w-full max-w-md bg-slate-900 rounded-3xl overflow-hidden shadow-2xl border border-slate-800 flex flex-col h-[750px] relative">
         
-        <div>
-            <label class="block text-xs text-slate-400 mb-2">۱. انتخاب روز:</label>
-            <div class="flex gap-2 overflow-x-auto pb-2" id="adminDateContainer"></div>
+        <!-- Header -->
+        <div class="bg-slate-800 px-4 py-3 flex items-center justify-between border-b border-slate-700 text-xs text-slate-300">
+            <div class="flex items-center space-x-2 space-x-reverse">
+                <i class="fa-solid fa-scissors text-emerald-400"></i>
+                <span class="font-bold text-white">رزرو آنلاین پیرایش سالار</span>
+            </div>
+            <span class="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                مینی‌اپ بله
+            </span>
         </div>
 
-        <div>
-            <label class="block text-xs text-slate-400 mb-2">۲. کلیک روی ساعات جهت تعطیل/فعال کردن:</label>
-            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="adminTimeContainer"></div>
+        <!-- Main Content -->
+        <div class="flex-1 overflow-y-auto p-4 space-y-5 custom-scrollbar" id="mainContainer">
+            
+            <div class="flex items-center justify-between px-2 bg-slate-800/40 p-3 rounded-2xl border border-slate-800">
+                <div class="flex items-center gap-2">
+                    <div id="stepBadge" class="w-6 h-6 rounded-full bg-emerald-500 text-white font-bold flex items-center justify-center text-xs">۱</div>
+                    <span id="stepTitle" class="text-xs font-bold text-slate-200">انتخاب خدمت مورد نظر</span>
+                </div>
+            </div>
+
+            <!-- STEP 1 -->
+            <div id="step1" class="space-y-3">
+                <div onclick="selectService(this, 'اصلاح و استایل مو')" class="service-card p-3.5 rounded-xl bg-slate-800 border border-slate-700 hover:border-emerald-500 cursor-pointer flex items-center justify-between">
+                    <div>
+                        <h3 class="text-sm font-semibold text-white">اصلاح و استایل مو</h3>
+                        <p class="text-[11px] text-slate-400 mt-1">مدت زمان: ۴۵ دقیقه</p>
+                    </div>
+                    <span class="text-xs font-bold text-emerald-400">۲۵۰,۰۰۰ تومان</span>
+                </div>
+
+                <div onclick="selectService(this, 'اصلاح کامل سر و صورت')" class="service-card p-3.5 rounded-xl bg-slate-800 border border-slate-700 hover:border-emerald-500 cursor-pointer flex items-center justify-between">
+                    <div>
+                        <h3 class="text-sm font-semibold text-white">اصلاح کامل سر و صورت</h3>
+                        <p class="text-[11px] text-slate-400 mt-1">مدت زمان: ۶۰ دقیقه</p>
+                    </div>
+                    <span class="text-xs font-bold text-emerald-400">۳۵۰,۰۰۰ تومان</span>
+                </div>
+            </div>
+
+            <!-- STEP 2 -->
+            <div id="step2" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-xs text-slate-400 mb-2">روز مراجعه:</label>
+                    <div class="flex gap-2 overflow-x-auto pb-2 custom-scrollbar" id="dateContainer"></div>
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-2">ساعت حضور:</label>
+                    <div class="grid grid-cols-2 gap-2" id="timeContainer"></div>
+                </div>
+            </div>
+
+            <!-- STEP 3 -->
+            <div id="step3" class="space-y-3 hidden">
+                <div>
+                    <label class="block text-xs text-slate-300 mb-1">نام و نام خانوادگی:</label>
+                    <input type="text" id="custName" placeholder="مثلا: علی محمدی" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-300 mb-1">شماره همراه:</label>
+                    <input type="tel" id="custPhone" dir="ltr" placeholder="09123456789" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-white text-right focus:outline-none focus:border-emerald-500">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-300 mb-1">توضیحات (اختیاری):</label>
+                    <textarea id="custNote" rows="2" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-emerald-500"></textarea>
+                </div>
+            </div>
+
+            <!-- SUCCESS -->
+            <div id="successState" class="text-center py-10 space-y-3 hidden">
+                <i class="fa-solid fa-circle-check text-emerald-400 text-5xl"></i>
+                <h2 class="text-base font-bold text-white">نوبت شما با موفقیت ثبت شد</h2>
+                <p class="text-xs text-slate-400">اطلاعات برای آرایشگر ارسال گردید.</p>
+            </div>
+
         </div>
 
-        <button onclick="saveDisabledSlots()" class="w-full py-2.5 bg-emerald-500 text-white rounded-xl text-xs font-bold">
-            ذخیره تغییرات ساعات
-        </button>
-    </div>
-
-    <!-- بخش دوم: مشاهده لیست نوبت‌های مشتریان -->
-    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 space-y-3">
-        <h2 class="text-xs font-bold text-slate-300 border-b border-slate-800 pb-2">
-            <i class="fa-solid fa-list-check text-emerald-400 ml-1"></i> لیست رزروهای مشتریان
-        </h2>
-        <div id="bookingList" class="space-y-2">
-            <p class="text-xs text-slate-500 text-center py-4">در حال دریافت رزروها...</p>
+        <!-- Bottom Bar -->
+        <div id="bottomBar" class="p-4 bg-slate-900 border-t border-slate-800 flex gap-2">
+            <button id="backBtn" onclick="prevStep()" class="px-4 py-3 rounded-xl bg-slate-800 text-slate-400 text-xs font-semibold hidden">بازگشت</button>
+            <button id="nextBtn" onclick="nextStep()" disabled class="w-full py-3 rounded-xl bg-slate-800 text-slate-500 text-xs font-bold">ادامه</button>
         </div>
+
     </div>
 
     <script>
         const WORKER_URL = "https://bale-sender.salar1368yb.workers.dev";
         const times = ["۱۰:۰۰ - ۱۱:۰۰", "۱۱:۰۰ - ۱۲:۰۰", "۱۶:۰۰ - ۱۷:۰۰", "۱۷:۰۰ - ۱۸:۰۰", "۱۸:۰۰ - ۱۹:۰۰"];
-        let selectedDate = "";
-        let disabledSlots = []; // فرمت: ["شنبه ۵ اسفند_۱۰:۰۰ - ۱۱:۰۰"]
+        let step = 1, service = "", date = "", time = "";
+        let disabledSlots = [];
 
-        async function loadData() {
+        try {
+            if (window.Bale && window.Bale.WebApp) {
+                window.Bale.WebApp.ready();
+                window.Bale.WebApp.expand();
+            }
+        } catch(e){}
+
+        async function fetchDisabledSlots() {
             try {
-                // دریافت سانس‌های غیرفعال
-                const resSlots = await fetch(`${WORKER_URL}/disabled-slots`);
-                const dataSlots = await resSlots.json();
-                disabledSlots = dataSlots.disabledSlots || [];
-
-                // دریافت رزروها
-                const resBookings = await fetch(`${WORKER_URL}/bookings`);
-                const dataBookings = await resBookings.json();
-                renderBookings(dataBookings.bookings || []);
-            } catch (e) { console.error(e); }
-
-            renderDates();
+                const res = await fetch(`${WORKER_URL}/disabled-slots`);
+                const data = await res.json();
+                disabledSlots = data.disabledSlots || [];
+            } catch(e){}
         }
 
-        function renderDates() {
-            const container = document.getElementById('adminDateContainer');
+        function selectService(el, sName) {
+            document.querySelectorAll('.service-card').forEach(e => e.classList.remove('border-emerald-500', 'bg-emerald-500/10'));
+            el.classList.add('border-emerald-500', 'bg-emerald-500/10');
+            service = sName;
+            const btn = document.getElementById('nextBtn');
+            btn.disabled = false;
+            btn.className = "w-full py-3 rounded-xl bg-emerald-500 text-white text-xs font-bold cursor-pointer";
+        }
+
+        function renderCalendar() {
+            const container = document.getElementById('dateContainer');
             container.innerHTML = '';
             for (let i = 0; i < 7; i++) {
                 const d = new Date(); d.setDate(d.getDate() + i);
                 const str = d.toLocaleDateString('fa-IR', { weekday: 'short', month: 'short', day: 'numeric' });
-                if (i === 0 && !selectedDate) selectedDate = str;
+                if (i === 0 && !date) date = str;
 
                 const b = document.createElement('button');
-                b.className = `flex-shrink-0 p-2.5 rounded-xl border text-xs min-w-[80px] ${
-                    selectedDate === str ? 'border-emerald-500 text-emerald-400 bg-slate-800' : 'border-slate-700 bg-slate-800/50 text-white'
+                b.className = `date-btn flex-shrink-0 p-2.5 rounded-xl border text-xs min-w-[75px] ${
+                    date === str ? 'border-emerald-500 text-emerald-400 bg-slate-800' : 'border-slate-700 bg-slate-800 text-white'
                 }`;
                 b.innerText = str;
-                b.onclick = () => { selectedDate = str; renderDates(); renderTimes(); };
+                b.onclick = () => {
+                    date = str;
+                    renderCalendar();
+                    renderTimes();
+                    checkStep2();
+                };
                 container.appendChild(b);
             }
-            renderTimes();
         }
 
         function renderTimes() {
-            const container = document.getElementById('adminTimeContainer');
+            const container = document.getElementById('timeContainer');
             container.innerHTML = '';
-
             times.forEach(t => {
-                const key = `${selectedDate}_${t}`;
+                const key = `${date}_${t}`;
                 const isDisabled = disabledSlots.includes(key);
-
-                const btn = document.createElement('button');
-                btn.className = `p-2.5 rounded-xl border text-xs flex items-center justify-between ${
-                    isDisabled 
-                    ? 'border-red-500/50 bg-red-500/10 text-red-400' 
-                    : 'border-slate-700 bg-slate-800 text-slate-200'
-                }`;
-                btn.innerHTML = `<span>${t}</span> <i class="fa-solid ${isDisabled ? 'fa-ban text-red-400' : 'fa-check text-emerald-400'}"></i>`;
-                btn.onclick = () => toggleSlot(key);
-                container.appendChild(btn);
+                const b = document.createElement('button');
+                
+                if (isDisabled) {
+                    b.className = "time-btn p-2.5 rounded-xl border border-slate-800 bg-slate-900/50 text-xs text-slate-600 cursor-not-allowed";
+                    b.innerText = `${t} (تکمیل)`;
+                    b.disabled = true;
+                } else {
+                    b.className = `time-btn p-2.5 rounded-xl border text-xs ${
+                        time === t ? 'border-emerald-500 text-emerald-400 bg-slate-800' : 'border-slate-700 bg-slate-800 text-white'
+                    }`;
+                    b.innerText = t;
+                    b.onclick = () => {
+                        time = t;
+                        renderTimes();
+                        checkStep2();
+                    };
+                }
+                container.appendChild(b);
             });
         }
 
-        function toggleSlot(key) {
-            if (disabledSlots.includes(key)) {
-                disabledSlots = disabledSlots.filter(s => s !== key);
-            } else {
-                disabledSlots.push(key);
+        function checkStep2() {
+            if (date && time) {
+                const btn = document.getElementById('nextBtn');
+                btn.disabled = false;
+                btn.className = "w-full py-3 rounded-xl bg-emerald-500 text-white text-xs font-bold cursor-pointer";
             }
-            renderTimes();
         }
 
-        async function saveDisabledSlots() {
+        async function sendNotification(bookingObj, bookingText) {
             try {
-                await fetch(`${WORKER_URL}/disabled-slots`, {
+                // ارسال اطلاعات به پنل مدیریت
+                await fetch(`${WORKER_URL}/bookings`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ disabledSlots })
+                    body: JSON.stringify(bookingObj)
                 });
-                alert('تغییرات با موفقیت ذخیره شد.');
-            } catch (e) { alert('خطا در ذخیره‌سازی'); }
-        }
 
-        function renderBookings(bookings) {
-            const list = document.getElementById('bookingList');
-            if (!bookings || bookings.length === 0) {
-                list.innerHTML = '<p class="text-xs text-slate-500 text-center py-4">هیچ رزروی ثبت نشده است.</p>';
-                return;
+                // ارسال پیام به پیام‌رسان بله
+                await fetch(WORKER_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: bookingText })
+                });
+            } catch (err) {
+                console.error("خطا:", err);
+            } finally {
+                setTimeout(() => {
+                    if (window.Bale && window.Bale.WebApp) {
+                        window.Bale.WebApp.close();
+                    }
+                }, 1500);
             }
-
-            list.innerHTML = '';
-            bookings.forEach(item => {
-                const div = document.createElement('div');
-                div.className = "bg-slate-800 border border-slate-700 p-3 rounded-xl flex items-center justify-between text-xs";
-                div.innerHTML = `
-                    <div class="space-y-1">
-                        <div class="font-bold text-white">${item.name} (<a href="tel:${item.phone}" class="text-emerald-400">${item.phone}</a>)</div>
-                        <div class="text-slate-400">${item.service} - <span class="text-amber-400">${item.date} (${item.time})</span></div>
-                        ${item.note !== 'ندارد' ? `<div class="text-[10px] text-slate-500">توضیحات: ${item.note}</div>` : ''}
-                    </div>
-                    <button onclick="deleteBooking(${item.id})" class="text-red-400 hover:text-red-300 p-2">
-                        <i class="fa-solid fa-trash-can"></i>
-                    </button>
-                `;
-                list.appendChild(div);
-            });
         }
 
-        async function deleteBooking(id) {
-            if (!confirm('آیا از حذف این رزرو مطمئن هستید؟')) return;
-            await fetch(`${WORKER_URL}/delete-booking`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id })
-            });
-            loadData();
+        async function nextStep() {
+            if (step === 1) {
+                step = 2;
+                await fetchDisabledSlots();
+                document.getElementById('step1').classList.add('hidden');
+                document.getElementById('step2').classList.remove('hidden');
+                document.getElementById('backBtn').classList.remove('hidden');
+                document.getElementById('stepBadge').innerText = '۲';
+                document.getElementById('stepTitle').innerText = 'انتخاب زمان';
+                renderCalendar(); renderTimes();
+                const btn = document.getElementById('nextBtn');
+                btn.disabled = true; btn.className = "w-full py-3 rounded-xl bg-slate-800 text-slate-500 text-xs font-bold";
+            } else if (step === 2) {
+                step = 3;
+                document.getElementById('step2').classList.add('hidden');
+                document.getElementById('step3').classList.remove('hidden');
+                document.getElementById('stepBadge').innerText = '۳';
+                document.getElementById('stepTitle').innerText = 'اطلاعات تماس';
+                document.getElementById('nextBtn').innerText = 'ثبت نهایی رزرو';
+            } else if (step === 3) {
+                const name = document.getElementById('custName').value.trim();
+                const phone = document.getElementById('custPhone').value.trim();
+                const note = document.getElementById('custNote').value.trim() || "ندارد";
+                
+                if (!name || !phone) return alert('لطفاً نام و شماره تلفن را وارد کنید.');
+
+                const bookingObj = { name, phone, service, date, time, note, id: Date.now() };
+                const bookingText = `💈 **نوبت جدید در پیرایش سالار**\n\n` +
+                                    `👤 مشتری: ${name}\n` +
+                                    `📞 تلفن: ${phone}\n` +
+                                    `✂️ خدمت: ${service}\n` +
+                                    `⏰ زمان: ${date} (${time})\n` +
+                                    `📝 توضیحات: ${note}`;
+
+                document.getElementById('step3').classList.add('hidden');
+                document.getElementById('bottomBar').classList.add('hidden');
+                document.getElementById('successState').classList.remove('hidden');
+
+                sendNotification(bookingObj, bookingText);
+            }
         }
 
-        loadData();
+        function prevStep() {
+            if (step === 2) {
+                step = 1;
+                document.getElementById('step2').classList.add('hidden');
+                document.getElementById('step1').classList.remove('hidden');
+                document.getElementById('backBtn').classList.add('hidden');
+                document.getElementById('stepBadge').innerText = '۱';
+            } else if (step === 3) {
+                step = 2;
+                document.getElementById('step3').classList.add('hidden');
+                document.getElementById('step2').classList.remove('hidden');
+                document.getElementById('stepBadge').innerText = '۲';
+                document.getElementById('nextBtn').innerText = 'ادامه';
+            }
+        }
     </script>
 </body>
 </html>
