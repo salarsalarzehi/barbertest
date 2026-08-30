@@ -199,14 +199,14 @@
 
         async function sendNotification(bookingObj, adminText, customerText) {
             try {
-                // ۱. ثبت در دیتابیس
+                // ۱. ثبت در دیتابیس (KV)
                 fetch(`${WORKER_URL}/bookings`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(bookingObj)
                 }).catch(() => {});
 
-                // ۲. ارسال پیام به مدیریت و مشتری
+                // ۲. ارسال هم‌زمان پیام به ادمین و مشتری از طریق ورکر
                 await fetch(WORKER_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -257,7 +257,7 @@
 
                 const bookingObj = { name, phone, service, date, time, note, id: Date.now() };
                 
-                // پیام کامل رزرو برای مدیریت
+                // پیام کامل رزرو برای مدیر (شما)
                 const adminText = `💈 **نوبت جدید در پیرایش سالار**\n\n` +
                                     `👤 مشتری: ${name}\n` +
                                     `📞 تلفن: ${phone}\n` +
