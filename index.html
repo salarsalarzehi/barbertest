@@ -30,7 +30,7 @@
 
     <div class="flex-1 overflow-y-auto p-3.5 space-y-3.5 custom-scrollbar" id="mainContainer">
 
-      <div class="flex items-center justify-between px-2 bg-slate-800/40 p-2.5 rounded-2xl border border-slate-800">
+      <div id="stepHeaderBox" class="flex items-center justify-between px-2 bg-slate-800/40 p-2.5 rounded-2xl border border-slate-800">
         <div class="flex items-center gap-2">
           <div id="stepBadge" class="w-5 h-5 rounded-full bg-emerald-500 text-white font-bold flex items-center justify-center text-[11px]">۱</div>
           <span id="stepTitle" class="text-xs font-bold text-slate-200">انتخاب خدمت مورد نظر</span>
@@ -85,10 +85,16 @@
       </div>
 
       <!-- SUCCESS -->
-      <div id="successState" class="text-center py-8 space-y-3 hidden">
+      <div id="successState" class="text-center py-6 space-y-3 hidden">
         <i class="fa-solid fa-circle-check text-emerald-400 text-5xl"></i>
         <h2 class="text-sm font-bold text-white">نوبت شما با موفقیت ثبت شد</h2>
         <p class="text-[11px] text-slate-400">اطلاعات برای آرایشگر ارسال گردید و ساعت مورد نظر قفل شد.</p>
+
+        <!-- بخش طراحی و توسعه که فقط در صفحه موفقیت نمایش داده می‌شود -->
+        <div class="mt-6 pt-4 border-t border-slate-800 text-center text-[10px] text-slate-500 flex items-center justify-center gap-1">
+          <span>طراحی و توسعه:</span>
+          <a href="#" onclick="openSalarProfile(event)" class="text-emerald-400 font-medium hover:underline cursor-pointer" dir="ltr">@salarx8</a>
+        </div>
       </div>
 
     </div>
@@ -97,12 +103,6 @@
     <div id="bottomBar" class="p-3 bg-slate-900 border-t border-slate-800 flex gap-2">
       <button id="backBtn" onclick="prevStep()" class="px-3.5 py-2.5 rounded-xl bg-slate-800 text-slate-400 text-xs font-semibold hidden cursor-pointer">بازگشت</button>
       <button id="nextBtn" onclick="nextStep()" disabled class="w-full py-2.5 rounded-xl bg-slate-800 text-slate-500 text-xs font-bold">ادامه</button>
-    </div>
-
-    <!-- فوتر طراحی و توسعه با شناسه salarx8 -->
-    <div class="py-2 px-3 bg-slate-950/60 border-t border-slate-800/60 text-center text-[10px] text-slate-500 flex items-center justify-center gap-1">
-      <span>طراحی و توسعه:</span>
-      <a href="#" onclick="openSalarProfile(event)" class="text-emerald-400 font-medium hover:underline cursor-pointer" dir="ltr">@salarx8</a>
     </div>
 
   </div>
@@ -127,7 +127,6 @@
       console.error("Bale Init Error:", e);
     }
 
-    // تابع مخصوص برای باز کردن صحیح پروفایل در بله
     function openSalarProfile(e) {
       e.preventDefault();
       const url = "https://ble.ir/salarx8";
@@ -322,6 +321,7 @@
           `منتظر حضور شما در پیرایش سالار هستیم! ✂️`;
 
         document.getElementById('step3').classList.add('hidden');
+        document.getElementById('stepHeaderBox').classList.add('hidden');
         document.getElementById('bottomBar').classList.add('hidden');
         document.getElementById('successState').classList.remove('hidden');
 
