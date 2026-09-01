@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>رزرو آنلاین پیرایش سالار</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- فراخوانی فونت وزیرمتن با اعداد فارسی از گوگل فونت -->
+  <!-- اتصال مانیفست برای قابلیت نصب -->
+  <link rel="manifest" href="manifest.json">
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
   <script src="https://tapi.bale.ai/miniapp.js?3"></script>
@@ -24,7 +25,7 @@
 
   <div class="w-full max-w-sm bg-slate-900/80 backdrop-blur-xl rounded-[2.5rem] border border-slate-800 shadow-2xl overflow-hidden flex flex-col relative p-6">
     
-    <!-- افکت نور تزئینی پشت آواتار -->
+    <!-- افکت نور تزئینی -->
     <div class="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
     <!-- Header / Branding -->
@@ -37,7 +38,6 @@
       </div>
       <h1 class="text-white font-extrabold text-lg tracking-tight">پیرایش سالار</h1>
       
-      <!-- نشانگر وضعیت زنده -->
       <div class="inline-flex items-center gap-1.5 mt-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
         آماده رزرو نوبت
@@ -47,7 +47,7 @@
     <!-- Actions / Buttons -->
     <div class="py-5 space-y-3.5 relative z-10">
       
-      <!-- باز کردن در بله -->
+      <!-- ورود به مینی‌اپ -->
       <a href="https://ble.ir/testpirbot?startapp" 
          class="group flex items-center justify-between p-4 bg-gradient-to-l from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white rounded-2xl font-bold text-sm transition-all shadow-lg shadow-emerald-600/25 active:scale-[0.98]">
         <div class="flex items-center gap-3">
@@ -77,7 +77,14 @@
         <i class="fa-solid fa-chevron-left text-xs text-slate-400 transition-transform group-hover:-translate-x-1"></i>
       </a>
 
-      <!-- دکمه اشتراک‌گذاری صفحه -->
+      <!-- دکمه نصب روی صفحه اصلی گوشی (PWA) -->
+      <button id="installBtn" onclick="installApp()" 
+              class="w-full py-3 bg-slate-800/60 hover:bg-slate-800 text-emerald-400 rounded-xl text-xs font-bold transition border border-emerald-500/20 flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] hidden">
+        <i class="fa-solid fa-download"></i>
+        <span>نصب اپلیکیشن روی گوشی</span>
+      </button>
+
+      <!-- دکمه اشتراک‌گذاری لینک صفحه -->
       <button onclick="copyPageLink()" 
               class="w-full py-3 bg-slate-800/40 hover:bg-slate-800 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition border border-slate-800 flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]">
         <i class="fa-solid fa-share-nodes text-emerald-400"></i>
@@ -98,6 +105,28 @@
   </div>
 
   <script>
+    let deferredPrompt;
+    const installBtn = document.getElementById('installBtn');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBtn.classList.remove('hidden'); // نمایش دکمه وقتی مرورگر اجازه نصب داد
+    });
+
+    function installApp() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            console.log('کاربر اپلیکیشن را نصب کرد');
+          }
+          deferredPrompt = null;
+          installBtn.classList.add('hidden');
+        });
+      }
+    }
+
     function copyPageLink() {
       navigator.clipboard.writeText(window.location.href);
       const copyText = document.getElementById('copyText');
