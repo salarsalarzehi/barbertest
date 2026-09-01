@@ -5,14 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>رزرو آنلاین پیرایش سالار</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- اتصال مانیفست برای قابلیت نصب -->
+  <!-- اتصال مانیفست برای قابلیت نصب روی موبایل -->
   <link rel="manifest" href="manifest.json">
-  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <!-- فراخوانی استاندارد فونت یکان بخ -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/yekan-bakh@v1.0.0/dist/yekan-bakh.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
   <script src="https://tapi.bale.ai/miniapp.js?3"></script>
   <style>
     body { 
-      font-family: 'Vazirmatn', sans-serif !important; 
+      font-family: 'Yekan Bakh', sans-serif !important; 
       background-color: #0f172a; 
       color: #f8fafc; 
       font-size: 14px;
@@ -23,9 +24,9 @@
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
 
-  <div class="w-full max-w-sm bg-slate-900/80 backdrop-blur-xl rounded-[2.5rem] border border-slate-800 shadow-2xl overflow-hidden flex flex-col relative p-6">
+  <div class="w-full max-w-sm bg-slate-900/85 backdrop-blur-xl rounded-[2.5rem] border border-slate-800 shadow-2xl overflow-hidden flex flex-col relative p-6">
     
-    <!-- افکت نور تزئینی -->
+    <!-- افکت نور تزئینی پشت آواتار -->
     <div class="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
     <!-- Header / Branding -->
@@ -38,6 +39,7 @@
       </div>
       <h1 class="text-white font-extrabold text-lg tracking-tight">پیرایش سالار</h1>
       
+      <!-- نشانگر وضعیت زنده -->
       <div class="inline-flex items-center gap-1.5 mt-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
         آماده رزرو نوبت
@@ -47,7 +49,7 @@
     <!-- Actions / Buttons -->
     <div class="py-5 space-y-3.5 relative z-10">
       
-      <!-- ورود به مینی‌اپ -->
+      <!-- باز کردن در بله -->
       <a href="https://ble.ir/testpirbot?startapp" 
          class="group flex items-center justify-between p-4 bg-gradient-to-l from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white rounded-2xl font-bold text-sm transition-all shadow-lg shadow-emerald-600/25 active:scale-[0.98]">
         <div class="flex items-center gap-3">
@@ -77,7 +79,7 @@
         <i class="fa-solid fa-chevron-left text-xs text-slate-400 transition-transform group-hover:-translate-x-1"></i>
       </a>
 
-      <!-- دکمه نصب روی صفحه اصلی گوشی (PWA) -->
+      <!-- دکمه نصب روی گوشی (به صورت خودکار وقتی مرورگر اجازه دهد ظاهر می‌شود) -->
       <button id="installBtn" onclick="installApp()" 
               class="w-full py-3 bg-slate-800/60 hover:bg-slate-800 text-emerald-400 rounded-xl text-xs font-bold transition border border-emerald-500/20 flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] hidden">
         <i class="fa-solid fa-download"></i>
@@ -111,7 +113,7 @@
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
-      installBtn.classList.remove('hidden'); // نمایش دکمه وقتی مرورگر اجازه نصب داد
+      installBtn.classList.remove('hidden');
     });
 
     function installApp() {
