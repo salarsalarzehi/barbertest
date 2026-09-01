@@ -5,9 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>رزرو آنلاین پیرایش سالار</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- اتصال مانیفست برای قابلیت نصب روی موبایل -->
   <link rel="manifest" href="manifest.json">
-  <!-- فراخوانی استاندارد فونت یکان بخ -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/yekan-bakh@v1.0.0/dist/yekan-bakh.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
   <script src="https://tapi.bale.ai/miniapp.js?3"></script>
@@ -26,10 +24,8 @@
 
   <div class="w-full max-w-sm bg-slate-900/85 backdrop-blur-xl rounded-[2.5rem] border border-slate-800 shadow-2xl overflow-hidden flex flex-col relative p-6">
     
-    <!-- افکت نور تزئینی پشت آواتار -->
     <div class="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
-    <!-- Header / Branding -->
     <div class="text-center relative z-10 pt-4 pb-5 border-b border-slate-800/80">
       <div class="relative w-24 h-24 mx-auto mb-4">
         <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-300 animate-pulse opacity-75 blur-sm"></div>
@@ -39,17 +35,14 @@
       </div>
       <h1 class="text-white font-extrabold text-lg tracking-tight">پیرایش سالار</h1>
       
-      <!-- نشانگر وضعیت زنده -->
       <div class="inline-flex items-center gap-1.5 mt-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
         آماده رزرو نوبت
       </div>
     </div>
 
-    <!-- Actions / Buttons -->
     <div class="py-5 space-y-3.5 relative z-10">
       
-      <!-- باز کردن در بله -->
       <a href="https://ble.ir/testpirbot?startapp" 
          class="group flex items-center justify-between p-4 bg-gradient-to-l from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white rounded-2xl font-bold text-sm transition-all shadow-lg shadow-emerald-600/25 active:scale-[0.98]">
         <div class="flex items-center gap-3">
@@ -64,7 +57,6 @@
         <i class="fa-solid fa-chevron-left text-xs transition-transform group-hover:-translate-x-1"></i>
       </a>
 
-      <!-- باز کردن در مرورگر -->
       <a href="https://salarsalarzehi.github.io/barbertest/" 
          class="group flex items-center justify-between p-4 bg-slate-800/80 hover:bg-slate-800 text-slate-300 hover:text-white rounded-2xl font-semibold text-sm transition-all border border-slate-700/80 active:scale-[0.98]">
         <div class="flex items-center gap-3">
@@ -79,14 +71,13 @@
         <i class="fa-solid fa-chevron-left text-xs text-slate-400 transition-transform group-hover:-translate-x-1"></i>
       </a>
 
-      <!-- دکمه نصب روی گوشی (به صورت خودکار وقتی مرورگر اجازه دهد ظاهر می‌شود) -->
-      <button id="installBtn" onclick="installApp()" 
-              class="w-full py-3 bg-slate-800/60 hover:bg-slate-800 text-emerald-400 rounded-xl text-xs font-bold transition border border-emerald-500/20 flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98] hidden">
+      <!-- دکمه نصب روی گوشی (همیشه قابل مشاهده) -->
+      <button onclick="installApp()" 
+              class="w-full py-3 bg-slate-800/60 hover:bg-slate-800 text-emerald-400 rounded-xl text-xs font-bold transition border border-emerald-500/20 flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]">
         <i class="fa-solid fa-download"></i>
         <span>نصب اپلیکیشن روی گوشی</span>
       </button>
 
-      <!-- دکمه اشتراک‌گذاری لینک صفحه -->
       <button onclick="copyPageLink()" 
               class="w-full py-3 bg-slate-800/40 hover:bg-slate-800 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition border border-slate-800 flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]">
         <i class="fa-solid fa-share-nodes text-emerald-400"></i>
@@ -95,7 +86,6 @@
 
     </div>
 
-    <!-- Footer & Developer Info -->
     <div class="pt-4 border-t border-slate-800/80 text-center relative z-10 flex items-center justify-between text-xs text-slate-400">
       <span>نسخه ۱.۰.۰</span>
       <div class="flex items-center gap-1.5">
@@ -106,27 +96,43 @@
 
   </div>
 
+  <!-- پاپ‌آپ راهنما برای نصب -->
+  <div id="installModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 max-w-xs w-full text-center space-y-4 shadow-2xl">
+      <div class="w-12 h-12 bg-emerald-500/10 text-emerald-400 rounded-2xl mx-auto flex items-center justify-center text-xl">
+        <i class="fa-solid fa-mobile-screen-button"></i>
+      </div>
+      <h3 class="text-white font-bold text-sm">چگونه اپلیکیشن را نصب کنید؟</h3>
+      <p class="text-xs text-slate-300 leading-relaxed">
+        برای افزودن اپلیکیشن به صفحه اصلی گوشی، از منوی مرورگر خود (سه نقطه بالا در کروم یا دکمه Share در سافاری آیفون) گزینه <span class="text-emerald-400 font-bold">Add to Home screen</span> را انتخاب کنید.
+      </p>
+      <button onclick="closeModal()" class="w-full py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold transition cursor-pointer">
+        متوجه شدم
+      </button>
+    </div>
+  </div>
+
   <script>
     let deferredPrompt;
-    const installBtn = document.getElementById('installBtn');
 
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
-      installBtn.classList.remove('hidden');
     });
 
     function installApp() {
       if (deferredPrompt) {
         deferredPrompt.prompt();
         deferredPrompt.userChoice.then((choiceResult) => {
-          if (choiceResult.outcome === 'accepted') {
-            console.log('کاربر اپلیکیشن را نصب کرد');
-          }
           deferredPrompt = null;
-          installBtn.classList.add('hidden');
         });
+      } else {
+        document.getElementById('installModal').classList.remove('hidden');
       }
+    }
+
+    function closeModal() {
+      document.getElementById('installModal').classList.add('hidden');
     }
 
     function copyPageLink() {
