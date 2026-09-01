@@ -6,60 +6,104 @@
   <title>رزرو آنلاین پیرایش سالار</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdn.jsdelivr.net/gh/rastikerdar/yekan-bakh@main/css/yekan-bakh.css" rel="stylesheet" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    body { font-family: 'Yekan Bakh', sans-serif; background: #0f172a; }
+    body { 
+      font-family: 'Yekan Bakh', sans-serif; 
+      background: #090d16;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(16, 185, 129, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.06) 0%, transparent 40%);
+    }
   </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
 
-  <div class="w-full max-w-sm bg-slate-900 rounded-3xl border border-slate-700 shadow-2xl overflow-hidden flex flex-col">
+  <div class="w-full max-w-sm bg-slate-900/80 backdrop-blur-xl rounded-[2.5rem] border border-slate-800 shadow-2xl overflow-hidden flex flex-col relative p-6">
     
-    <!-- Header همراه با عکس پروفایل شما -->
-    <div class="bg-slate-800 px-6 py-6 text-center border-b border-slate-700">
-      <div class="w-20 h-20 rounded-full overflow-hidden border-2 border-emerald-400 mx-auto mb-3 shadow-md">
-        <img src="https://raw.githubusercontent.com/salarsalarzehi/barbertest/main/profile.jpg" alt="سالار" class="w-full h-full object-cover">
+    <!-- افکت نور تزئینی پشت آواتار -->
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+    <!-- Header / Branding -->
+    <div class="text-center relative z-10 pt-4 pb-5 border-b border-slate-800/80">
+      <div class="relative w-24 h-24 mx-auto mb-4">
+        <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-300 animate-pulse opacity-75 blur-sm"></div>
+        <div class="relative w-full h-full rounded-full overflow-hidden border-2 border-emerald-400 shadow-xl">
+          <img src="https://raw.githubusercontent.com/salarsalarzehi/barbertest/main/profile.jpg" alt="سالار" class="w-full h-full object-cover">
+        </div>
       </div>
-      <h1 class="text-white font-bold text-lg">پیرایش سالار</h1>
-      <p class="text-slate-400 text-sm mt-1">رزرو آنلاین نوبت</p>
+      <h1 class="text-white font-extrabold text-xl tracking-tight">پیرایش سالار</h1>
+      
+      <!-- نشانگر وضعیت زنده (باز / بسته) -->
+      <div class="inline-flex items-center gap-1.5 mt-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+        آماده رزرو نوبت
+      </div>
     </div>
 
-    <!-- Buttons -->
-    <div class="p-6 space-y-4">
+    <!-- Actions / Buttons -->
+    <div class="py-5 space-y-3 relative z-10">
       
       <!-- باز کردن در بله -->
       <a href="https://ble.ir/testpirbot?startapp" 
-         class="flex items-center justify-center gap-3 w-full py-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-bold text-sm transition-all active:scale-95 shadow-lg shadow-emerald-500/20">
-        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-        </svg>
-        باز کردن در بله
+         class="group flex items-center justify-between p-4 bg-gradient-to-l from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white rounded-2xl font-bold text-sm transition-all shadow-lg shadow-emerald-600/25 active:scale-[0.98]">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center text-white">
+            <i class="fa-solid fa-bolt text-lg"></i>
+          </div>
+          <div class="text-right">
+            <div>ورود به بله</div>
+            <div class="text-[10px] text-emerald-100 font-normal">تجربه سریع و ثبت خودکار نوبت</div>
+          </div>
+        </div>
+        <i class="fa-solid fa-chevron-left text-xs transition-transform group-hover:-translate-x-1"></i>
       </a>
 
       <!-- باز کردن در مرورگر -->
       <a href="https://salarsalarzehi.github.io/barbertest/" 
-         class="flex items-center justify-center gap-3 w-full py-4 bg-slate-800 hover:bg-slate-700 text-white rounded-2xl font-bold text-sm transition-all active:scale-95 border border-slate-700">
-        <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
-        </svg>
-        باز کردن در مرورگر
+         class="group flex items-center justify-between p-4 bg-slate-800/80 hover:bg-slate-800 text-slate-300 hover:text-white rounded-2xl font-semibold text-sm transition-all border border-slate-700/80 active:scale-[0.98]">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-slate-700/50 flex items-center justify-center text-slate-400">
+            <i class="fa-solid fa-globe text-base"></i>
+          </div>
+          <div class="text-right">
+            <div>باز کردن در مرورگر</div>
+            <div class="text-[10px] text-slate-500 font-normal">مشاهده نسخه وب معمولی</div>
+          </div>
+        </div>
+        <i class="fa-solid fa-chevron-left text-xs text-slate-500 transition-transform group-hover:-translate-x-1"></i>
       </a>
 
-      <p class="text-center text-slate-500 text-xs pt-1 leading-relaxed">
-        توصیه می‌شود از طریق <span class="text-emerald-400">بله</span> وارد شوید<br>
-        تا پیام تأیید رزرو را دریافت کنید
-      </p>
-
-      <!-- بخش طراح و توسعه‌دهنده -->
-      <div class="mt-4 pt-4 border-t border-slate-800 text-center text-xs text-slate-400 space-y-1.5">
-        <p>طراحی و توسعه:</p>
-        <div>
-          <a href="https://ble.ir/salarx8" target="_blank" class="inline-block bg-slate-800 border border-slate-700 px-4 py-1.5 rounded-xl text-emerald-400 font-bold hover:bg-slate-700 transition" dir="ltr">@salarx8</a>
-        </div>
-      </div>
+      <!-- دکمه اشتراک‌گذاری صفحه -->
+      <button onclick="copyPageLink()" 
+              class="w-full py-3 bg-slate-800/40 hover:bg-slate-800 text-slate-400 hover:text-white rounded-xl text-xs font-semibold transition border border-slate-800 flex items-center justify-center gap-2 cursor-pointer">
+        <i class="fa-solid fa-share-nodes"></i>
+        <span id="copyText">اشتراک‌گذاری لینک صفحه</span>
+      </button>
 
     </div>
+
+    <!-- Footer & Developer Info -->
+    <div class="pt-4 border-t border-slate-800/80 text-center relative z-10 flex items-center justify-between text-xs text-slate-500">
+      <span>نسخه ۱.۰.۰</span>
+      <div class="flex items-center gap-1.5">
+        <span>طراح و توسعه دهنده:</span>
+        <a href="https://ble.ir/salarx8" target="_blank" class="text-emerald-400 font-bold hover:underline" dir="ltr">@salarx8</a>
+      </div>
+    </div>
+
   </div>
+
+  <script>
+    function copyPageLink() {
+      navigator.clipboard.writeText(window.location.href);
+      const copyText = document.getElementById('copyText');
+      copyText.innerText = 'لینک صفحه کپی شد! ✓';
+      setTimeout(() => {
+        copyText.innerText = 'اشتراک‌گذاری لینک صفحه';
+      }, 2500);
+    }
+  </script>
 
 </body>
 </html>
