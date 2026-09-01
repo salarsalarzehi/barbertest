@@ -5,12 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>رزرو آنلاین پیرایش سالار</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://cdn.jsdelivr.net/gh/rastikerdar/yekan-bakh@main/css/yekan-bakh.css" rel="stylesheet" />
+  <!-- فراخوانی فونت یکان بخ با اعداد فارسی (FaNum) -->
+  <link href="https://cdn.jsdelivr.net/gh/rastikerdar/yekan-bakh@main/assets/fonts/font-face-fa-num.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     body { 
-      font-family: 'Yekan Bakh', sans-serif; 
+      font-family: 'Yekan Bakh FaNum', sans-serif; 
       background: #090d16;
+      font-size: 14px;
       background-image: 
         radial-gradient(circle at 10% 20%, rgba(16, 185, 129, 0.08) 0%, transparent 40%),
         radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.06) 0%, transparent 40%);
@@ -32,9 +34,9 @@
           <img src="https://raw.githubusercontent.com/salarsalarzehi/barbertest/main/profile.jpg" alt="سالار" class="w-full h-full object-cover">
         </div>
       </div>
-      <h1 class="text-white font-extrabold text-xl tracking-tight">پیرایش سالار</h1>
+      <h1 class="text-white font-extrabold text-lg tracking-tight">پیرایش سالار</h1>
       
-      <!-- نشانگر وضعیت زنده (باز / بسته) -->
+      <!-- نشانگر وضعیت زنده -->
       <div class="inline-flex items-center gap-1.5 mt-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
         آماده رزرو نوبت
@@ -42,18 +44,18 @@
     </div>
 
     <!-- Actions / Buttons -->
-    <div class="py-5 space-y-3 relative z-10">
+    <div class="py-5 space-y-3.5 relative z-10">
       
       <!-- باز کردن در بله -->
       <a href="https://ble.ir/testpirbot?startapp" 
          class="group flex items-center justify-between p-4 bg-gradient-to-l from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white rounded-2xl font-bold text-sm transition-all shadow-lg shadow-emerald-600/25 active:scale-[0.98]">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center text-white">
-            <i class="fa-solid fa-bolt text-lg"></i>
+            <i class="fa-solid fa-bolt text-base"></i>
           </div>
           <div class="text-right">
-            <div>ورود به بله</div>
-            <div class="text-[10px] text-emerald-100 font-normal">تجربه سریع و ثبت خودکار نوبت</div>
+            <div>ورود به مینی‌اپ</div>
+            <div class="text-[11px] text-emerald-100 font-normal">تجربه سریع و ثبت خودکار نوبت</div>
           </div>
         </div>
         <i class="fa-solid fa-chevron-left text-xs transition-transform group-hover:-translate-x-1"></i>
@@ -68,26 +70,26 @@
           </div>
           <div class="text-right">
             <div>باز کردن در مرورگر</div>
-            <div class="text-[10px] text-slate-500 font-normal">مشاهده نسخه وب معمولی</div>
+            <div class="text-[11px] text-slate-400 font-normal">مشاهده نسخه وب معمولی</div>
           </div>
         </div>
-        <i class="fa-solid fa-chevron-left text-xs text-slate-500 transition-transform group-hover:-translate-x-1"></i>
+        <i class="fa-solid fa-chevron-left text-xs text-slate-400 transition-transform group-hover:-translate-x-1"></i>
       </a>
 
       <!-- دکمه اشتراک‌گذاری صفحه -->
       <button onclick="copyPageLink()" 
-              class="w-full py-3 bg-slate-800/40 hover:bg-slate-800 text-slate-400 hover:text-white rounded-xl text-xs font-semibold transition border border-slate-800 flex items-center justify-center gap-2 cursor-pointer">
-        <i class="fa-solid fa-share-nodes"></i>
+              class="w-full py-3 bg-slate-800/40 hover:bg-slate-800 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition border border-slate-800 flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]">
+        <i class="fa-solid fa-share-nodes text-emerald-400"></i>
         <span id="copyText">اشتراک‌گذاری لینک صفحه</span>
       </button>
 
     </div>
 
     <!-- Footer & Developer Info -->
-    <div class="pt-4 border-t border-slate-800/80 text-center relative z-10 flex items-center justify-between text-xs text-slate-500">
+    <div class="pt-4 border-t border-slate-800/80 text-center relative z-10 flex items-center justify-between text-xs text-slate-400">
       <span>نسخه ۱.۰.۰</span>
       <div class="flex items-center gap-1.5">
-        <span>طراح و توسعه دهنده:</span>
+        <span>توسعه:</span>
         <a href="https://ble.ir/salarx8" target="_blank" class="text-emerald-400 font-bold hover:underline" dir="ltr">@salarx8</a>
       </div>
     </div>
