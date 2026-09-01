@@ -5,346 +5,107 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>رزرو آنلاین پیرایش سالار</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://cdn.jsdelivr.net/gh/rastikerdar/yekan-bakh@main/css/yekan-bakh.css" rel="stylesheet" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
-  <script src="https://tapi.bale.ai/miniapp.js?3"></script>
+  <!-- فراخوانی فونت یکان بخ با اعداد فارسی (FaNum) -->
+  <link href="https://cdn.jsdelivr.net/gh/rastikerdar/yekan-bakh@main/assets/fonts/font-face-fa-num.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    body { font-family: 'Yekan Bakh', sans-serif; background-color: #0f172a; color: #f8fafc; }
-    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    body { 
+      font-family: 'Yekan Bakh FaNum', sans-serif; 
+      background: #090d16;
+      font-size: 14px;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(16, 185, 129, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.06) 0%, transparent 40%);
+    }
   </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-2 sm:p-4">
+<body class="min-h-screen flex items-center justify-center p-4">
 
-  <div class="w-full max-w-md bg-slate-900 rounded-3xl overflow-hidden shadow-2xl border border-slate-800 flex flex-col h-[640px] relative">
+  <div class="w-full max-w-sm bg-slate-900/80 backdrop-blur-xl rounded-[2.5rem] border border-slate-800 shadow-2xl overflow-hidden flex flex-col relative p-6">
+    
+    <!-- افکت نور تزئینی پشت آواتار -->
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
-    <div class="bg-slate-800 px-4 py-2.5 flex items-center justify-between border-b border-slate-700 text-xs text-slate-300">
-      <div class="flex items-center space-x-2 space-x-reverse">
-        <div class="w-8 h-8 rounded-full overflow-hidden border-2 border-emerald-400 flex-shrink-0 shadow-sm">
+    <!-- Header / Branding -->
+    <div class="text-center relative z-10 pt-4 pb-5 border-b border-slate-800/80">
+      <div class="relative w-24 h-24 mx-auto mb-4">
+        <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-300 animate-pulse opacity-75 blur-sm"></div>
+        <div class="relative w-full h-full rounded-full overflow-hidden border-2 border-emerald-400 shadow-xl">
           <img src="https://raw.githubusercontent.com/salarsalarzehi/barbertest/main/profile.jpg" alt="سالار" class="w-full h-full object-cover">
         </div>
-        <span class="font-bold text-white">پیرایش سالار</span>
       </div>
-      <span class="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20">
-        مینی‌اپ بله
-      </span>
+      <h1 class="text-white font-extrabold text-lg tracking-tight">پیرایش سالار</h1>
+      
+      <!-- نشانگر وضعیت زنده -->
+      <div class="inline-flex items-center gap-1.5 mt-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+        آماده رزرو نوبت
+      </div>
     </div>
 
-    <div class="flex-1 overflow-y-auto p-3.5 space-y-3.5 custom-scrollbar" id="mainContainer">
-
-      <div id="stepHeaderBox" class="flex items-center justify-between px-2 bg-slate-800/40 p-2.5 rounded-2xl border border-slate-800">
-        <div class="flex items-center gap-2">
-          <div id="stepBadge" class="w-5 h-5 rounded-full bg-emerald-500 text-white font-bold flex items-center justify-center text-[11px]">۱</div>
-          <span id="stepTitle" class="text-xs font-bold text-slate-200">انتخاب خدمت مورد نظر</span>
-        </div>
-      </div>
-
-      <div id="step1" class="space-y-2.5">
-        <div onclick="selectService(this, 'اصلاح و استایل مو')" class="service-card p-3 rounded-xl bg-slate-800 border border-slate-700 hover:border-emerald-500 cursor-pointer flex items-center justify-between">
-          <div>
-            <h3 class="text-xs font-semibold text-white">اصلاح و استایل مو</h3>
-            <p class="text-[10px] text-slate-400 mt-0.5">مدت زمان: ۴۵ دقیقه</p>
+    <!-- Actions / Buttons -->
+    <div class="py-5 space-y-3.5 relative z-10">
+      
+      <!-- باز کردن در بله -->
+      <a href="https://ble.ir/testpirbot?startapp" 
+         class="group flex items-center justify-between p-4 bg-gradient-to-l from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white rounded-2xl font-bold text-sm transition-all shadow-lg shadow-emerald-600/25 active:scale-[0.98]">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center text-white">
+            <i class="fa-solid fa-bolt text-base"></i>
           </div>
-          <span class="text-xs font-bold text-emerald-400">۲۵۰,۰۰۰ تومان</span>
-        </div>
-        <div onclick="selectService(this, 'اصلاح کامل سر و صورت')" class="service-card p-3 rounded-xl bg-slate-800 border border-slate-700 hover:border-emerald-500 cursor-pointer flex items-center justify-between">
-          <div>
-            <h3 class="text-xs font-semibold text-white">اصلاح کامل سر و صورت</h3>
-            <p class="text-[10px] text-slate-400 mt-0.5">مدت زمان: ۶۰ دقیقه</p>
-          </div>
-          <span class="text-xs font-bold text-emerald-400">۳۵۰,۰۰۰ تومان</span>
-        </div>
-      </div>
-
-      <div id="step2" class="space-y-3 hidden">
-        <div>
-          <label class="block text-[11px] text-slate-400 mb-1.5">روز مراجعه:</label>
-          <div class="flex gap-2 overflow-x-auto pb-1.5 custom-scrollbar" id="dateContainer"></div>
-        </div>
-        <div>
-          <label class="block text-[11px] text-slate-400 mb-1.5">ساعت حضور (ساعت‌های تکمیل‌شده قفل هستند):</label>
-          <div class="grid grid-cols-2 gap-1.5" id="timeContainer"></div>
-        </div>
-      </div>
-
-      <div id="step3" class="space-y-2.5 hidden">
-        <div>
-          <label class="block text-[11px] text-slate-300 mb-1">نام و نام خانوادگی:</label>
-          <input type="text" id="custName" placeholder="مثلا: علی محمدی" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2 text-xs text-white focus:outline-none focus:border-emerald-500">
-        </div>
-        <div>
-          <label class="block text-[11px] text-slate-300 mb-1">شماره همراه (الزامی):</label>
-          <input type="tel" id="custPhone" dir="ltr" placeholder="09123456789" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2 text-xs text-white text-right focus:outline-none focus:border-emerald-500">
-          <p id="phoneError" class="text-[10px] text-rose-400 mt-1 hidden">لطفاً شماره موبایل معتبر وارد کنید (مثل 09123456789)</p>
-        </div>
-        <div>
-          <label class="block text-[11px] text-slate-300 mb-1">توضیحات (اختیاری):</label>
-          <textarea id="custNote" rows="2" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2 text-xs text-white focus:outline-none focus:border-emerald-500"></textarea>
-        </div>
-      </div>
-
-      <div id="successState" class="text-center py-6 space-y-3 hidden">
-        <i class="fa-solid fa-circle-check text-emerald-400 text-5xl"></i>
-        <h2 class="text-sm font-bold text-white">نوبت شما با موفقیت ثبت شد</h2>
-        <p class="text-[11px] text-slate-400">اطلاعات برای آرایشگر ارسال گردید و ساعت مورد نظر قفل شد.</p>
-
-        <div class="mt-6 pt-4 border-t border-slate-800 text-center text-[11px] text-slate-400 space-y-2">
-          <p>طراحی و توسعه:</p>
-          <div>
-            <a href="#" onclick="openSalarProfile(event)" class="inline-block bg-slate-800 border border-slate-700 px-4 py-1.5 rounded-xl text-emerald-400 font-bold hover:bg-slate-700 transition cursor-pointer" dir="ltr">@salarx8</a>
+          <div class="text-right">
+            <div>ورود به مینی‌اپ</div>
+            <div class="text-[11px] text-emerald-100 font-normal">تجربه سریع و ثبت خودکار نوبت</div>
           </div>
         </div>
-      </div>
+        <i class="fa-solid fa-chevron-left text-xs transition-transform group-hover:-translate-x-1"></i>
+      </a>
+
+      <!-- باز کردن در مرورگر -->
+      <a href="https://salarsalarzehi.github.io/barbertest/" 
+         class="group flex items-center justify-between p-4 bg-slate-800/80 hover:bg-slate-800 text-slate-300 hover:text-white rounded-2xl font-semibold text-sm transition-all border border-slate-700/80 active:scale-[0.98]">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-slate-700/50 flex items-center justify-center text-slate-400">
+            <i class="fa-solid fa-globe text-base"></i>
+          </div>
+          <div class="text-right">
+            <div>باز کردن در مرورگر</div>
+            <div class="text-[11px] text-slate-400 font-normal">مشاهده نسخه وب معمولی</div>
+          </div>
+        </div>
+        <i class="fa-solid fa-chevron-left text-xs text-slate-400 transition-transform group-hover:-translate-x-1"></i>
+      </a>
+
+      <!-- دکمه اشتراک‌گذاری صفحه -->
+      <button onclick="copyPageLink()" 
+              class="w-full py-3 bg-slate-800/40 hover:bg-slate-800 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition border border-slate-800 flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]">
+        <i class="fa-solid fa-share-nodes text-emerald-400"></i>
+        <span id="copyText">اشتراک‌گذاری لینک صفحه</span>
+      </button>
 
     </div>
 
-    <div id="bottomBar" class="p-3 bg-slate-900 border-t border-slate-800 flex gap-2">
-      <button id="backBtn" onclick="prevStep()" class="px-3.5 py-2.5 rounded-xl bg-slate-800 text-slate-400 text-xs font-semibold hidden cursor-pointer">بازگشت</button>
-      <button id="nextBtn" onclick="nextStep()" disabled class="w-full py-2.5 rounded-xl bg-slate-800 text-slate-500 text-xs font-bold">ادامه</button>
+    <!-- Footer & Developer Info -->
+    <div class="pt-4 border-t border-slate-800/80 text-center relative z-10 flex items-center justify-between text-xs text-slate-400">
+      <span>نسخه ۱.۰.۰</span>
+      <div class="flex items-center gap-1.5">
+        <span>توسعه:</span>
+        <a href="https://ble.ir/salarx8" target="_blank" class="text-emerald-400 font-bold hover:underline" dir="ltr">@salarx8</a>
+      </div>
     </div>
 
   </div>
 
   <script>
-    const WORKER_URL = "https://bale-sender.salar1368yb.workers.dev";
-    const times = ["۱۰:۰۰ - ۱۱:۰۰", "۱۱:۰۰ - ۱۲:۰۰", "۱۶:۰۰ - ۱۷:۰۰", "۱۷:۰۰ - ۱۸:۰۰", "۱۸:۰۰ - ۱۹:۰۰"];
-    let step = 1, service = "", date = "", time = "";
-    let disabledSlots = [];
-    let userChatId = null;
-
-    try {
-      if (window.Bale && window.Bale.WebApp) {
-        window.Bale.WebApp.ready();
-        window.Bale.WebApp.expand();
-        const webApp = window.Bale.WebApp;
-        if (webApp.initDataUnsafe && webApp.initDataUnsafe.user) {
-          userChatId = webApp.initDataUnsafe.user.id;
-        }
-      }
-    } catch(e) {
-      console.error("Bale Init Error:", e);
-    }
-
-    function openSalarProfile(e) {
-      e.preventDefault();
-      const url = "https://ble.ir/salarx8";
-      try {
-        if (window.Bale && window.Bale.WebApp && typeof window.Bale.WebApp.openExternalLink === 'function') {
-          window.Bale.WebApp.openExternalLink(url);
-        } else {
-          window.open(url, '_blank');
-        }
-      } catch (err) {
-        window.open(url, '_blank');
-      }
-    }
-
-    async function fetchDisabledSlots() {
-      try {
-        const res = await fetch(`${WORKER_URL}/disabled-slots`);
-        const data = await res.json();
-        disabledSlots = data.disabledSlots || [];
-      } catch(e) {
-        console.error("خطا در دریافت سانس‌ها:", e);
-      }
-    }
-
-    function selectService(el, sName) {
-      document.querySelectorAll('.service-card').forEach(e => e.classList.remove('border-emerald-500', 'bg-emerald-500/10'));
-      el.classList.add('border-emerald-500', 'bg-emerald-500/10');
-      service = sName;
-      const btn = document.getElementById('nextBtn');
-      btn.disabled = false;
-      btn.className = "w-full py-2.5 rounded-xl bg-emerald-500 text-white text-xs font-bold cursor-pointer";
-    }
-
-    function renderCalendar() {
-      const container = document.getElementById('dateContainer');
-      container.innerHTML = '';
-      for (let i = 0; i < 7; i++) {
-        const d = new Date();
-        d.setDate(d.getDate() + i);
-        const str = d.toLocaleDateString('fa-IR', { weekday: 'short', month: 'short', day: 'numeric' });
-        if (i === 0 && !date) date = str;
-        const b = document.createElement('button');
-        b.className = `date-btn flex-shrink-0 p-2 rounded-xl border text-xs min-w-[70px] cursor-pointer ${
-          date === str ? 'border-emerald-500 text-emerald-400 bg-slate-800' : 'border-slate-700 bg-slate-800 text-white'
-        }`;
-        b.innerText = str;
-        b.onclick = () => {
-          date = str;
-          time = "";
-          renderCalendar();
-          renderTimes();
-          document.getElementById('nextBtn').disabled = true;
-          document.getElementById('nextBtn').className = "w-full py-2.5 rounded-xl bg-slate-800 text-slate-500 text-xs font-bold";
-        };
-        container.appendChild(b);
-      }
-    }
-
-    function renderTimes() {
-      const container = document.getElementById('timeContainer');
-      container.innerHTML = '';
-      times.forEach(t => {
-        const key = `${date}_${t}`;
-        const isDisabled = disabledSlots.includes(key);
-        const b = document.createElement('button');
-        if (isDisabled) {
-          b.className = "time-btn p-2 rounded-xl border border-slate-800 bg-slate-900/50 text-xs text-slate-600 cursor-not-allowed";
-          b.innerText = `${t} (تکمیل)`;
-          b.disabled = true;
-        } else {
-          b.className = `time-btn p-2 rounded-xl border text-xs cursor-pointer ${
-            time === t ? 'border-emerald-500 text-emerald-400 bg-slate-800' : 'border-slate-700 bg-slate-800 text-white'
-          }`;
-          b.innerText = t;
-          b.onclick = () => {
-            time = t;
-            renderTimes();
-            checkStep2();
-          };
-        }
-        container.appendChild(b);
-      });
-    }
-
-    function checkStep2() {
-      if (date && time) {
-        const btn = document.getElementById('nextBtn');
-        btn.disabled = false;
-        btn.className = "w-full py-2.5 rounded-xl bg-emerald-500 text-white text-xs font-bold cursor-pointer";
-      }
-    }
-
-    function isValidIranianMobile(phone) {
-      const mobileRegex = /^(09[0-9]{9}|\+989[0-9]{9})$/;
-      return mobileRegex.test(phone);
-    }
-
-    async function finalizeBooking(bookingObj, adminText, userText, currentSlotKey) {
-      try {
-        if (!disabledSlots.includes(currentSlotKey)) {
-          disabledSlots.push(currentSlotKey);
-        }
-
-        await fetch(`${WORKER_URL}/`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            adminText: adminText,
-            userChatId: userChatId,
-            userText: userText,
-            bookingInfo: bookingObj
-          })
-        });
-
-        await fetch(`${WORKER_URL}/disabled-slots`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ disabledSlots })
-        });
-
-      } catch (err) {
-        console.error("خطا در ثبت نهایی:", err);
-      } finally {
-        setTimeout(() => {
-          if (window.Bale && window.Bale.WebApp) {
-            window.Bale.WebApp.close();
-          }
-        }, 6000);
-      }
-    }
-
-    async function nextStep() {
-      if (step === 1) {
-        step = 2;
-        await fetchDisabledSlots();
-        document.getElementById('step1').classList.add('hidden');
-        document.getElementById('step2').classList.remove('hidden');
-        document.getElementById('backBtn').classList.remove('hidden');
-        document.getElementById('stepBadge').innerText = '۲';
-        document.getElementById('stepTitle').innerText = 'انتخاب زمان';
-        renderCalendar();
-        renderTimes();
-        const btn = document.getElementById('nextBtn');
-        btn.disabled = true;
-        btn.className = "w-full py-2.5 rounded-xl bg-slate-800 text-slate-500 text-xs font-bold";
-      } 
-      else if (step === 2) {
-        step = 3;
-        document.getElementById('step2').classList.add('hidden');
-        document.getElementById('step3').classList.remove('hidden');
-        document.getElementById('stepBadge').innerText = '۳';
-        document.getElementById('stepTitle').innerText = 'اطلاعات تماس';
-        document.getElementById('nextBtn').innerText = 'ثبت نهایی رزرو';
-        document.getElementById('nextBtn').disabled = false;
-        document.getElementById('nextBtn').className = "w-full py-2.5 rounded-xl bg-emerald-500 text-white text-xs font-bold cursor-pointer";
-      } 
-      else if (step === 3) {
-        const name = document.getElementById('custName').value.trim();
-        const phone = document.getElementById('custPhone').value.trim();
-        const note = document.getElementById('custNote').value.trim() || "ندارد";
-        const phoneError = document.getElementById('phoneError');
-        const phoneInput = document.getElementById('custPhone');
-
-        phoneError.classList.add('hidden');
-        phoneInput.classList.remove('border-rose-500');
-
-        if (!name) {
-          alert('لطفاً نام و نام خانوادگی خود را وارد کنید.');
-          return;
-        }
-
-        if (!phone || !isValidIranianMobile(phone)) {
-          phoneError.classList.remove('hidden');
-          phoneInput.classList.add('border-rose-500');
-          phoneInput.focus();
-          return;
-        }
-
-        const currentSlotKey = `${date}_${time}`;
-        const bookingObj = { name, phone, service, date, time, note, id: Date.now() };
-
-        const adminText = `💈 **نوبت جدید در پیرایش سالار**\n\n` +
-          `👤 مشتری: ${name}\n` +
-          `📞 تلفن: ${phone}\n` +
-          `✂️ خدمت: ${service}\n` +
-          `⏰ زمان: ${date} (${time})\n` +
-          `📝 توضیحات: ${note}`;
-
-        const userText = `✅ **رزرو شما با موفقیت ثبت شد!**\n\n` +
-          `سلام ${name} عزیز،\n` +
-          `نوبت شما برای خدمت **${service}** در تاریخ **${date} ساعت ${time}** ثبت گردید.\n\n` +
-          `منتظر حضور شما در پیرایش سالار هستیم! ✂️`;
-
-        document.getElementById('step3').classList.add('hidden');
-        document.getElementById('stepHeaderBox').classList.add('hidden');
-        document.getElementById('bottomBar').classList.add('hidden');
-        document.getElementById('successState').classList.remove('hidden');
-
-        finalizeBooking(bookingObj, adminText, userText, currentSlotKey);
-      }
-    }
-
-    function prevStep() {
-      if (step === 2) {
-        step = 1;
-        document.getElementById('step2').classList.add('hidden');
-        document.getElementById('step1').classList.remove('hidden');
-        document.getElementById('backBtn').classList.add('hidden');
-        document.getElementById('stepBadge').innerText = '۱';
-        document.getElementById('stepTitle').innerText = 'انتخاب خدمت مورد نظر';
-        document.getElementById('nextBtn').innerText = 'ادامه';
-      } else if (step === 3) {
-        step = 2;
-        document.getElementById('step3').classList.add('hidden');
-        document.getElementById('step2').classList.remove('hidden');
-        document.getElementById('stepBadge').innerText = '۲';
-        document.getElementById('stepTitle').innerText = 'انتخاب زمان';
-        document.getElementById('nextBtn').innerText = 'ادامه';
-      }
+    function copyPageLink() {
+      navigator.clipboard.writeText(window.location.href);
+      const copyText = document.getElementById('copyText');
+      copyText.innerText = 'لینک صفحه کپی شد! ✓';
+      setTimeout(() => {
+        copyText.innerText = 'اشتراک‌گذاری لینک صفحه';
+      }, 2500);
     }
   </script>
+
 </body>
 </html>
