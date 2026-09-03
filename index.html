@@ -46,19 +46,27 @@
      </div>
   
      <div id="step1" class="space-y-2.5">
-        <div onclick="selectService(this, 'اصلاح و استایل مو')" class="service-card p-3.5 rounded-xl bg-slate-800 border border-slate-700 hover:border-emerald-500 cursor-pointer flex items-center justify-between transition">
+        <div onclick="selectService(this, 'اصلاح و استایل مو', 45)" class="service-card p-3.5 rounded-xl bg-slate-800 border border-slate-700 hover:border-emerald-500 cursor-pointer flex items-center justify-between transition">
           <div>
             <h3 class="text-sm font-semibold text-white">اصلاح و استایل مو</h3>
             <p class="text-xs text-slate-400 mt-1">مدت زمان: ۴۵ دقیقه</p>
           </div>
           <span class="text-xs font-bold text-emerald-400">۲۵۰,۰۰۰ تومان</span>
        </div>
-        <div onclick="selectService(this, 'اصلاح کامل سر و صورت')" class="service-card p-3.5 rounded-xl bg-slate-800 border border-slate-700 hover:border-emerald-500 cursor-pointer flex items-center justify-between transition">
+        <div onclick="selectService(this, 'اصلاح کامل سر و صورت', 60)" class="service-card p-3.5 rounded-xl bg-slate-800 border border-slate-700 hover:border-emerald-500 cursor-pointer flex items-center justify-between transition">
           <div>
             <h3 class="text-sm font-semibold text-white">اصلاح کامل سر و صورت</h3>
             <p class="text-xs text-slate-400 mt-1">مدت زمان: ۶۰ دقیقه</p>
           </div>
           <span class="text-xs font-bold text-emerald-400">۳۵۰,۰۰۰ تومان</span>
+       </div>
+       <!-- نمونه خدمت نیم ساعته (در صورت نیاز می‌توانید اضافه یا ویرایش کنید) -->
+        <div onclick="selectService(this, 'اصلاح ریش', 30)" class="service-card p-3.5 rounded-xl bg-slate-800 border border-slate-700 hover:border-emerald-500 cursor-pointer flex items-center justify-between transition">
+          <div>
+            <h3 class="text-sm font-semibold text-white">اصلاح ریش</h3>
+            <p class="text-xs text-slate-400 mt-1">مدت زمان: ۳۰ دقیقه</p>
+          </div>
+          <span class="text-xs font-bold text-emerald-400">۱۵۰,۰۰۰ تومان</span>
        </div>
      </div>
   
@@ -113,17 +121,25 @@
   
  <script>
     const WORKER_URL = "https://bale-sender.salar1368yb.workers.dev";
-    // بازه‌های یک ساعته دقیق
-    const times = [
-      "۱۰:۰۰ - ۱۱:۰۰", 
-      "۱۱:۰۰ - ۱۲:۰۰", 
-      "۱۲:۰۰ - ۱۳:۰۰", 
-      "۱۶:۰۰ - ۱۷:۰۰", 
-      "۱۷:۰۰ - ۱۸:۰۰", 
-      "۱۸:۰۰ - ۱۹:۰۰", 
-      "۱۹:۰۰ - ۲۰:۰۰"
+    
+    // تعریف بازه‌های یک ساعته و نیم ساعته
+    const oneHourTimes = [
+      "۱۰:۰۰ - ۱۱:۰۰", "۱۱:۰۰ - ۱۲:۰۰", "۱۲:۰۰ - ۱۳:۰۰", 
+      "۱۶:۰۰ - ۱۷:۰۰", "۱۷:۰۰ - ۱۸:۰۰", "۱۸:۰۰ - ۱۹:۰۰", "۱۹:۰۰ - ۲۰:۰۰"
     ];
-    let step = 1, service = "", date = "", time = "";
+
+    const halfHourTimes = [
+      "۱۰:۰۰ - ۱۰:۳۰", "۱۰:۳۰ - ۱۱:۰۰", 
+      "۱۱:۰۰ - ۱۱:۳۰", "۱۱:۳۰ - ۱۲:۰۰", 
+      "۱۲:۰۰ - ۱۲:۳۰", "۱۲:۳۰ - ۱۳:۰۰", 
+      "۱۶:۰۰ - ۱۶:۳۰", "۱۶:۳۰ - ۱۷:۰۰", 
+      "۱۷:۰۰ - ۱۷:۳۰", "۱۷:۳۰ - ۱۸:۰۰", 
+      "۱۸:۰۰ - ۱۸:۳۰", "۱۸:۳۰ - ۱۹:۰۰", 
+      "۱۹:۰۰ - ۱۹:۳۰", "۱۹:۳۰ - ۲۰:۰۰"
+    ];
+
+    let times = oneHourTimes; // پیش‌فرض
+    let step = 1, service = "", serviceDuration = 60, date = "", time = "";
     let disabledSlots = [];
     let userChatId = null;
   
@@ -164,10 +180,19 @@
       }
     }
   
-    function selectService(el, sName) {
+    function selectService(el, sName, duration) {
       document.querySelectorAll('.service-card').forEach(e => e.classList.remove('border-emerald-500', 'bg-emerald-500/10'));
       el.classList.add('border-emerald-500', 'bg-emerald-500/10');
       service = sName;
+      serviceDuration = duration;
+
+      // تنظیم خودکار ساعت‌ها بر اساس مدت زمان خدمت
+      if (duration <= 30) {
+        times = halfHourTimes;
+      } else {
+        times = oneHourTimes;
+      }
+
       const btn = document.getElementById('nextBtn');
       btn.disabled = false;
       btn.className = "w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold cursor-pointer transition";
