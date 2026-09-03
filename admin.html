@@ -1,34 +1,264 @@
-// فرض کنید متغیر disabledSlots شامل آرایه‌ای از کلیدها مثل ["1405-06-13_12:00", ...] است
-// و selectedDate تاریخ انتخابی ادمین است (مثلاً "1405-06-13")
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پنل مدیریت - سیستم رزرو</title>
+    <style>
+        body {
+            font-family: Tahoma, sans-serif;
+            background-color: #121826;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h2 {
+            border-bottom: 2px solid #22c55e;
+            padding-bottom: 10px;
+            margin-top: 30px;
+        }
+        .card {
+            background-color: #1f2937;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        .booking-item {
+            background: #374151;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .slots-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .slot-btn {
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.2s;
+        }
+        .slot-btn.active {
+            background-color: #065f46;
+            color: #6ee7b7;
+        }
+        .slot-btn.disabled {
+            background-color: #7f1d1d;
+            color: #fca5a5;
+        }
+        button.save-btn {
+            background-color: #22c55e;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 15px;
+            width: 100%;
+        }
+        button.save-btn:hover {
+            background-color: #16a34a;
+        }
+        button.delete-btn {
+            background-color: #ef4444;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        input, select {
+            background: #374151;
+            border: 1px solid #4b5563;
+            color: white;
+            padding: 8px;
+            border-radius: 5px;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
 
-function renderAdminSlots(workingHours, disabledSlots, selectedDate) {
-    const container = document.getElementById('slots-container'); // کانتینر دکمه‌های سانس در پنل
-    container.innerHTML = '';
+<div class="container">
+    <h1>پنل مدیریت رزروها</h1>
 
-    // ترکیب شیفت صبح و عصر به صورت پله‌های ۳۰ دقیقه‌ای استاندارد
-    // یا می‌توانید مستقیماً از آرایه workingHours که شامل "12:00", "12:30" است استفاده کنید
-    let allSlots = [...(workingHours.morning || []), ...(workingHours.evening || [])];
-
-    allSlots.forEach(time => {
-        let slotKey = `${selectedDate}_${time}`;
-        let isDisabled = disabledSlots.includes(slotKey);
-
-        // محاسبه ساعت پایان برای نمایش زیبا (مثلا 12:00 تا 12:30)
-        let [h, m] = time.split(':').map(Number);
-        let endTotal = h * 60 + m + 30;
-        let endH = Math.floor(endTotal / 60).toString().padStart(2, '0');
-        let endM = (endTotal % 60).toString().padStart(2, '0');
-        let timeRangeText = `${time} - ${endH}:${endM}`;
-
-        let btn = document.createElement('button');
-        btn.className = `slot-btn ${isDisabled ? 'disabled' : 'active'}`;
-        btn.innerHTML = `<span>${timeRangeText}</span> <span>${isDisabled ? '❌' : '✔️'}</span>`;
+    <!-- بخش مدیریت سانس‌ها -->
+    <div class="card">
+        <h3>🕒 بستن یا باز کردن سانس‌های روزانه (۳۰ دقیقه‌ای)</h3>
+        <label>انتخاب تاریخ:</label>
+        <input type="date" id="selected-date" onchange="loadSlotsData()">
         
-        // قابلیت کلیک برای بستن یا باز کردن دستی سانس توسط ادمین
-        btn.onclick = () => {
-            toggleSlotStatus(slotKey);
-        };
+        <div id="slots-container" class="slots-grid">
+            <!-- سانس‌ها به صورت دینامیک اینجا بارگذاری می‌شوند -->
+        </div>
+        <button class="save-btn" onclick="saveDisabledSlots()">ذخیره تغییرات بسته بودن این روز</button>
+    </div>
 
-        container.appendChild(btn);
-    });
-}
+    <!-- بخش رزروهای ثبت شده -->
+    <div class="card">
+        <h3>📋 رزروهای ثبت‌شده مشتریان</h3>
+        <div id="bookings-list">
+            بارگذاری...
+        </div>
+    </div>
+</div>
+
+<script>
+    // آدرس ورکر کلادفلر خود را اینجا قرار دهید (مثلاً https://your-worker.your-subdomain.workers.dev)
+    const WORKER_URL = "https://< نام ورکر شما >.workers.dev"; 
+
+    let workingHours = {
+        morning: ["10:00", "10:30", "11:00", "11:30", "12:00"],
+        evening: ["16:00", "16:30", "17:00", "17:30", "18:00", "18:30", "19:00", "19:30", "20:00"]
+    };
+    let disabledSlots = [];
+
+    // تنظیم تاریخ امروز به صورت پیش‌فرض
+    document.getElementById('selected-date').valueAsDate = new Date();
+
+    async function initAdmin() {
+        await loadWorkingHours();
+        await loadBookings();
+        await loadSlotsData();
+    }
+
+    async function loadWorkingHours() {
+        try {
+            let res = await fetch(`${WORKER_URL}/working-hours`);
+            let data = await res.json();
+            if (data.workingHours) workingHours = data.workingHours;
+        } catch (e) { console.error("خطا در دریافت ساعات کاری", e); }
+    }
+
+    async function loadBookings() {
+        try {
+            let res = await fetch(`${WORKER_URL}/bookings`);
+            let data = await res.json();
+            let container = document.getElementById('bookings-list');
+            container.innerHTML = '';
+
+            if (!data.bookings || data.bookings.length === 0) {
+                container.innerHTML = '<p>هیچ رزروی ثبت نشده است.</p>';
+                return;
+            }
+
+            data.bookings.forEach(b => {
+                let div = document.createElement('div');
+                div.className = 'booking-item';
+                div.innerHTML = `
+                    <div>
+                        <strong>${b.name || 'مشتری'} (${b.phone || 'بدون شماره'})</strong><br>
+                        <small>${b.service || 'خدمت'} (${b.price || ''}) - ${b.date} (${b.time})</small>
+                    </div>
+                    <button class="delete-btn" onclick="deleteBooking('${b.id}')">حذف</button>
+                `;
+                container.appendChild(div);
+            });
+        } catch (e) { console.error("خطا در دریافت رزروها", e); }
+    }
+
+    async function loadSlotsData() {
+        try {
+            let res = await fetch(`${WORKER_URL}/disabled-slots`);
+            let data = await res.json();
+            disabledSlots = data.disabledSlots || [];
+            renderSlots();
+        } catch (e) { console.error("خطا در دریافت سانس‌ها", e); }
+    }
+
+    function renderSlots() {
+        const container = document.getElementById('slots-container');
+        container.innerHTML = '';
+        const selectedDate = document.getElementById('selected-date').value;
+
+        let allSlots = [...(workingHours.morning || []), ...(workingHours.evening || [])];
+
+        allSlots.forEach(time => {
+            let slotKey = `${selectedDate}_${time}`;
+            let isDisabled = disabledSlots.includes(slotKey);
+
+            // محاسبه ساعت پایان برای نمایش بازه ۳۰ دقیقه‌ای (مثلاً 12:00 - 12:30)
+            let [h, m] = time.split(':').map(Number);
+            let endTotal = h * 60 + m + 30;
+            let endH = Math.floor(endTotal / 60).toString().padStart(2, '0');
+            let endM = (endTotal % 60).toString().padStart(2, '0');
+            let timeRangeText = `${time} - ${endH}:${endM}`;
+
+            let btn = document.createElement('button');
+            btn.className = `slot-btn ${isDisabled ? 'disabled' : 'active'}`;
+            btn.innerHTML = `<span>${timeRangeText}</span> <span>${isDisabled ? '❌ بسته' : '✔️ باز'}</span>`;
+            
+            btn.onclick = () => {
+                if (isDisabled) {
+                    disabledSlots = disabledSlots.filter(s => s !== slotKey);
+                } else {
+                    disabledSlots.push(slotKey);
+                }
+                renderSlots();
+            };
+
+            container.appendChild(btn);
+        });
+    }
+
+    async function saveDisabledSlots() {
+        try {
+            let res = await fetch(`${WORKER_URL}/disabled-slots`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ disabledSlots })
+            });
+            let data = await res.json();
+            if (data.success) {
+                alert("تغییرات سانس‌ها با موفقیت ذخیره شد!");
+            } else {
+                alert("خطا در ذخیره اطلاعات.");
+            }
+        } catch (e) {
+            alert("خطای ارتباط با سرور.");
+        }
+    }
+
+    async function deleteBooking(id) {
+        if (!confirm("آیا از حذف این رزرو و آزاد شدن سانس مطمئن هستید؟")) return;
+        try {
+            let res = await fetch(`${WORKER_URL}/delete-booking`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id })
+            });
+            let data = await res.json();
+            if (data.success) {
+                loadBookings();
+                loadSlotsData();
+            } else {
+                alert("خطا در حذف رزرو.");
+            }
+        } catch (e) {
+            alert("خطای ارتباط با سرور.");
+        }
+    }
+
+    initAdmin();
+</script>
+
+</body>
+</html>
