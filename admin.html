@@ -104,10 +104,10 @@
     <div class="card">
         <h3>🕒 بستن یا باز کردن سانس‌های روزانه (۳۰ دقیقه‌ای)</h3>
         <label>انتخاب تاریخ:</label>
-        <input type="date" id="selected-date" onchange="loadSlotsData()">
+        <input type="date" id="selected-date" onchange="renderSlots()">
         
         <div id="slots-container" class="slots-grid">
-            <!-- سانس‌ها به صورت دینامیک اینجا بارگذاری می‌شوند -->
+            بارگذاری سانس‌ها...
         </div>
         <button class="save-btn" onclick="saveDisabledSlots()">ذخیره تغییرات بسته بودن این روز</button>
     </div>
@@ -116,14 +116,14 @@
     <div class="card">
         <h3>📋 رزروهای ثبت‌شده مشتریان</h3>
         <div id="bookings-list">
-            بارگذاری...
+            بارگذاری رزروها...
         </div>
     </div>
 </div>
 
 <script>
-    // آدرس ورکر کلادفلر خود را اینجا قرار دهید (مثلاً https://your-worker.your-subdomain.workers.dev)
-    const WORKER_URL = "https://< نام ورکر شما >.workers.dev"; 
+    // آدرس دقیق ورکر کلادفلر شما
+    const WORKER_URL = "https://salar1368yari.salar1368yari.workers.dev"; 
 
     let workingHours = {
         morning: ["10:00", "10:30", "11:00", "11:30", "12:00"],
@@ -137,7 +137,7 @@
     async function initAdmin() {
         await loadWorkingHours();
         await loadBookings();
-        await loadSlotsData();
+        await loadDisabledSlots();
     }
 
     async function loadWorkingHours() {
@@ -172,10 +172,12 @@
                 `;
                 container.appendChild(div);
             });
-        } catch (e) { console.error("خطا در دریافت رزروها", e); }
+        } catch (e) { 
+            document.getElementById('bookings-list').innerHTML = '<p style="color:red;">خطا در ارتباط با سرور کلادفلر</p>';
+        }
     }
 
-    async function loadSlotsData() {
+    async function loadDisabledSlots() {
         try {
             let res = await fetch(`${WORKER_URL}/disabled-slots`);
             let data = await res.json();
@@ -191,11 +193,15 @@
 
         let allSlots = [...(workingHours.morning || []), ...(workingHours.evening || [])];
 
+        if (allSlots.length === 0) {
+            container.innerHTML = '<p>ساعتی تعریف نشده است.</p>';
+            return;
+        }
+
         allSlots.forEach(time => {
             let slotKey = `${selectedDate}_${time}`;
             let isDisabled = disabledSlots.includes(slotKey);
 
-            // محاسبه ساعت پایان برای نمایش بازه ۳۰ دقیقه‌ای (مثلاً 12:00 - 12:30)
             let [h, m] = time.split(':').map(Number);
             let endTotal = h * 60 + m + 30;
             let endH = Math.floor(endTotal / 60).toString().padStart(2, '0');
@@ -203,6 +209,7 @@
             let timeRangeText = `${time} - ${endH}:${endM}`;
 
             let btn = document.createElement('button');
+            btn.type = "button";
             btn.className = `slot-btn ${isDisabled ? 'disabled' : 'active'}`;
             btn.innerHTML = `<span>${timeRangeText}</span> <span>${isDisabled ? '❌ بسته' : '✔️ باز'}</span>`;
             
@@ -248,7 +255,7 @@
             let data = await res.json();
             if (data.success) {
                 loadBookings();
-                loadSlotsData();
+                loadDisabledSlots();
             } else {
                 alert("خطا در حذف رزرو.");
             }
