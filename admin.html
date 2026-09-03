@@ -1,288 +1,34 @@
-<!DOCTYPE html>
-<html lang="fa" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>پنل مدیریت رزروها - پیرایش آرمین</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/yekan-bakh@main/css/yekan-bakh.css" rel="stylesheet" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
-    <style>
-        body { font-family: 'Yekan Bakh', sans-serif; background-color: #0f172a; color: #f8fafc; }
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
-    </style>
-</head>
-<body class="p-4 max-w-2xl mx-auto space-y-6">
+// فرض کنید متغیر disabledSlots شامل آرایه‌ای از کلیدها مثل ["1405-06-13_12:00", ...] است
+// و selectedDate تاریخ انتخابی ادمین است (مثلاً "1405-06-13")
 
-    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex items-center justify-between">
-        <h1 class="text-base font-bold text-white"><i class="fa-solid fa-user-gear text-emerald-400 ml-2"></i>مدیریت نوبت‌های پیرایش آرمین</h1>
-        <button onclick="loadData()" class="text-xs bg-slate-800 px-3 py-2 rounded-xl border border-slate-700 text-slate-300 cursor-pointer">
-            <i class="fa-solid fa-rotate-right ml-1"></i> بروزرسانی
-        </button>
-    </div>
+function renderAdminSlots(workingHours, disabledSlots, selectedDate) {
+    const container = document.getElementById('slots-container'); // کانتینر دکمه‌های سانس در پنل
+    container.innerHTML = '';
 
-    <!-- مدیریت قیمت‌ها و خدمات -->
-    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 space-y-3">
-        <h2 class="text-xs font-bold text-slate-300 border-b border-slate-800 pb-2 flex justify-between items-center">
-            <span><i class="fa-solid fa-tags text-emerald-400 ml-1"></i> مدیریت خدمات و قیمت‌ها</span>
-            <button onclick="addNewServiceModal()" class="text-[11px] bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded-lg border border-emerald-500/30 cursor-pointer">+ افزودن خدمت جدید</button>
-        </h2>
-        <div id="adminServicesList" class="space-y-2">
-            <p class="text-xs text-slate-500 text-center py-2">در حال بارگذاری خدمات...</p>
-        </div>
-        <button onclick="saveServices()" class="w-full mt-2 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold cursor-pointer transition">
-            ذخیره تغییرات قیمت‌ها و خدمات
-        </button>
-    </div>
+    // ترکیب شیفت صبح و عصر به صورت پله‌های ۳۰ دقیقه‌ای استاندارد
+    // یا می‌توانید مستقیماً از آرایه workingHours که شامل "12:00", "12:30" است استفاده کنید
+    let allSlots = [...(workingHours.morning || []), ...(workingHours.evening || [])];
 
-    <!-- بستن سانس‌ها در روزهای خاص -->
-    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 space-y-3">
-        <h2 class="text-xs font-bold text-slate-300 border-b border-slate-800 pb-2">
-            <i class="fa-solid fa-clock text-amber-400 ml-1"></i> بستن یا باز کردن سانس‌های روزانه (استراحت، کار شخصی و...)
-        </h2>
-        <div>
-            <label class="block text-xs text-slate-400 mb-2">انتخاب روز:</label>
-            <div class="flex gap-2 overflow-x-auto pb-2 custom-scrollbar" id="adminDateContainer"></div>
-        </div>
-        <div class="pt-2">
-            <label class="block text-xs text-slate-400 mb-2">لیست سانس‌ها (برای بستن یا باز کردن هر ساعت، روی آن کلیک کنید):</label>
-            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="adminTimeContainer"></div>
-        </div>
-        <button onclick="saveDisabledSlots()" class="w-full mt-3 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold cursor-pointer transition">
-            ذخیره تغییرات بسته بودن این روز
-        </button>
-    </div>
+    allSlots.forEach(time => {
+        let slotKey = `${selectedDate}_${time}`;
+        let isDisabled = disabledSlots.includes(slotKey);
 
-    <!-- لیست رزروها -->
-    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 space-y-3">
-        <h2 class="text-xs font-bold text-slate-300 border-b border-slate-800 pb-2">
-            <i class="fa-solid fa-list-check text-emerald-400 ml-1"></i> رزروهای ثبت شده مشتریان
-        </h2>
-        <div id="bookingList" class="space-y-2">
-            <p class="text-xs text-slate-500 text-center py-4">در حال دریافت رزروها...</p>
-        </div>
-    </div>
+        // محاسبه ساعت پایان برای نمایش زیبا (مثلا 12:00 تا 12:30)
+        let [h, m] = time.split(':').map(Number);
+        let endTotal = h * 60 + m + 30;
+        let endH = Math.floor(endTotal / 60).toString().padStart(2, '0');
+        let endM = (endTotal % 60).toString().padStart(2, '0');
+        let timeRangeText = `${time} - ${endH}:${endM}`;
 
-<script>
-    const WORKER_URL = "https://bale-sender.salar1368yb.workers.dev";
-    
-    const oneHourTimes = [
-      "۱۰:۰۰ - ۱۱:۰۰", "۱۱:۰۰ - ۱۲:۰۰", "۱۲:۰۰ - ۱۳:۰۰", 
-      "۱۶:۰۰ - ۱۷:۰۰", "۱۷:۰۰ - ۱۸:۰۰", "۱۸:۰۰ - ۱۹:۰۰", "۱۹:۰۰ - ۲۰:۰۰"
-    ];
-
-    const halfHourTimes = [
-      "۱۰:۰۰ - ۱۰:۳۰", "۱۰:۳۰ - ۱۱:۰۰", 
-      "۱۱:۰۰ - ۱۱:۳۰", "۱۱:۳۰ - ۱۲:۰۰", 
-      "۱۲:۰۰ - ۱۲:۳۰", "۱۲:۳۰ - ۱۳:۰۰", 
-      "۱۶:۰۰ - ۱۶:۳۰", "۱۶:۳۰ - ۱۷:۰۰", 
-      "۱۷:۰۰ - ۱۷:۳۰", "۱۷:۳۰ - ۱۸:۰۰", 
-      "۱۸:۰۰ - ۱۸:۳۰", "۱۸:۳۰ - ۱۹:۰۰", 
-      "۱۹:۰۰ - ۱۹:۳۰", "۱۹:۳۰ - ۲۰:۰۰"
-    ];
-
-    let disabledSlots = [];
-    let servicesList = [];
-    let selectedAdminDate = "";
-
-    async function loadData() {
-        const d = new Date();
-        selectedAdminDate = d.toLocaleDateString('fa-IR', { weekday: 'short', month: 'short', day: 'numeric' });
-
-        try {
-            // دریافت خدمات و قیمت‌ها
-            const resServ = await fetch(`${WORKER_URL}/services`);
-            const dataServ = await resServ.json();
-            servicesList = dataServ.services || [
-              { name: "اصلاح و استایل مو", duration: 60, price: "۲۵۰,۰۰۰ تومان" },
-              { name: "اصلاح کامل سر و صورت", duration: 60, price: "۳۵۰,۰۰۰ تومان" },
-              { name: "اصلاح ریش", duration: 30, price: "۱۵۰,۰۰۰ تومان" }
-            ];
-            renderAdminServices();
-
-            // دریافت سانس‌های بسته
-            const resSlots = await fetch(`${WORKER_URL}/disabled-slots`);
-            const dataSlots = await resSlots.json();
-            disabledSlots = dataSlots.disabledSlots || [];
-
-            renderAdminCalendar();
-            renderAdminTimes();
-
-            // دریافت رزروها
-            const resBookings = await fetch(`${WORKER_URL}/bookings`);
-            const dataBookings = await resBookings.json();
-            renderBookings(dataBookings.bookings || []);
-        } catch (e) {
-            console.error("Error:", e);
-        }
-    }
-
-    function renderAdminServices() {
-        const container = document.getElementById('adminServicesList');
-        container.innerHTML = '';
-        servicesList.forEach((s, index) => {
-            const div = document.createElement('div');
-            div.className = "bg-slate-800 border border-slate-700 p-2.5 rounded-xl flex items-center justify-between gap-2 text-xs";
-            div.innerHTML = `
-                <div class="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-2">
-                    <input type="text" value="${s.name}" onchange="servicesList[${index}].name = this.value" class="bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-white" placeholder="نام خدمت">
-                    <input type="number" value="${s.duration}" onchange="servicesList[${index}].duration = parseInt(this.value)" class="bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-white" placeholder="مدت (دقیقه)">
-                    <input type="text" value="${s.price}" onchange="servicesList[${index}].price = this.value" class="bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-white" placeholder="قیمت">
-                </div>
-                <button type="button" onclick="deleteService(${index})" class="text-red-400 p-2 cursor-pointer hover:text-red-300"><i class="fa-solid fa-trash-can"></i></button>
-            `;
-            container.appendChild(div);
-        });
-    }
-
-    function addNewServiceModal() {
-        servicesList.push({ name: "خدمت جدید", duration: 30, price: "۱۰۰,۰۰۰ تومان" });
-        renderAdminServices();
-    }
-
-    function deleteService(index) {
-        servicesList.splice(index, 1);
-        renderAdminServices();
-    }
-
-    async function saveServices() {
-        try {
-            await fetch(`${WORKER_URL}/services`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ services: servicesList })
-            });
-            alert('خدمات و قیمت‌ها با موفقیت ذخیره شد.');
-        } catch (e) {
-            alert('خطا در ذخیره اطلاعات');
-        }
-    }
-
-    function renderAdminCalendar() {
-        const container = document.getElementById('adminDateContainer');
-        container.innerHTML = '';
-        for (let i = 0; i < 7; i++) {
-            const d = new Date();
-            d.setDate(d.getDate() + i);
-            const labelStr = d.toLocaleDateString('fa-IR', { weekday: 'short', month: 'short', day: 'numeric' });
-            if (i === 0 && !selectedAdminDate) selectedAdminDate = labelStr;
-
-            const buttonEl = document.createElement('button');
-            buttonEl.type = "button";
-            buttonEl.className = `flex-shrink-0 p-2.5 rounded-xl border text-xs min-w-[85px] cursor-pointer transition ${
-                selectedAdminDate === labelStr ? 'border-emerald-500 text-emerald-400 bg-slate-800 font-bold' : 'border-slate-700 bg-slate-800 text-white'
-            }`;
-            buttonEl.innerText = labelStr;
-            buttonEl.onclick = () => {
-                selectedAdminDate = labelStr;
-                renderAdminCalendar();
-                renderAdminTimes();
-            };
-            container.appendChild(buttonEl);
-        }
-    }
-
-    function timeToMinutes(tStr) {
-      const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-      let englishStr = tStr;
-      persianDigits.forEach((p, i) => {
-        englishStr = englishStr.replace(new RegExp(p, 'g'), i);
-      });
-      const parts = englishStr.split(':');
-      return parseInt(parts[0]) * 60 + parseInt(parts[1]);
-    }
-
-    function renderAdminTimes() {
-        const container = document.getElementById('adminTimeContainer');
-        container.innerHTML = '';
+        let btn = document.createElement('button');
+        btn.className = `slot-btn ${isDisabled ? 'disabled' : 'active'}`;
+        btn.innerHTML = `<span>${timeRangeText}</span> <span>${isDisabled ? '❌' : '✔️'}</span>`;
         
-        oneHourTimes.forEach(t => {
-            const key = `${selectedAdminDate}_${t}`;
-            
-            const parts = t.split(" - ");
-            const startMinutes = timeToMinutes(parts[0]);
-            const endMinutes = timeToMinutes(parts[1]);
-            
-            const subSlots = halfHourTimes.filter(hs => {
-              const hsParts = hs.split(" - ");
-              const hsStart = timeToMinutes(hsParts[0]);
-              return hsStart >= startMinutes && hsStart < endMinutes;
-            });
+        // قابلیت کلیک برای بستن یا باز کردن دستی سانس توسط ادمین
+        btn.onclick = () => {
+            toggleSlotStatus(slotKey);
+        };
 
-            const isFullDisabled = disabledSlots.includes(key) || subSlots.every(sub => disabledSlots.includes(`${selectedAdminDate}_${sub}`));
-
-            const timeBtn = document.createElement('button');
-            timeBtn.type = "button";
-            timeBtn.className = `p-2.5 rounded-xl border text-xs flex items-center justify-between cursor-pointer transition ${
-                isFullDisabled ? 'border-red-500/50 bg-red-500/10 text-red-400' : 'border-slate-700 bg-slate-800 text-slate-200 hover:border-slate-600'
-            }`;
-            timeBtn.innerHTML = `<span class="font-medium">${t}</span> <i class="fa-solid ${isFullDisabled ? 'fa-ban text-red-400' : 'fa-check text-emerald-400'}"></i>`;
-            
-            timeBtn.onclick = () => {
-                if (isFullDisabled) {
-                    disabledSlots = disabledSlots.filter(s => s !== key && !subSlots.some(sub => s === `${selectedAdminDate}_${sub}`));
-                } else {
-                    if (!disabledSlots.includes(key)) disabledSlots.push(key);
-                    subSlots.forEach(sub => {
-                        const subKey = `${selectedAdminDate}_${sub}`;
-                        if (!disabledSlots.includes(subKey)) disabledSlots.push(subKey);
-                    });
-                }
-                renderAdminTimes();
-            };
-            container.appendChild(timeBtn);
-        });
-    }
-
-    async function saveDisabledSlots() {
-        try {
-            await fetch(`${WORKER_URL}/disabled-slots`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ disabledSlots })
-            });
-            alert('تغییرات ساعات ذخیره شد.');
-        } catch (e) {
-            alert('خطا در ارتباط با سرور');
-        }
-    }
-
-    function renderBookings(bookings) {
-        const list = document.getElementById('bookingList');
-        if (!bookings || bookings.length === 0) {
-            list.innerHTML = '<p class="text-xs text-slate-500 text-center py-4">رزروی موجود نیست.</p>';
-            return;
-        }
-        list.innerHTML = '';
-        bookings.forEach(item => {
-            const div = document.createElement('div');
-            div.className = "bg-slate-800 border border-slate-700 p-3 rounded-xl flex items-center justify-between text-xs";
-            div.innerHTML = `
-                <div class="space-y-1">
-                    <div class="font-bold text-white">${item.name} (<a href="tel:${item.phone}" class="text-emerald-400">${item.phone}</a>)</div>
-                    <div class="text-slate-400">${item.service} (${item.price || ''}) - <span class="text-emerald-400">${item.date} (${item.time})</span></div>
-                    ${item.note && item.note !== 'ندارد' ? `<div class="text-[10px] text-slate-500">توضیحات: ${item.note}</div>` : ''}
-                </div>
-                <button type="button" onclick="deleteBooking(${item.id})" class="text-red-400 p-2 cursor-pointer hover:text-red-300 transition"><i class="fa-solid fa-trash-can"></i></button>
-            `;
-            list.appendChild(div);
-        });
-    }
-
-    async function deleteBooking(id) {
-        if (!confirm('آیا مطمئن هستید؟')) return;
-        try {
-            await fetch(`${WORKER_URL}/delete-booking`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id })
-            });
-            loadData();
-        } catch(e) {}
-    }
-
-    loadData();
-</script>
-</body>
-</html>
+        container.appendChild(btn);
+    });
+}
