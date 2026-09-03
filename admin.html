@@ -25,37 +25,37 @@
     <!-- تنظیمات ساعات کاری کلی -->
     <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 space-y-3">
         <h2 class="text-xs font-bold text-slate-300 border-b border-slate-800 pb-2">
-            <i class="fa-solid fa-sliders text-cyan-400 ml-1"></i> تعریف ساعات کاری کل سیستم (شیفت‌بندی)
+            <i class="fa-solid fa-sliders text-cyan-400 ml-1"></i> تعریف لیست ساعت‌های هر روز (۱۰ صبح تا ۱۰ شب)
         </h2>
         <div class="flex gap-2">
-            <input type="text" id="workingHoursInput" placeholder="۱۰:۰۰, ۱۱:۰۰, ۱۶:۰۰, ۱۷:۰۰, ۱۸:۰۰" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-white" dir="ltr">
+            <input type="text" id="workingHoursInput" value="۱۰:۰۰, ۱۰:۳۰, ۱۱:۰۰, ۱۱:۳۰, ۱۲:۰۰, ۱۲:۳۰, ۱۶:۰۰, ۱۶:۳۰, ۱۷:۰۰, ۱۷:۳۰, ۱۸:۰۰, ۱۸:۳۰, ۱۹:۰۰, ۱۹:۳۰, ۲۰:۰۰, ۲۰:۳۰, ۲۱:۰۰, ۲۱:۳۰, ۲۲:۰۰" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-white" dir="ltr">
             <button onclick="saveWorkingHours()" class="bg-cyan-600 hover:bg-cyan-500 text-white px-4 py-2 rounded-xl text-xs font-bold cursor-pointer whitespace-nowrap">ذخیره تایم‌ها</button>
         </div>
-        <p class="text-[11px] text-slate-400">ساعت‌ها را با کامتا (,) به انگلیسی جدا کنید.</p>
+        <p class="text-[11px] text-slate-400">می‌توانید فاصله ۳۰ دقیقه‌ای یا هر تایم دیگری را با کاما (,) جدا کرده و ذخیره کنید.</p>
     </div>
 
     <!-- بستن سانس‌ها در روزهای خاص -->
     <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 space-y-3">
         <h2 class="text-xs font-bold text-slate-300 border-b border-slate-800 pb-2">
-            <i class="fa-solid fa-clock text-amber-400 ml-1"></i> مدیریت سانس‌های روزانه
+            <i class="fa-solid fa-clock text-amber-400 ml-1"></i> بستن یا باز کردن سانس‌های روزانه (استراحت، کار شخصی و...)
         </h2>
         <div>
             <label class="block text-xs text-slate-400 mb-2">انتخاب روز:</label>
             <div class="flex gap-2 overflow-x-auto pb-2 custom-scrollbar" id="adminDateContainer"></div>
         </div>
         <div class="pt-2">
-            <label class="block text-xs text-slate-400 mb-2">ساعات کاری این روز (کلیک برای باز/بسته کردن):</label>
+            <label class="block text-xs text-slate-400 mb-2">لیست سانس‌ها (برای بستن یا باز کردن هر ساعت، روی آن کلیک کنید):</label>
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-2" id="adminTimeContainer"></div>
         </div>
         <button onclick="saveDisabledSlots()" class="w-full mt-3 py-2.5 bg-emerald-500 text-white rounded-xl text-xs font-bold cursor-pointer">
-            ذخیره تغییرات ساعات این روز
+            ذخیره تغییرات بسته بودن این روز
         </button>
     </div>
 
     <!-- لیست رزروها -->
     <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 space-y-3">
         <h2 class="text-xs font-bold text-slate-300 border-b border-slate-800 pb-2">
-            <i class="fa-solid fa-list-check text-emerald-400 ml-1"></i> رزروهای اخیر مشتریان
+            <i class="fa-solid fa-list-check text-emerald-400 ml-1"></i> رزروهای ثبت شده مشتریان
         </h2>
         <div id="bookingList" class="space-y-2">
             <p class="text-xs text-slate-500 text-center py-4">در حال دریافت رزروها...</p>
@@ -64,7 +64,11 @@
 
 <script>
     const WORKER_URL = "https://bale-sender.salar1368yb.workers.dev";
-    let times = ["۱۰:۰۰", "۱۱:۰۰", "۱۲:۰۰", "۱۶:۰۰", "۱۷:۰۰", "۱۸:۰۰", "۱۹:۰۰"];
+    let times = [
+        "۱۰:۰۰", "۱۰:۳۰", "۱۱:۰۰", "۱۱:۳۰", "۱۲:۰۰", "۱۲:۳۰", 
+        "۱۶:۰۰", "۱۶:۳۰", "۱۷:۰۰", "۱۷:۳۰", "۱۸:۰۰", "۱۸:۳۰", 
+        "۱۹:۰۰", "۱۹:۳۰", "۲۰:۰۰", "۲۰:۳۰", "۲۱:۰۰", "۲۱:۳۰", "۲۲:۰۰"
+    ];
     let disabledSlots = [];
     let selectedAdminDate = "";
 
