@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>رزرو آنلاین پیرایش سالار</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- فراخوانی فونت وزیرمتن با اعداد فارسی از گوگل فونت -->
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
   <script src="https://tapi.bale.ai/miniapp.js?3"></script>
@@ -60,7 +59,6 @@
           </div>
           <span class="text-xs font-bold text-emerald-400">۳۵۰,۰۰۰ تومان</span>
        </div>
-       <!-- نمونه خدمت نیم ساعته (در صورت نیاز می‌توانید اضافه یا ویرایش کنید) -->
         <div onclick="selectService(this, 'اصلاح ریش', 30)" class="service-card p-3.5 rounded-xl bg-slate-800 border border-slate-700 hover:border-emerald-500 cursor-pointer flex items-center justify-between transition">
           <div>
             <h3 class="text-sm font-semibold text-white">اصلاح ریش</h3>
@@ -122,7 +120,6 @@
  <script>
     const WORKER_URL = "https://bale-sender.salar1368yb.workers.dev";
     
-    // تعریف بازه‌های یک ساعته و نیم ساعته
     const oneHourTimes = [
       "۱۰:۰۰ - ۱۱:۰۰", "۱۱:۰۰ - ۱۲:۰۰", "۱۲:۰۰ - ۱۳:۰۰", 
       "۱۶:۰۰ - ۱۷:۰۰", "۱۷:۰۰ - ۱۸:۰۰", "۱۸:۰۰ - ۱۹:۰۰", "۱۹:۰۰ - ۲۰:۰۰"
@@ -138,7 +135,7 @@
       "۱۹:۰۰ - ۱۹:۳۰", "۱۹:۳۰ - ۲۰:۰۰"
     ];
 
-    let times = oneHourTimes; // پیش‌فرض
+    let times = oneHourTimes;
     let step = 1, service = "", serviceDuration = 60, date = "", time = "";
     let disabledSlots = [];
     let userChatId = null;
@@ -186,7 +183,6 @@
       service = sName;
       serviceDuration = duration;
 
-      // تنظیم خودکار ساعت‌ها بر اساس مدت زمان خدمت
       if (duration <= 30) {
         times = halfHourTimes;
       } else {
@@ -223,12 +219,45 @@
       }
     }
   
+    function timeToMinutes(tStr) {
+      const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+      let englishStr = tStr;
+      persianDigits.forEach((p, i) => {
+        englishStr = englishStr.replace(new RegExp(p, 'g'), i);
+      });
+      const parts = englishStr.split(':');
+      return parseInt(parts[0]) * 60 + parseInt(parts[1]);
+    }
+
     function renderTimes() {
       const container = document.getElementById('timeContainer');
       container.innerHTML = '';
+      
       times.forEach(t => {
-        const key = `${date}_${t}`;
-        const isDisabled = disabledSlots.includes(key);
+        let isDisabled = false;
+        
+        // اگر خدمت انتخاب‌شده طولانی‌تر از ۳۰ دقیقه است (مثل یک‌ساعته)، بررسی می‌کنیم که اگر هر کدام از نیم‌ساعت‌های تشکیل‌دهنده آن بسته شده بود، این بازه هم قفل شود
+        if (serviceDuration > 30) {
+          const parts = t.split(" - ");
+          if (parts.length === 2) {
+            const startMinutes = timeToMinutes(parts[0]);
+            const endMinutes = timeToMinutes(parts[1]);
+            
+            const subSlots = halfHourTimes.filter(hs => {
+              const hsParts = hs.split(" - ");
+              const hsStart = timeToMinutes(hsParts[0]);
+              return hsStart >= startMinutes && hsStart < endMinutes;
+            });
+            
+            const isAnySubSlotDisabled = subSlots.some(sub => disabledSlots.includes(`${date}_${sub}`));
+            const isDirectDisabled = disabledSlots.includes(`${date}_${t}`);
+            
+            isDisabled = isDirectDisabled || isAnySubSlotDisabled;
+          }
+        } else {
+          isDisabled = disabledSlots.includes(`${date}_${t}`);
+        }
+
         const b = document.createElement('button');
         if (isDisabled) {
           b.className = "time-btn p-2.5 rounded-xl border border-slate-800 bg-slate-900/50 text-xs text-slate-600 cursor-not-allowed";
@@ -343,9 +372,31 @@
           return;
         }
   
-        const currentSlotKey = `${date}_${time}`;
+        let currentSlotKey = `${date}_${time}`;
+        
+        // اگر خدمت انتخابی نیم‌ساعته بود، مستقیم کلید نیم‌ساعته را می‌بندیم
+        // اگر یک‌ساعته بود، علاوه بر کلید اصلی، زیرمجموعه‌های نیم‌ساعته‌اش را هم قفل می‌کنیم تا در هر دو حالت هماهنگ بماند
         const bookingObj = { name, phone, service, date, time, note, id: Date.now() };
   
+        if (serviceDuration > 30) {
+          const parts = time.split(" - ");
+          if (parts.length === 2) {
+            const startMinutes = timeToMinutes(parts[0]);
+            const endMinutes = timeToMinutes(parts[1]);
+            halfHourTimes.forEach(hs => {
+              const hsParts = hs.split(" - ");
+              const hsStart = timeToMinutes(hsParts[0]);
+              if (hsStart >= startMinutes && hsStart < endMinutes) {
+                const subKey = `${date}_${hs}`;
+                if (!disabledSlots.includes(subKey)) disabledSlots.push(subKey);
+              }
+            });
+          }
+        }
+        if (!disabledSlots.includes(currentSlotKey)) {
+          disabledSlots.push(currentSlotKey);
+        }
+
         const adminText = `💈 **نوبت جدید در پیرایش سالار**\n\n` +
           `👤 مشتری: ${name}\n` +
           `📞 تلفن: ${phone}\n` +
