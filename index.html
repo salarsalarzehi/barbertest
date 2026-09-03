@@ -5,17 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>رزرو آنلاین پیرایش سالار</title>
   <script src="https://cdn.tailwindcss.com"></script>
- <!-- فراخوانی فونت وزیرمتن با اعداد فارسی از گوگل فونت -->
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
   <script src="https://tapi.bale.ai/miniapp.js?3"></script>
   <style>
-    body { 
-      font-family: 'Vazirmatn', sans-serif !important; 
-      background-color: #0f172a; 
-      color: #f8fafc; 
-      font-size: 14px;
-    }
+    body { font-family: 'Vazirmatn', sans-serif !important; background-color: #0f172a; color: #f8fafc; font-size: 14px; }
     .custom-scrollbar::-webkit-scrollbar { width: 4px; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
   </style>
@@ -46,16 +40,16 @@
       </div>
 
       <div id="step1" class="space-y-2.5">
-        <div onclick="selectService(this, 'اصلاح و استایل مو')" class="service-card p-3.5 rounded-xl bg-slate-800 border border-slate-700 hover:border-emerald-500 cursor-pointer flex items-center justify-between transition">
+        <div onclick="selectService(this, 'اصلاح سر (نیم ساعتی)', 30)" class="service-card p-3.5 rounded-xl bg-slate-800 border border-slate-700 hover:border-emerald-500 cursor-pointer flex items-center justify-between transition">
           <div>
-            <h3 class="text-sm font-semibold text-white">اصلاح و استایل مو</h3>
-            <p class="text-xs text-slate-400 mt-1">مدت زمان: ۴۵ دقیقه</p>
+            <h3 class="text-sm font-semibold text-white">اصلاح سر خالی</h3>
+            <p class="text-xs text-slate-400 mt-1">مدت زمان: ۳۰ دقیقه</p>
           </div>
           <span class="text-xs font-bold text-emerald-400">۲۵۰,۰۰۰ تومان</span>
         </div>
-        <div onclick="selectService(this, 'اصلاح کامل سر و صورت')" class="service-card p-3.5 rounded-xl bg-slate-800 border border-slate-700 hover:border-emerald-500 cursor-pointer flex items-center justify-between transition">
+        <div onclick="selectService(this, 'اصلاح کامل و خدمات (یک ساعتی)', 60)" class="service-card p-3.5 rounded-xl bg-slate-800 border border-slate-700 hover:border-emerald-500 cursor-pointer flex items-center justify-between transition">
           <div>
-            <h3 class="text-sm font-semibold text-white">اصلاح کامل سر و صورت</h3>
+            <h3 class="text-sm font-semibold text-white">اصلاح کامل و خدمات</h3>
             <p class="text-xs text-slate-400 mt-1">مدت زمان: ۶۰ دقیقه</p>
           </div>
           <span class="text-xs font-bold text-emerald-400">۳۵۰,۰۰۰ تومان</span>
@@ -68,7 +62,7 @@
           <div class="flex gap-2 overflow-x-auto pb-1.5 custom-scrollbar" id="dateContainer"></div>
         </div>
         <div>
-          <label class="block text-xs text-slate-300 mb-1.5 font-medium">ساعت حضور (ساعت‌های تکمیل‌شده قفل هستند):</label>
+          <label class="block text-xs text-slate-300 mb-1.5 font-medium">ساعت حضور:</label>
           <div class="grid grid-cols-2 gap-2" id="timeContainer"></div>
         </div>
       </div>
@@ -81,7 +75,7 @@
         <div>
           <label class="block text-xs text-slate-300 mb-1 font-medium">شماره همراه (الزامی):</label>
           <input type="tel" id="custPhone" dir="ltr" placeholder="09123456789" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-white text-right focus:outline-none focus:border-emerald-500">
-          <p id="phoneError" class="text-xs text-rose-400 mt-1 hidden">لطفاً شماره موبایل معتبر وارد کنید (مثل 09123456789)</p>
+          <p id="phoneError" class="text-xs text-rose-400 mt-1 hidden">لطفاً شماره موبایل معتبر وارد کنید</p>
         </div>
         <div>
           <label class="block text-xs text-slate-300 mb-1 font-medium">توضیحات (اختیاری):</label>
@@ -93,28 +87,25 @@
         <i class="fa-solid fa-circle-check text-emerald-400 text-5xl"></i>
         <h2 class="text-sm font-bold text-white">نوبت شما با موفقیت ثبت شد</h2>
         <p class="text-xs text-slate-400 leading-relaxed">اطلاعات برای آرایشگر ارسال گردید و ساعت مورد نظر قفل شد.</p>
-
         <div class="mt-6 pt-4 border-t border-slate-800 text-center text-xs text-slate-400 space-y-2">
           <p>طراحی و توسعه:</p>
-          <div>
-            <a href="#" onclick="openSalarProfile(event)" class="inline-block bg-slate-800 border border-slate-700 px-4 py-1.5 rounded-xl text-emerald-400 font-bold hover:bg-slate-700 transition cursor-pointer" dir="ltr">@salarx8</a>
-          </div>
+          <div><a href="#" onclick="openSalarProfile(event)" class="inline-block bg-slate-800 border border-slate-700 px-4 py-1.5 rounded-xl text-emerald-400 font-bold" dir="ltr">@salarx8</a></div>
         </div>
       </div>
 
     </div>
 
     <div id="bottomBar" class="p-3.5 bg-slate-900 border-t border-slate-800 flex gap-2">
-      <button id="backBtn" onclick="prevStep()" class="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold hidden cursor-pointer hover:bg-slate-700 transition">بازگشت</button>
-      <button id="nextBtn" onclick="nextStep()" disabled class="w-full py-2.5 rounded-xl bg-slate-800 text-slate-500 text-xs font-bold transition">ادامه</button>
+      <button id="backBtn" onclick="prevStep()" class="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold hidden cursor-pointer">بازگشت</button>
+      <button id="nextBtn" onclick="nextStep()" disabled class="w-full py-2.5 rounded-xl bg-slate-800 text-slate-500 text-xs font-bold">ادامه</button>
     </div>
 
   </div>
 
   <script>
     const WORKER_URL = "https://bale-sender.salar1368yb.workers.dev";
-    const times = ["۱۰:۰۰ - ۱۱:۰۰", "۱۱:۰۰ - ۱۲:۰۰", "۱۶:۰۰ - ۱۷:۰۰", "۱۷:۰۰ - ۱۸:۰۰", "۱۸:۰۰ - ۱۹:۰۰"];
-    let step = 1, service = "", date = "", time = "";
+    let times = ["۱۰:۰۰", "۱۱:۰۰", "۱۲:۰۰", "۱۶:۰۰", "۱۷:۰۰", "۱۸:۰۰", "۱۹:۰۰"];
+    let step = 1, service = "", serviceDuration = 30, date = "", time = "";
     let disabledSlots = [];
     let userChatId = null;
 
@@ -122,46 +113,39 @@
       if (window.Bale && window.Bale.WebApp) {
         window.Bale.WebApp.ready();
         window.Bale.WebApp.expand();
-        const webApp = window.Bale.WebApp;
-        if (webApp.initDataUnsafe && webApp.initDataUnsafe.user) {
-          userChatId = webApp.initDataUnsafe.user.id;
+        if (window.Bale.WebApp.initDataUnsafe && window.Bale.WebApp.initDataUnsafe.user) {
+          userChatId = window.Bale.WebApp.initDataUnsafe.user.id;
         }
       }
-    } catch(e) {
-      console.error("Bale Init Error:", e);
-    }
+    } catch(e) {}
 
     function openSalarProfile(e) {
       e.preventDefault();
-      const url = "https://ble.ir/salarx8";
+      window.open("https://ble.ir/salarx8", '_blank');
+    }
+
+    async function fetchConfigData() {
       try {
-        if (window.Bale && window.Bale.WebApp && typeof window.Bale.WebApp.openExternalLink === 'function') {
-          window.Bale.WebApp.openExternalLink(url);
-        } else {
-          window.open(url, '_blank');
+        const resSlots = await fetch(`${WORKER_URL}/disabled-slots`);
+        const dataSlots = await resSlots.json();
+        disabledSlots = dataSlots.disabledSlots || [];
+
+        const resWorking = await fetch(`${WORKER_URL}/working-hours`);
+        const dataWorking = await resWorking.json();
+        if (dataWorking.workingHours && dataWorking.workingHours.length > 0) {
+          times = dataWorking.workingHours;
         }
-      } catch (err) {
-        window.open(url, '_blank');
-      }
+      } catch(e) {}
     }
 
-    async function fetchDisabledSlots() {
-      try {
-        const res = await fetch(`${WORKER_URL}/disabled-slots`);
-        const data = await res.json();
-        disabledSlots = data.disabledSlots || [];
-      } catch(e) {
-        console.error("خطا در دریافت سانس‌ها:", e);
-      }
-    }
-
-    function selectService(el, sName) {
+    function selectService(el, sName, duration) {
       document.querySelectorAll('.service-card').forEach(e => e.classList.remove('border-emerald-500', 'bg-emerald-500/10'));
       el.classList.add('border-emerald-500', 'bg-emerald-500/10');
       service = sName;
+      serviceDuration = duration;
       const btn = document.getElementById('nextBtn');
       btn.disabled = false;
-      btn.className = "w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold cursor-pointer transition";
+      btn.className = "w-full py-2.5 rounded-xl bg-emerald-500 text-white text-xs font-bold cursor-pointer";
     }
 
     function renderCalendar() {
@@ -173,8 +157,8 @@
         const str = d.toLocaleDateString('fa-IR', { weekday: 'short', month: 'short', day: 'numeric' });
         if (i === 0 && !date) date = str;
         const b = document.createElement('button');
-        b.className = `date-btn flex-shrink-0 p-2.5 rounded-xl border text-xs min-w-[75px] cursor-pointer transition ${
-          date === str ? 'border-emerald-500 text-emerald-400 bg-slate-800 font-bold' : 'border-slate-700 bg-slate-800 text-white hover:border-slate-600'
+        b.className = `flex-shrink-0 p-2.5 rounded-xl border text-xs min-w-[75px] cursor-pointer ${
+          date === str ? 'border-emerald-500 text-emerald-400 bg-slate-800 font-bold' : 'border-slate-700 bg-slate-800 text-white'
         }`;
         b.innerText = str;
         b.onclick = () => {
@@ -197,75 +181,29 @@
         const isDisabled = disabledSlots.includes(key);
         const b = document.createElement('button');
         if (isDisabled) {
-          b.className = "time-btn p-2.5 rounded-xl border border-slate-800 bg-slate-900/50 text-xs text-slate-600 cursor-not-allowed";
+          b.className = "p-2.5 rounded-xl border border-slate-800 bg-slate-900/50 text-xs text-slate-600 cursor-not-allowed";
           b.innerText = `${t} (تکمیل)`;
           b.disabled = true;
         } else {
-          b.className = `time-btn p-2.5 rounded-xl border text-xs cursor-pointer transition ${
-            time === t ? 'border-emerald-500 text-emerald-400 bg-slate-800 font-bold' : 'border-slate-700 bg-slate-800 text-white hover:border-slate-600'
+          b.className = `p-2.5 rounded-xl border text-xs cursor-pointer ${
+            time === t ? 'border-emerald-500 text-emerald-400 bg-slate-800 font-bold' : 'border-slate-700 bg-slate-800 text-white'
           }`;
           b.innerText = t;
           b.onclick = () => {
             time = t;
             renderTimes();
-            checkStep2();
+            document.getElementById('nextBtn').disabled = false;
+            document.getElementById('nextBtn').className = "w-full py-2.5 rounded-xl bg-emerald-500 text-white text-xs font-bold cursor-pointer";
           };
         }
         container.appendChild(b);
       });
     }
 
-    function checkStep2() {
-      if (date && time) {
-        const btn = document.getElementById('nextBtn');
-        btn.disabled = false;
-        btn.className = "w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold cursor-pointer transition";
-      }
-    }
-
-    function isValidIranianMobile(phone) {
-      const mobileRegex = /^(09[0-9]{9}|\+989[0-9]{9})$/;
-      return mobileRegex.test(phone);
-    }
-
-    async function finalizeBooking(bookingObj, adminText, userText, currentSlotKey) {
-      try {
-        if (!disabledSlots.includes(currentSlotKey)) {
-          disabledSlots.push(currentSlotKey);
-        }
-
-        await fetch(`${WORKER_URL}/`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            adminText: adminText,
-            userChatId: userChatId,
-            userText: userText,
-            bookingInfo: bookingObj
-          })
-        });
-
-        await fetch(`${WORKER_URL}/disabled-slots`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ disabledSlots })
-        });
-
-      } catch (err) {
-        console.error("خطا در ثبت نهایی:", err);
-      } finally {
-        setTimeout(() => {
-          if (window.Bale && window.Bale.WebApp) {
-            window.Bale.WebApp.close();
-          }
-        }, 6000);
-      }
-    }
-
     async function nextStep() {
       if (step === 1) {
         step = 2;
-        await fetchDisabledSlots();
+        await fetchConfigData();
         document.getElementById('step1').classList.add('hidden');
         document.getElementById('step2').classList.remove('hidden');
         document.getElementById('backBtn').classList.remove('hidden');
@@ -273,11 +211,9 @@
         document.getElementById('stepTitle').innerText = 'انتخاب زمان';
         renderCalendar();
         renderTimes();
-        const btn = document.getElementById('nextBtn');
-        btn.disabled = true;
-        btn.className = "w-full py-2.5 rounded-xl bg-slate-800 text-slate-500 text-xs font-bold";
-      } 
-      else if (step === 2) {
+        document.getElementById('nextBtn').disabled = true;
+        document.getElementById('nextBtn').className = "w-full py-2.5 rounded-xl bg-slate-800 text-slate-500 text-xs font-bold";
+      } else if (step === 2) {
         step = 3;
         document.getElementById('step2').classList.add('hidden');
         document.getElementById('step3').classList.remove('hidden');
@@ -285,51 +221,43 @@
         document.getElementById('stepTitle').innerText = 'اطلاعات تماس';
         document.getElementById('nextBtn').innerText = 'ثبت نهایی رزرو';
         document.getElementById('nextBtn').disabled = false;
-        document.getElementById('nextBtn').className = "w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold cursor-pointer transition";
-      } 
-      else if (step === 3) {
+        document.getElementById('nextBtn').className = "w-full py-2.5 rounded-xl bg-emerald-500 text-white text-xs font-bold cursor-pointer";
+      } else if (step === 3) {
         const name = document.getElementById('custName').value.trim();
         const phone = document.getElementById('custPhone').value.trim();
         const note = document.getElementById('custNote').value.trim() || "ندارد";
-        const phoneError = document.getElementById('phoneError');
-        const phoneInput = document.getElementById('custPhone');
 
-        phoneError.classList.add('hidden');
-        phoneInput.classList.remove('border-rose-500');
-
-        if (!name) {
-          alert('لطفاً نام و نام خانوادگی خود را وارد کنید.');
-          return;
-        }
-
-        if (!phone || !isValidIranianMobile(phone)) {
-          phoneError.classList.remove('hidden');
-          phoneInput.classList.add('border-rose-500');
-          phoneInput.focus();
+        if (!name || !phone) {
+          alert('لطفاً نام و شماره تلفن را وارد کنید.');
           return;
         }
 
         const currentSlotKey = `${date}_${time}`;
         const bookingObj = { name, phone, service, date, time, note, id: Date.now() };
 
-        const adminText = `💈 **نوبت جدید در پیرایش سالار**\n\n` +
-          `👤 مشتری: ${name}\n` +
-          `📞 تلفن: ${phone}\n` +
-          `✂️ خدمت: ${service}\n` +
-          `⏰ زمان: ${date} (${time})\n` +
-          `📝 توضیحات: ${note}`;
-
-        const userText = `✅ **رزرو شما با موفقیت ثبت شد!**\n\n` +
-          `سلام ${name} عزیز،\n` +
-          `نوبت شما برای خدمت **${service}** در تاریخ **${date} ساعت ${time}** ثبت گردید.\n\n` +
-          `منتظر حضور شما در پیرایش سالار هستیم! ✂️`;
-
         document.getElementById('step3').classList.add('hidden');
         document.getElementById('stepHeaderBox').classList.add('hidden');
         document.getElementById('bottomBar').classList.add('hidden');
         document.getElementById('successState').classList.remove('hidden');
 
-        finalizeBooking(bookingObj, adminText, userText, currentSlotKey);
+        try {
+          disabledSlots.push(currentSlotKey);
+          await fetch(`${WORKER_URL}/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              adminText: `💈 **نوبت جدید**\n👤 مشتری: ${name}\n📞 تلفن: ${phone}\n✂️ خدمت: ${service}\n⏰ زمان: ${date} (${time})`,
+              userChatId: userChatId,
+              userText: `✅ نوبت شما برای ${service} در تاریخ ${date} ساعت ${time} ثبت شد.`,
+              bookingInfo: bookingObj
+            })
+          });
+          await fetch(`${WORKER_URL}/disabled-slots`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ disabledSlots })
+          });
+        } catch (err) {}
       }
     }
 
@@ -342,6 +270,8 @@
         document.getElementById('stepBadge').innerText = '۱';
         document.getElementById('stepTitle').innerText = 'انتخاب خدمت مورد نظر';
         document.getElementById('nextBtn').innerText = 'ادامه';
+        document.getElementById('nextBtn').disabled = false;
+        document.getElementById('nextBtn').className = "w-full py-2.5 rounded-xl bg-emerald-500 text-white text-xs font-bold cursor-pointer";
       } else if (step === 3) {
         step = 2;
         document.getElementById('step3').classList.add('hidden');
@@ -349,6 +279,8 @@
         document.getElementById('stepBadge').innerText = '۲';
         document.getElementById('stepTitle').innerText = 'انتخاب زمان';
         document.getElementById('nextBtn').innerText = 'ادامه';
+        document.getElementById('nextBtn').disabled = false;
+        document.getElementById('nextBtn').className = "w-full py-2.5 rounded-xl bg-emerald-500 text-white text-xs font-bold cursor-pointer";
       }
     }
   </script>
