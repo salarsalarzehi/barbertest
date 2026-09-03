@@ -1,300 +1,230 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>رزرو آنلاین پیرایش سالار</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
-  <script src="https://tapi.bale.ai/miniapp.js?3"></script>
-  <style>
-    body { font-family: 'Vazirmatn', sans-serif !important; background-color: #0f172a; color: #f8fafc; font-size: 14px; }
-    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>رزرو نوبت - پیرایش آرمین (سالار)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/yekan-bakh@main/css/yekan-bakh.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <style>
+        body { font-family: 'Yekan Bakh', sans-serif; background-color: #0f172a; color: #f8fafc; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-2 sm:p-4">
+<body class="p-4 max-w-xl mx-auto space-y-6">
 
-  <div class="w-full max-w-md bg-slate-900 rounded-3xl overflow-hidden shadow-2xl border border-slate-800 flex flex-col h-[640px] relative">
-
-    <div class="bg-slate-800 px-4 py-3 flex items-center justify-between border-b border-slate-700 text-xs text-slate-300">
-      <div class="flex items-center space-x-2 space-x-reverse">
-        <div class="w-8 h-8 rounded-full overflow-hidden border-2 border-emerald-400 flex-shrink-0 shadow-sm">
-          <img src="https://raw.githubusercontent.com/salarsalarzehi/barbertest/main/profile.jpg" alt="سالار" class="w-full h-full object-cover">
-        </div>
-        <span class="font-bold text-white text-sm">پیرایش سالار</span>
-      </div>
-      <span class="text-[11px] bg-emerald-500/10 text-emerald-400 px-2.5 py-0.5 rounded-full border border-emerald-500/20 font-medium">
-        مینی‌اپ بله
-      </span>
+    <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 text-center space-y-2">
+        <h1 class="text-lg font-bold text-white"><i class="fa-solid fa-scissors text-emerald-400 ml-2"></i>پیرایش آرمین</h1>
+        <p class="text-xs text-slate-400">ساعت کاری: ۱۰:۰۰ صبح تا ۲۲:۰۰ شب</p>
     </div>
 
-    <div class="flex-1 overflow-y-auto p-3.5 space-y-3.5 custom-scrollbar" id="mainContainer">
+    <!-- فرم رزرو -->
+    <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 space-y-4">
+        <h2 class="text-xs font-bold text-slate-300 border-b border-slate-800 pb-2">
+            <i class="fa-solid fa-calendar-days text-cyan-400 ml-1"></i> فرم ثبت نوبت آنلاین
+        </h2>
 
-      <div id="stepHeaderBox" class="flex items-center justify-between px-3 bg-slate-800/40 p-2.5 rounded-2xl border border-slate-800">
-        <div class="flex items-center gap-2">
-          <div id="stepBadge" class="w-6 h-6 rounded-full bg-emerald-500 text-white font-bold flex items-center justify-center text-xs">۱</div>
-          <span id="stepTitle" class="text-xs font-bold text-slate-200">انتخاب خدمت مورد نظر</span>
-        </div>
-      </div>
-
-      <div id="step1" class="space-y-2.5">
-        <div onclick="selectService(this, 'اصلاح سر (نیم ساعتی)', 30)" class="service-card p-3.5 rounded-xl bg-slate-800 border border-slate-700 hover:border-emerald-500 cursor-pointer flex items-center justify-between transition">
-          <div>
-            <h3 class="text-sm font-semibold text-white">اصلاح سر خالی</h3>
-            <p class="text-xs text-slate-400 mt-1">مدت زمان: ۳۰ دقیقه</p>
-          </div>
-          <span class="text-xs font-bold text-emerald-400">۲۵۰,۰۰۰ تومان</span>
-        </div>
-        <div onclick="selectService(this, 'اصلاح کامل و خدمات (یک ساعتی)', 60)" class="service-card p-3.5 rounded-xl bg-slate-800 border border-slate-700 hover:border-emerald-500 cursor-pointer flex items-center justify-between transition">
-          <div>
-            <h3 class="text-sm font-semibold text-white">اصلاح کامل و خدمات</h3>
-            <p class="text-xs text-slate-400 mt-1">مدت زمان: ۶۰ دقیقه</p>
-          </div>
-          <span class="text-xs font-bold text-emerald-400">۳۵۰,۰۰۰ تومان</span>
-        </div>
-      </div>
-
-      <div id="step2" class="space-y-3 hidden">
+        <!-- انتخاب خدمت -->
         <div>
-          <label class="block text-xs text-slate-300 mb-1.5 font-medium">روز مراجعه:</label>
-          <div class="flex gap-2 overflow-x-auto pb-1.5 custom-scrollbar" id="dateContainer"></div>
+            <label class="block text-xs text-slate-400 mb-2">انتخاب خدمت:</label>
+            <select id="serviceSelect" onchange="onServiceChange()" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-xs text-white">
+                <option value="اصلاح سر (کوتاهی)|30">اصلاح سر (زمان: ۳۰ دقیقه)</option>
+                <option value="اصلاح کامل سر و ریش|60">اصلاح کامل سر و ریش (زمان: ۶۰ دقیقه)</option>
+                <option value="اصلاح ریش|30">اصلاح ریش (زمان: ۳۰ دقیقه)</option>
+            </select>
         </div>
-        <div>
-          <label class="block text-xs text-slate-300 mb-1.5 font-medium">ساعت حضور:</label>
-          <div class="grid grid-cols-2 gap-2" id="timeContainer"></div>
-        </div>
-      </div>
 
-      <div id="step3" class="space-y-3 hidden">
+        <!-- انتخاب روز -->
         <div>
-          <label class="block text-xs text-slate-300 mb-1 font-medium">نام و نام خانوادگی:</label>
-          <input type="text" id="custName" placeholder="مثلا: علی محمدی" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-emerald-500">
+            <label class="block text-xs text-slate-400 mb-2">انتخاب روز:</label>
+            <div class="flex gap-2 overflow-x-auto pb-2 custom-scrollbar" id="dateContainer"></div>
         </div>
-        <div>
-          <label class="block text-xs text-slate-300 mb-1 font-medium">شماره همراه (الزامی):</label>
-          <input type="tel" id="custPhone" dir="ltr" placeholder="09123456789" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-white text-right focus:outline-none focus:border-emerald-500">
-        </div>
-        <div>
-          <label class="block text-xs text-slate-300 mb-1 font-medium">توضیحات (اختیاری):</label>
-          <textarea id="custNote" rows="2" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-emerald-500"></textarea>
-        </div>
-      </div>
 
-      <div id="successState" class="text-center py-8 space-y-3.5 hidden">
-        <i class="fa-solid fa-circle-check text-emerald-400 text-5xl"></i>
-        <h2 class="text-sm font-bold text-white">نوبت شما با موفقیت ثبت شد</h2>
-        <p class="text-xs text-slate-400 leading-relaxed">اطلاعات برای آرایشگر ارسال گردید و ساعت مورد نظر قفل شد.</p>
-        <div class="mt-6 pt-4 border-t border-slate-800 text-center text-xs text-slate-400 space-y-2">
-          <p>طراحی و توسعه:</p>
-          <div><a href="#" onclick="openSalarProfile(event)" class="inline-block bg-slate-800 border border-slate-700 px-4 py-1.5 rounded-xl text-emerald-400 font-bold" dir="ltr">@salarx8</a></div>
+        <!-- انتخاب ساعت -->
+        <div>
+            <label class="block text-xs text-slate-400 mb-2">ساعت‌های خالی:</label>
+            <div class="grid grid-cols-3 gap-2" id="timeContainer">
+                <p class="text-xs text-slate-500 col-span-3 text-center py-2">لطفاً روز را انتخاب کنید</p>
+            </div>
         </div>
-      </div>
 
+        <!-- اطلاعات مشتری -->
+        <div class="space-y-3 pt-2">
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">نام و نام خانوادگی:</label>
+                <input type="text" id="clientName" placeholder="مثال: علی احمدی" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-xs text-white">
+            </div>
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">شماره تماس:</label>
+                <input type="tel" id="clientPhone" placeholder="09123456789" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-xs text-white" dir="ltr">
+            </div>
+            <div>
+                <label class="block text-xs text-slate-400 mb-1">توضیحات (اختیاری):</label>
+                <input type="text" id="clientNote" placeholder="نکته خاصی اگر دارید..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-3 text-xs text-white">
+            </div>
+        </div>
+
+        <button onclick="submitBooking()" class="w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl text-xs font-bold cursor-pointer transition-all">
+            ثبت نوبت
+        </button>
     </div>
 
-    <div id="bottomBar" class="p-3.5 bg-slate-900 border-t border-slate-800 flex gap-2">
-      <button id="backBtn" onclick="prevStep()" class="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold hidden cursor-pointer">بازگشت</button>
-      <button id="nextBtn" onclick="nextStep()" disabled class="w-full py-2.5 rounded-xl bg-slate-800 text-slate-500 text-xs font-bold">ادامه</button>
-    </div>
-
-  </div>
-
-  <script>
+<script>
     const WORKER_URL = "https://bale-sender.salar1368yb.workers.dev";
-    let times = [
-      "۱۰:۰۰", "۱۰:۳۰", "۱۱:۰۰", "۱۱:۳۰", "۱۲:۰۰", "۱۲:۳۰", 
-      "۱۶:۰۰", "۱۶:۳۰", "۱۷:۰۰", "۱۷:۳۰", "۱۸:۰۰", "۱۸:۳۰", 
-      "۱۹:۰۰", "۱۹:۳۰", "۲۰:۰۰", "۲۰:۳۰", "۲۱:۰۰", "۲۱:۳۰", "۲۲:۰۰"
+    
+    // بازه‌های ۳۰ دقیقه‌ای پایه از ۱۰ صبح تا ۱۰ شب
+    const baseSlots = [
+        "۱۰:۰۰", "۱۰:۳۰", "۱۱:۰۰", "۱۱:۳۰", "۱۲:۰۰", "۱۲:۳۰",
+        "۱۳:۰۰", "۱۳:۳۰", "۱۶:۰۰", "۱۶:۳۰", "۱۷:۰۰", "۱۷:۳۰",
+        "۱۸:۰۰", "۱۸:۳۰", "۱۹:۰۰", "۱۹:۳۰", "۲۰:۰۰", "۲۰:۳۰", "۲۱:۰۰", "۲۱:۳۰"
     ];
-    let step = 1, service = "", serviceDuration = 30, date = "", time = "";
+
+    let selectedDate = "";
+    let selectedTime = "";
+    let existingBookings = [];
     let disabledSlots = [];
-    let userChatId = null;
 
-    try {
-      if (window.Bale && window.Bale.WebApp) {
-        window.Bale.WebApp.ready();
-        window.Bale.WebApp.expand();
-        if (window.Bale.WebApp.initDataUnsafe && window.Bale.WebApp.initDataUnsafe.user) {
-          userChatId = window.Bale.WebApp.initDataUnsafe.user.id;
+    async function init() {
+        try {
+            const resB = await fetch(`${WORKER_URL}/bookings`);
+            const dataB = await resB.json();
+            existingBookings = dataB.bookings || [];
+
+            const resD = await fetch(`${WORKER_URL}/disabled-slots`);
+            const dataD = await resD.json();
+            disabledSlots = dataD.disabledSlots || [];
+        } catch (e) {
+            console.error(e);
         }
-      }
-    } catch(e) {}
-
-    function openSalarProfile(e) {
-      e.preventDefault();
-      window.open("https://ble.ir/salarx8", '_blank');
-    }
-
-    async function fetchConfigData() {
-      try {
-        const resSlots = await fetch(`${WORKER_URL}/disabled-slots`);
-        const dataSlots = await resSlots.json();
-        disabledSlots = dataSlots.disabledSlots || [];
-
-        const resWorking = await fetch(`${WORKER_URL}/working-hours`);
-        const dataWorking = await resWorking.json();
-        if (dataWorking.workingHours && dataWorking.workingHours.length > 0) {
-          times = dataWorking.workingHours;
-        }
-      } catch(e) {}
-    }
-
-    function selectService(el, sName, duration) {
-      document.querySelectorAll('.service-card').forEach(e => e.classList.remove('border-emerald-500', 'bg-emerald-500/10'));
-      el.classList.add('border-emerald-500', 'bg-emerald-500/10');
-      service = sName;
-      serviceDuration = duration;
-      const btn = document.getElementById('nextBtn');
-      btn.disabled = false;
-      btn.className = "w-full py-2.5 rounded-xl bg-emerald-500 text-white text-xs font-bold cursor-pointer";
+        renderCalendar();
     }
 
     function renderCalendar() {
-      const container = document.getElementById('dateContainer');
-      container.innerHTML = '';
-      for (let i = 0; i < 7; i++) {
-        const d = new Date();
-        d.setDate(d.getDate() + i);
-        const str = d.toLocaleDateString('fa-IR', { weekday: 'short', month: 'short', day: 'numeric' });
-        if (i === 0 && !date) date = str;
-        const b = document.createElement('button');
-        b.className = `flex-shrink-0 p-2.5 rounded-xl border text-xs min-w-[75px] cursor-pointer ${
-          date === str ? 'border-emerald-500 text-emerald-400 bg-slate-800 font-bold' : 'border-slate-700 bg-slate-800 text-white'
-        }`;
-        b.innerText = str;
-        b.onclick = () => {
-          date = str;
-          time = "";
-          renderCalendar();
-          renderTimes();
-          document.getElementById('nextBtn').disabled = true;
-          document.getElementById('nextBtn').className = "w-full py-2.5 rounded-xl bg-slate-800 text-slate-500 text-xs font-bold";
-        };
-        container.appendChild(b);
-      }
+        const container = document.getElementById('dateContainer');
+        container.innerHTML = '';
+        for (let i = 0; i < 7; i++) {
+            const d = new Date();
+            d.setDate(d.getDate() + i);
+            const labelStr = d.toLocaleDateString('fa-IR', { weekday: 'short', month: 'short', day: 'numeric' });
+            if (i === 0 && !selectedDate) selectedDate = labelStr;
+
+            const btn = document.createElement('button');
+            btn.type = "button";
+            btn.className = `flex-shrink-0 p-2.5 rounded-xl border text-xs min-w-[85px] cursor-pointer ${
+                selectedDate === labelStr ? 'border-emerald-500 text-emerald-400 bg-slate-800 font-bold' : 'border-slate-700 bg-slate-800 text-white'
+            }`;
+            btn.innerText = labelStr;
+            btn.onclick = () => {
+                selectedDate = labelStr;
+                selectedTime = "";
+                renderCalendar();
+                renderTimes();
+            };
+            container.appendChild(btn);
+        }
+        renderTimes();
+    }
+
+    function onServiceChange() {
+        renderTimes();
     }
 
     function renderTimes() {
-      const container = document.getElementById('timeContainer');
-      container.innerHTML = '';
-      times.forEach(t => {
-        const key = `${date}_${t}`;
-        const isDisabled = disabledSlots.includes(key);
-        const b = document.createElement('button');
-        if (isDisabled) {
-          b.className = "p-2.5 rounded-xl border border-slate-800 bg-slate-900/50 text-xs text-slate-600 cursor-not-allowed";
-          b.innerText = `${t} (تکمیل/بسته)`;
-          b.disabled = true;
-        } else {
-          b.className = `p-2.5 rounded-xl border text-xs cursor-pointer ${
-            time === t ? 'border-emerald-500 text-emerald-400 bg-slate-800 font-bold' : 'border-slate-700 bg-slate-800 text-white'
-          }`;
-          b.innerText = t;
-          b.onclick = () => {
-            time = t;
-            renderTimes();
-            document.getElementById('nextBtn').disabled = false;
-            document.getElementById('nextBtn').className = "w-full py-2.5 rounded-xl bg-emerald-500 text-white text-xs font-bold cursor-pointer";
-          };
-        }
-        container.appendChild(b);
-      });
+        const container = document.getElementById('timeContainer');
+        container.innerHTML = '';
+
+        const serviceVal = document.getElementById('serviceSelect').value;
+        const durationMinutes = parseInt(serviceVal.split('|')[1]); // ۳۰ یا ۶۰ دقیقه
+        const slotsNeeded = durationMinutes / 30; // تعداد سانس‌های ۳۰ دقیقه‌ای مورد نیاز
+
+        baseSlots.forEach((time, index) => {
+            // بررسی اینکه آیا به اندازه زمان خدمت، سانس خالی پشت سر هم وجود دارد یا خیر
+            let isAvailable = true;
+            for (let j = 0; j < slotsNeeded; j++) {
+                if (index + j >= baseSlots.length) {
+                    isAvailable = false;
+                    break;
+                }
+                const targetTime = baseSlots[index + j];
+                const key = `${selectedDate}_${targetTime}`;
+
+                // چک کردن اینکه آیا سانس غیرفعال است یا قبلاً رزرو شده
+                if (disabledSlots.includes(key)) {
+                    isAvailable = false;
+                    break;
+                }
+                const isBooked = existingBookings.some(b => b.date === selectedDate && b.time.includes(targetTime));
+                if (isBooked) {
+                    isAvailable = false;
+                    break;
+                }
+            }
+
+            const timeBtn = document.createElement('button');
+            timeBtn.type = "button";
+            timeBtn.className = `p-2.5 rounded-xl border text-xs cursor-pointer text-center ${
+                !isAvailable ? 'opacity-40 border-slate-800 bg-slate-900 text-slate-600 cursor-not-allowed' :
+                selectedTime === time ? 'border-emerald-500 bg-emerald-500/20 text-emerald-400 font-bold' :
+                'border-slate-700 bg-slate-800 text-slate-200 hover:border-slate-500'
+            }`;
+            timeBtn.innerText = time;
+
+            if (isAvailable) {
+                timeBtn.onclick = () => {
+                    selectedTime = time;
+                    renderTimes();
+                };
+            } else {
+                timeBtn.disabled = true;
+            }
+            container.appendChild(timeBtn);
+        });
     }
 
-    async function nextStep() {
-      if (step === 1) {
-        step = 2;
-        await fetchConfigData();
-        document.getElementById('step1').classList.add('hidden');
-        document.getElementById('step2').classList.remove('hidden');
-        document.getElementById('backBtn').classList.remove('hidden');
-        document.getElementById('stepBadge').innerText = '۲';
-        document.getElementById('stepTitle').innerText = 'انتخاب زمان';
-        renderCalendar();
-        renderTimes();
-        document.getElementById('nextBtn').disabled = true;
-        document.getElementById('nextBtn').className = "w-full py-2.5 rounded-xl bg-slate-800 text-slate-500 text-xs font-bold";
-      } else if (step === 2) {
-        step = 3;
-        document.getElementById('step2').classList.add('hidden');
-        document.getElementById('step3').classList.remove('hidden');
-        document.getElementById('stepBadge').innerText = '۳';
-        document.getElementById('stepTitle').innerText = 'اطلاعات تماس';
-        document.getElementById('nextBtn').innerText = 'ثبت نهایی رزرو';
-        document.getElementById('nextBtn').disabled = false;
-        document.getElementById('nextBtn').className = "w-full py-2.5 rounded-xl bg-emerald-500 text-white text-xs font-bold cursor-pointer";
-      } else if (step === 3) {
-        const name = document.getElementById('custName').value.trim();
-        const phone = document.getElementById('custPhone').value.trim();
-        const note = document.getElementById('custNote').value.trim() || "ندارد";
+    async function submitBooking() {
+        const name = document.getElementById('clientName').value.trim();
+        const phone = document.getElementById('clientPhone').value.trim();
+        const note = document.getElementById('clientNote').value.trim() || 'ندارد';
+        const serviceFull = document.getElementById('serviceSelect').value.split('|')[0];
 
         if (!name || !phone) {
-          alert('لطفاً نام و شماره تلفن را وارد کنید.');
-          return;
+            alert('لطفاً نام و شماره تماس خود را وارد کنید.');
+            return;
+        }
+        if (!selectedTime) {
+            alert('لطفاً یک ساعت خالی انتخاب کنید.');
+            return;
         }
 
-        const currentSlotKey = `${date}_${time}`;
-        const bookingObj = { name, phone, service, date, time, note, id: Date.now() };
-
-        document.getElementById('step3').classList.add('hidden');
-        document.getElementById('stepHeaderBox').classList.add('hidden');
-        document.getElementById('bottomBar').classList.add('hidden');
-        document.getElementById('successState').classList.remove('hidden');
+        const bookingData = {
+            name,
+            phone,
+            service: serviceFull,
+            date: selectedDate,
+            time: selectedTime,
+            note
+        };
 
         try {
-          disabledSlots.push(currentSlotKey);
-          // اگر خدمت یک ساعته بود، سانس بعدی هم به طور خودکار بسته شود تا تداخل پیش نیاید
-          if (serviceDuration === 60) {
-            const currentIndex = times.indexOf(time);
-            if (currentIndex !== -1 && currentIndex + 1 < times.length) {
-              const nextTimeSlot = times[currentIndex + 1];
-              disabledSlots.push(`${date}_${nextTimeSlot}`);
+            const res = await fetch(`${WORKER_URL}/book`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(bookingData)
+            });
+            if (res.ok) {
+                alert('نوبت شما با موفقیت ثبت شد!');
+                location.reload();
+            } else {
+                alert('خطا در ثبت نوبت. لطفاً دوباره تلاش کنید.');
             }
-          }
-
-          await fetch(`${WORKER_URL}/`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              adminText: `💈 **نوبت جدید**\n👤 مشتری: ${name}\n📞 تلفن: ${phone}\n✂️ خدمت: ${service}\n⏰ زمان: ${date} (${time})`,
-              userChatId: userChatId,
-              userText: `✅ نوبت شما برای ${service} در تاریخ ${date} ساعت ${time} ثبت شد.`,
-              bookingInfo: bookingObj
-            })
-          });
-          await fetch(`${WORKER_URL}/disabled-slots`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ disabledSlots })
-          });
-        } catch (err) {}
-      }
+        } catch (e) {
+            alert('خطا در ارتباط با سرور');
+        }
     }
 
-    function prevStep() {
-      if (step === 2) {
-        step = 1;
-        document.getElementById('step2').classList.add('hidden');
-        document.getElementById('step1').classList.remove('hidden');
-        document.getElementById('backBtn').classList.add('hidden');
-        document.getElementById('stepBadge').innerText = '۱';
-        document.getElementById('stepTitle').innerText = 'انتخاب خدمت مورد نظر';
-        document.getElementById('nextBtn').innerText = 'ادامه';
-        document.getElementById('nextBtn').disabled = false;
-        document.getElementById('nextBtn').className = "w-full py-2.5 rounded-xl bg-emerald-500 text-white text-xs font-bold cursor-pointer";
-      } else if (step === 3) {
-        step = 2;
-        document.getElementById('step3').classList.add('hidden');
-        document.getElementById('step2').classList.remove('hidden');
-        document.getElementById('stepBadge').innerText = '۲';
-        document.getElementById('stepTitle').innerText = 'انتخاب زمان';
-        document.getElementById('nextBtn').innerText = 'ادامه';
-        document.getElementById('nextBtn').disabled = false;
-        document.getElementById('nextBtn').className = "w-full py-2.5 rounded-xl bg-emerald-500 text-white text-xs font-bold cursor-pointer";
-      }
-    }
-  </script>
+    init();
+</script>
 </body>
 </html>
