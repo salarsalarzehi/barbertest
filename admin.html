@@ -53,7 +53,6 @@
 <script>
     const WORKER_URL = "https://bale-sender.salar1368yb.workers.dev";
     
-    // بازه‌های زمانی هماهنگ با بخش مشتری (شامل حالت‌های یک‌ساعته و نیم‌ساعته)
     const oneHourTimes = [
       "۱۰:۰۰ - ۱۱:۰۰", "۱۱:۰۰ - ۱۲:۰۰", "۱۲:۰۰ - ۱۳:۰۰", 
       "۱۶:۰۰ - ۱۷:۰۰", "۱۷:۰۰ - ۱۸:۰۰", "۱۸:۰۰ - ۱۹:۰۰", "۱۹:۰۰ - ۲۰:۰۰"
@@ -116,27 +115,51 @@
         }
     }
 
+    function timeToMinutes(tStr) {
+      const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+      let englishStr = tStr;
+      persianDigits.forEach((p, i) => {
+        englishStr = englishStr.replace(new RegExp(p, 'g'), i);
+      });
+      const parts = englishStr.split(':');
+      return parseInt(parts[0]) * 60 + parseInt(parts[1]);
+    }
+
     function renderAdminTimes() {
         const container = document.getElementById('adminTimeContainer');
         container.innerHTML = '';
         
-        // ترکیب هر دو لیست ساعت برای اینکه ادمین بتواند هم بازه‌های نیم‌ساعته و هم یک‌ساعته را مدیریت کند
-        const allTimes = [...new Set([...oneHourTimes, ...halfHourTimes])];
-
-        allTimes.forEach(t => {
+        oneHourTimes.forEach(t => {
             const key = `${selectedAdminDate}_${t}`;
-            const isDisabled = disabledSlots.includes(key);
+            
+            const parts = t.split(" - ");
+            const startMinutes = timeToMinutes(parts[0]);
+            const endMinutes = timeToMinutes(parts[1]);
+            
+            const subSlots = halfHourTimes.filter(hs => {
+              const hsParts = hs.split(" - ");
+              const hsStart = timeToMinutes(hsParts[0]);
+              return hsStart >= startMinutes && hsStart < endMinutes;
+            });
+
+            const isFullDisabled = disabledSlots.includes(key) || subSlots.every(sub => disabledSlots.includes(`${selectedAdminDate}_${sub}`));
+
             const timeBtn = document.createElement('button');
             timeBtn.type = "button";
             timeBtn.className = `p-2.5 rounded-xl border text-xs flex items-center justify-between cursor-pointer transition ${
-                isDisabled ? 'border-red-500/50 bg-red-500/10 text-red-400' : 'border-slate-700 bg-slate-800 text-slate-200 hover:border-slate-600'
+                isFullDisabled ? 'border-red-500/50 bg-red-500/10 text-red-400' : 'border-slate-700 bg-slate-800 text-slate-200 hover:border-slate-600'
             }`;
-            timeBtn.innerHTML = `<span class="font-medium">${t}</span> <i class="fa-solid ${isDisabled ? 'fa-ban text-red-400' : 'fa-check text-emerald-400'}"></i>`;
+            timeBtn.innerHTML = `<span class="font-medium">${t}</span> <i class="fa-solid ${isFullDisabled ? 'fa-ban text-red-400' : 'fa-check text-emerald-400'}"></i>`;
+            
             timeBtn.onclick = () => {
-                if (disabledSlots.includes(key)) {
-                    disabledSlots = disabledSlots.filter(s => s !== key);
+                if (isFullDisabled) {
+                    disabledSlots = disabledSlots.filter(s => s !== key && !subSlots.some(sub => s === `${selectedAdminDate}_${sub}`));
                 } else {
-                    disabledSlots.push(key);
+                    if (!disabledSlots.includes(key)) disabledSlots.push(key);
+                    subSlots.forEach(sub => {
+                        const subKey = `${selectedAdminDate}_${sub}`;
+                        if (!disabledSlots.includes(subKey)) disabledSlots.push(subKey);
+                    });
                 }
                 renderAdminTimes();
             };
