@@ -44,28 +44,9 @@
        </div>
      </div>
   
+     <!-- لیست خدمات که به صورت پویا از سرور بارگذاری می‌شود -->
      <div id="step1" class="space-y-2.5">
-        <div onclick="selectService(this, 'اصلاح و استایل مو', 45)" class="service-card p-3.5 rounded-xl bg-slate-800 border border-slate-700 hover:border-emerald-500 cursor-pointer flex items-center justify-between transition">
-          <div>
-            <h3 class="text-sm font-semibold text-white">اصلاح و استایل مو</h3>
-            <p class="text-xs text-slate-400 mt-1">مدت زمان: ۴۵ دقیقه</p>
-          </div>
-          <span class="text-xs font-bold text-emerald-400">۲۵۰,۰۰۰ تومان</span>
-       </div>
-        <div onclick="selectService(this, 'اصلاح کامل سر و صورت', 60)" class="service-card p-3.5 rounded-xl bg-slate-800 border border-slate-700 hover:border-emerald-500 cursor-pointer flex items-center justify-between transition">
-          <div>
-            <h3 class="text-sm font-semibold text-white">اصلاح کامل سر و صورت</h3>
-            <p class="text-xs text-slate-400 mt-1">مدت زمان: ۶۰ دقیقه</p>
-          </div>
-          <span class="text-xs font-bold text-emerald-400">۳۵۰,۰۰۰ تومان</span>
-       </div>
-        <div onclick="selectService(this, 'اصلاح ریش', 30)" class="service-card p-3.5 rounded-xl bg-slate-800 border border-slate-700 hover:border-emerald-500 cursor-pointer flex items-center justify-between transition">
-          <div>
-            <h3 class="text-sm font-semibold text-white">اصلاح ریش</h3>
-            <p class="text-xs text-slate-400 mt-1">مدت زمان: ۳۰ دقیقه</p>
-          </div>
-          <span class="text-xs font-bold text-emerald-400">۱۵۰,۰۰۰ تومان</span>
-       </div>
+        <p class="text-xs text-slate-500 text-center py-4">در حال بارگذاری خدمات...</p>
      </div>
   
      <div id="step2" class="space-y-3 hidden">
@@ -74,7 +55,7 @@
           <div class="flex gap-2 overflow-x-auto pb-1.5 custom-scrollbar" id="dateContainer"></div>
         </div>
         <div>
-          <label class="block text-xs text-slate-300 mb-1.5 font-medium">ساعت حضور (ساعت‌های تکمیل‌شده قفل هستند):</label>
+          <label class="block text-xs text-slate-300 mb-1.5 font-medium">ساعت حضور:</label>
           <div class="grid grid-cols-2 gap-2" id="timeContainer"></div>
         </div>
      </div>
@@ -136,8 +117,9 @@
     ];
 
     let times = oneHourTimes;
-    let step = 1, service = "", serviceDuration = 60, date = "", time = "";
+    let step = 1, service = "", serviceDuration = 60, servicePrice = "", date = "", time = "";
     let disabledSlots = [];
+    let servicesList = [];
     let userChatId = null;
   
     try {
@@ -151,6 +133,46 @@
       }
     } catch(e) {
       console.error("Bale Init Error:", e);
+    }
+
+    async function loadServices() {
+      try {
+        const res = await fetch(`${WORKER_URL}/services`);
+        const data = await res.json();
+        servicesList = data.services || [
+          { name: "اصلاح و استایل مو", duration: 60, price: "۲۵۰,۰۰۰ تومان" },
+          { name: "اصلاح کامل سر و صورت", duration: 60, price: "۳۵۰,۰۰۰ تومان" },
+          { name: "اصلاح ریش", duration: 30, price: "۱۵۰,۰۰۰ تومان" }
+        ];
+        renderServices();
+      } catch(e) {
+        console.error("Error loading services:", e);
+        // مقادیر پیش‌فرض در صورت خطا
+        servicesList = [
+          { name: "اصلاح و استایل مو", duration: 60, price: "۲۵۰,۰۰۰ تومان" },
+          { name: "اصلاح کامل سر و صورت", duration: 60, price: "۳۵۰,۰۰۰ تومان" },
+          { name: "اصلاح ریش", duration: 30, price: "۱۵۰,۰۰۰ تومان" }
+        ];
+        renderServices();
+      }
+    }
+
+    function renderServices() {
+      const container = document.getElementById('step1');
+      container.innerHTML = '';
+      servicesList.forEach(s => {
+        const div = document.createElement('div');
+        div.className = "service-card p-3.5 rounded-xl bg-slate-800 border border-slate-700 hover:border-emerald-500 cursor-pointer flex items-center justify-between transition";
+        div.innerHTML = `
+          <div>
+            <h3 class="text-sm font-semibold text-white">${s.name}</h3>
+            <p class="text-xs text-slate-400 mt-1">مدت زمان: ${s.duration} دقیقه</p>
+          </div>
+          <span class="text-xs font-bold text-emerald-400">${s.price}</span>
+        `;
+        div.onclick = () => selectService(div, s.name, s.duration, s.price);
+        container.appendChild(div);
+      });
     }
   
     function openSalarProfile(e) {
@@ -177,11 +199,12 @@
       }
     }
   
-    function selectService(el, sName, duration) {
+    function selectService(el, sName, duration, price) {
       document.querySelectorAll('.service-card').forEach(e => e.classList.remove('border-emerald-500', 'bg-emerald-500/10'));
       el.classList.add('border-emerald-500', 'bg-emerald-500/10');
       service = sName;
       serviceDuration = duration;
+      servicePrice = price;
 
       if (duration <= 30) {
         times = halfHourTimes;
@@ -236,7 +259,6 @@
       times.forEach(t => {
         let isDisabled = false;
         
-        // اگر خدمت انتخاب‌شده طولانی‌تر از ۳۰ دقیقه است (مثل یک‌ساعته)، بررسی می‌کنیم که اگر هر کدام از نیم‌ساعت‌های تشکیل‌دهنده آن بسته شده بود، این بازه هم قفل شود
         if (serviceDuration > 30) {
           const parts = t.split(" - ");
           if (parts.length === 2) {
@@ -373,10 +395,7 @@
         }
   
         let currentSlotKey = `${date}_${time}`;
-        
-        // اگر خدمت انتخابی نیم‌ساعته بود، مستقیم کلید نیم‌ساعته را می‌بندیم
-        // اگر یک‌ساعته بود، علاوه بر کلید اصلی، زیرمجموعه‌های نیم‌ساعته‌اش را هم قفل می‌کنیم تا در هر دو حالت هماهنگ بماند
-        const bookingObj = { name, phone, service, date, time, note, id: Date.now() };
+        const bookingObj = { name, phone, service, date, time, note, price: servicePrice, id: Date.now() };
   
         if (serviceDuration > 30) {
           const parts = time.split(" - ");
@@ -400,13 +419,13 @@
         const adminText = `💈 **نوبت جدید در پیرایش سالار**\n\n` +
           `👤 مشتری: ${name}\n` +
           `📞 تلفن: ${phone}\n` +
-          `✂️ خدمت: ${service}\n` +
+          `✂️ خدمت: ${service} (${servicePrice})\n` +
           `⏰ زمان: ${date} (${time})\n` +
           `📝 توضیحات: ${note}`;
   
         const userText = `✅ **رزرو شما با موفقیت ثبت شد!**\n\n` +
           `سلام ${name} عزیز،\n` +
-          `نوبت شما برای خدمت **${service}** در تاریخ **${date} ساعت ${time}** ثبت گردید.\n\n` +
+          `نوبت شما برای خدمت **${service}** (${servicePrice}) در تاریخ **${date} ساعت ${time}** ثبت گردید.\n\n` +
           `منتظر حضور شما در پیرایش سالار هستیم!✂️`;
   
         document.getElementById('step3').classList.add('hidden');
@@ -436,6 +455,8 @@
         document.getElementById('nextBtn').innerText = 'ادامه';
       }
     }
+
+    loadServices();
   </script>
 </body>
 </html>
