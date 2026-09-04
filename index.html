@@ -44,12 +44,24 @@
         </div>
       </div>
   
-      <!-- مرحله اول: نمونه کارها + لیست خدمات -->
+      <!-- مرحله اول: نمونه کارها (۴تایی ثابت) + لیست خدمات -->
       <div id="step1" class="space-y-3">
         <div>
-          <label class="block text-xs text-slate-300 mb-1.5 font-medium">📸 نمونه کارهای اخیر:</label>
-          <div class="flex gap-2 overflow-x-auto pb-1.5 custom-scrollbar" id="portfolioContainer">
-            <!-- تصاویر نمونه کار به صورت پویا یا ثابت قرار می‌گیرند -->
+          <label class="block text-xs text-slate-300 mb-1.5 font-medium">📸 نمونه کارها:</label>
+          <div class="grid grid-cols-4 gap-2" id="portfolioContainer">
+            <!-- ۴ عکس ثابت بدون اسکرول -->
+            <div class="h-16 rounded-xl overflow-hidden border border-slate-700 bg-slate-800 shadow-sm">
+              <img src="https://images.unsplash.com/photo-1622286342621-4bd786c2447c?w=500&auto=format&fit=crop&q=60" alt="نمونه کار" class="w-full h-full object-cover hover:scale-105 transition duration-300">
+            </div>
+            <div class="h-16 rounded-xl overflow-hidden border border-slate-700 bg-slate-800 shadow-sm">
+              <img src="https://images.unsplash.com/photo-1599351431202-1e0f0137899a?w=500&auto=format&fit=crop&q=60" alt="نمونه کار" class="w-full h-full object-cover hover:scale-105 transition duration-300">
+            </div>
+            <div class="h-16 rounded-xl overflow-hidden border border-slate-700 bg-slate-800 shadow-sm">
+              <img src="https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=500&auto=format&fit=crop&q=60" alt="نمونه کار" class="w-full h-full object-cover hover:scale-105 transition duration-300">
+            </div>
+            <div class="h-16 rounded-xl overflow-hidden border border-slate-700 bg-slate-800 shadow-sm">
+              <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&auto=format&fit=crop&q=60" alt="نمونه کار" class="w-full h-full object-cover hover:scale-105 transition duration-300">
+            </div>
           </div>
         </div>
 
@@ -113,12 +125,11 @@
  <script>
     const WORKER_URL = "https://bale-sender.salar1368yb.workers.dev";
     
-    // لینک عکس‌های نمونه کار شما (می‌توانید عکس‌های خودتان را جایگزین این لینک‌ها کنید)
-    const portfolioImages = [
-      "https://images.unsplash.com/photo-1622286342621-4bd786c2447c?w=500&auto=format&fit=crop&q=60",
-      "https://images.unsplash.com/photo-1599351431202-1e0f0137899a?w=500&auto=format&fit=crop&q=60",
-      "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=500&auto=format&fit=crop&q=60",
-      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&auto=format&fit=crop&q=60"
+    // خدمات اختصاصی شما
+    const customServices = [
+      { name: "اصلاح سر و ریش فید", duration: 60, price: "۳۵۰,۰۰۰ تومان" },
+      { name: "اصلاح سر کلاسیک", duration: 45, price: "۲۵۰,۰۰۰ تومان" },
+      { name: "اصلاح سر فید", duration: 45, price: "۲۸۰,۰۰۰ تومان" }
     ];
 
     const halfHourSlots = [
@@ -149,35 +160,15 @@
       console.error("Bale Init Error:", e);
     }
 
-    function renderPortfolio() {
-      const container = document.getElementById('portfolioContainer');
-      container.innerHTML = '';
-      portfolioImages.forEach(imgUrl => {
-        const imgDiv = document.createElement('div');
-        imgDiv.className = "w-20 h-20 rounded-xl overflow-hidden border border-slate-700 flex-shrink-0 bg-slate-800 shadow-sm";
-        imgDiv.innerHTML = `<img src="${imgUrl}" alt="نمونه کار پیرایش سالار" class="w-full h-full object-cover hover:scale-105 transition duration-300">`;
-        container.appendChild(imgDiv);
-      });
-    }
-
     async function loadServices() {
-      renderPortfolio();
       try {
         const res = await fetch(`${WORKER_URL}/services`);
         const data = await res.json();
-        servicesList = data.services || [
-          { name: "اصلاح و استایل مو", duration: 60, price: "۲۵۰,۰۰۰ تومان" },
-          { name: "اصلاح کامل سر و صورت", duration: 60, price: "۳۵۰,۰۰۰ تومان" },
-          { name: "اصلاح ریش", duration: 30, price: "۱۵۰,۰۰۰ تومان" }
-        ];
+        servicesList = (data.services && data.services.length > 0) ? data.services : customServices;
         renderServices();
       } catch(e) {
         console.error("Error loading services:", e);
-        servicesList = [
-          { name: "اصلاح و استایل مو", duration: 60, price: "۲۵۰,۰۰۰ تومان" },
-          { name: "اصلاح کامل سر و صورت", duration: 60, price: "۳۵۰,۰۰۰ تومان" },
-          { name: "اصلاح ریش", duration: 30, price: "۱۵۰,۰۰۰ تومان" }
-        ];
+        servicesList = customServices;
         renderServices();
       }
     }
@@ -275,7 +266,7 @@
       const container = document.getElementById('timeContainer');
       container.innerHTML = '';
       
-      const slotsNeeded = serviceDuration / 30;
+      const slotsNeeded = Math.ceil(serviceDuration / 30);
       const availableTimes = [];
       for (let i = 0; i <= halfHourSlots.length - slotsNeeded; i++) {
         const startSlot = halfHourSlots[i];
@@ -283,7 +274,7 @@
 
         const startTimeVal = timeToMinutes(startSlot.start);
         const endTimeVal = timeToMinutes(endSlot.end);
-        if (endTimeVal - startTimeVal !== serviceDuration) continue;
+        if (endTimeVal - startTimeVal < serviceDuration) continue;
 
         let isValidRange = true;
         for (let j = 0; j < slotsNeeded; j++) {
@@ -426,7 +417,7 @@
           halfHourSlots.forEach(hs => {
             const hsStart = timeToMinutes(hs.start);
             const hsEnd = timeToMinutes(hs.end);
-            if (hsStart >= startMin && hsEnd <= endMin) {
+            if (hsStart >= startMin && hsEnd < endMin) {
               slotsToDisable.push(`${date}_${hs.start} - ${hs.end}`);
             }
           });
