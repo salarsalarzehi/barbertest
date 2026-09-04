@@ -73,7 +73,7 @@
     ];
 
     const halfHourTimes = [
-      "۱۰:۰۰ - ۱۰:۳۰", "۱۰:۳۰ - ۱۱:۰۰", 
+      "۱۰:۰۰ - ۱۰:۳۰", "۱۰:۳۰ - ۱1:۰۰", 
       "۱۱:۰۰ - ۱۱:۳۰", "۱۱:۳۰ - ۱۲:۰۰", 
       "۱۲:۰۰ - ۱۲:۳۰", "۱۲:۳۰ - ۱۳:۰۰", 
       "۱۶:۰۰ - ۱۶:۳۰", "۱۶:۳۰ - ۱۷:۰۰", 
@@ -88,7 +88,9 @@
 
     async function loadData() {
         const d = new Date();
-        selectedAdminDate = d.toLocaleDateString('fa-IR', { weekday: 'short', month: 'short', day: 'numeric' });
+        if (!selectedAdminDate) {
+            selectedAdminDate = d.toLocaleDateString('fa-IR', { weekday: 'short', month: 'short', day: 'numeric' });
+        }
 
         try {
             // دریافت خدمات و قیمت‌ها
@@ -166,7 +168,6 @@
             const d = new Date();
             d.setDate(d.getDate() + i);
             const labelStr = d.toLocaleDateString('fa-IR', { weekday: 'short', month: 'short', day: 'numeric' });
-            if (i === 0 && !selectedAdminDate) selectedAdminDate = labelStr;
 
             const buttonEl = document.createElement('button');
             buttonEl.type = "button";
