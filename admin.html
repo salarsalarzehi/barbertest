@@ -33,22 +33,22 @@
       </button>
     </div>
 
-    <!-- بخش مدیریت سانس‌های رزرو شده / مسدود شده (منتقل شده به بالا) -->
+    <!-- بخش ۱: مدیریت سانس‌های رزرو شده (منتقل شده به بالا) -->
     <div class="space-y-4 bg-slate-800/40 p-4 rounded-2xl border border-slate-800">
       <h2 class="text-xs font-bold text-sky-400 flex items-center gap-2">
         <i class="fa-solid fa-calendar-days"></i> مدیریت سانس‌های رزرو یا غیرفعال
       </h2>
       <p class="text-[11px] text-slate-400 leading-relaxed">
-        اگر سانسی رزرو شده و می‌خواهید دوباره آن را برای مشتریان آزاد کنید، می‌توانید از لیست زیر آن را آزاد کنید.
+        اگر سانسی رزرو شده و می‌خواهید دوباره آن را برای مشتریان آزاد کنید، از لیست زیر آن را آزاد کنید.
       </p>
       <div class="mt-2">
         <div id="disabledSlotsList" class="space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
-          <p class="text-xs text-slate-500 text-center py-2">هیچ سانسی مسدود نشده است (همه سانس‌ها آزادند).</p>
+          <p class="text-xs text-slate-500 text-center py-2">در حال بارگذاری سانس‌ها...</p>
         </div>
       </div>
     </div>
 
-    <!-- بخش مدیریت خدمات -->
+    <!-- بخش ۲: مدیریت خدمات -->
     <div class="space-y-4 bg-slate-800/40 p-4 rounded-2xl border border-slate-800">
       <h2 class="text-xs font-bold text-emerald-400 flex items-center gap-2">
         <i class="fa-solid fa-scissors"></i> افزودن خدمت جدید
@@ -81,7 +81,7 @@
       </div>
     </div>
 
-    <!-- بخش مدیریت محصولات -->
+    <!-- بخش ۳: مدیریت محصولات (با قابلیت Choose File) -->
     <div class="space-y-4 bg-slate-800/40 p-4 rounded-2xl border border-slate-800">
       <h2 class="text-xs font-bold text-amber-400 flex items-center gap-2">
         <i class="fa-solid fa-box"></i> افزودن محصول جدید (فروشگاه)
@@ -97,8 +97,8 @@
             <input type="text" id="prodPrice" placeholder="قیمت محصول..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-amber-500">
           </div>
           <div>
-            <label class="block text-[11px] text-slate-300 mb-1">لینک تصویر محصول:</label>
-            <input type="text" id="prodImage" placeholder="آدرس لینک عکس..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-amber-500" dir="ltr">
+            <label class="block text-[11px] text-slate-300 mb-1">انتخاب تصویر محصول (Choose File):</label>
+            <input type="file" id="prodImageFile" accept="image/*" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-1.5 text-[10px] text-slate-300 file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-[10px] file:font-semibold file:bg-amber-500 file:text-white hover:file:bg-amber-600 cursor-pointer">
           </div>
         </div>
         <button onclick="addProduct()" class="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition cursor-pointer">
@@ -119,17 +119,19 @@
   <script>
     const WORKER_URL = "https://bale-sender.salar1368yb.workers.dev";
     
-    let customServices = [];
-    let customProducts = [];
-    let disabledSlots = [];
+    let adminData = {
+      disabledSlots: [],
+      customProducts: [],
+      customServices: []
+    };
 
     async function loadData() {
       try {
         const res = await fetch(`${WORKER_URL}/admin-data`, { cache: 'no-store' });
         const data = await res.json();
-        customServices = Array.isArray(data.customServices) ? data.customServices : [];
-        customProducts = Array.isArray(data.customProducts) ? data.customProducts : [];
-        disabledSlots = Array.isArray(data.disabledSlots) ? data.disabledSlots : [];
+        adminData.disabledSlots = Array.isArray(data.disabledSlots) ? data.disabledSlots : [];
+        adminData.customProducts = Array.isArray(data.customProducts) ? data.customProducts : [];
+        adminData.customServices = Array.isArray(data.customServices) ? data.customServices : [];
         renderUI();
       } catch (err) {
         console.error("خطا در دریافت اطلاعات:", err);
@@ -142,7 +144,7 @@
         const res = await fetch(`${WORKER_URL}/admin-update`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ customServices, customProducts, disabledSlots })
+          body: JSON.stringify(adminData)
         });
         if (!res.ok) throw new Error('خطا در ذخیره‌سازی سرور');
         renderUI();
@@ -153,14 +155,32 @@
     }
 
     function renderUI() {
-      // رندر لیست خدمات
+      // ۱. رندر سانس‌های مسدود شده
+      const slotsContainer = document.getElementById('disabledSlotsList');
+      slotsContainer.innerHTML = '';
+      if (adminData.disabledSlots.length === 0) {
+        slotsContainer.innerHTML = '<p class="text-xs text-slate-500 text-center py-2">هیچ سانسی مسدود نشده است (همه سانس‌ها آزادند).</p>';
+      } else {
+        adminData.disabledSlots.forEach((slotKey, index) => {
+          const div = document.createElement('div');
+          div.className = "flex items-center justify-between p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs";
+          div.innerHTML = `
+            <span class="text-slate-300 font-mono" dir="ltr">${slotKey}</span>
+            <button onclick="freeSlot(${index})" class="px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-white text-xs transition cursor-pointer">
+              آزاد کردن سانس
+            </button>
+          `;
+          slotsContainer.appendChild(div);
+        });
+      }
+
+      // ۲. رندر لیست خدمات
       const srvContainer = document.getElementById('servicesList');
       srvContainer.innerHTML = '';
-      
-      if (customServices.length === 0) {
-        srvContainer.innerHTML = '<p class="text-xs text-slate-500 text-center py-2">هیچ خدمتی ثبت نشده است. (خدمات پیش‌فرض در مینی‌اپ فعالند)</p>';
+      if (adminData.customServices.length === 0) {
+        srvContainer.innerHTML = '<p class="text-xs text-slate-500 text-center py-2">هیچ خدمت سفارشی ثبت نشده است.</p>';
       } else {
-        customServices.forEach((s, index) => {
+        adminData.customServices.forEach((s, index) => {
           const div = document.createElement('div');
           div.className = "flex items-center justify-between p-2.5 bg-slate-800 border border-slate-700 rounded-xl";
           div.innerHTML = `
@@ -176,14 +196,13 @@
         });
       }
 
-      // رندر لیست محصولات
+      // ۳. رندر لیست محصولات
       const prodContainer = document.getElementById('productsList');
       prodContainer.innerHTML = '';
-
-      if (customProducts.length === 0) {
+      if (adminData.customProducts.length === 0) {
         prodContainer.innerHTML = '<p class="text-xs text-slate-500 text-center py-2">محصولی ثبت نشده است.</p>';
       } else {
-        customProducts.forEach((p, index) => {
+        adminData.customProducts.forEach((p, index) => {
           const div = document.createElement('div');
           div.className = "flex items-center justify-between p-2.5 bg-slate-800 border border-slate-700 rounded-xl";
           div.innerHTML = `
@@ -201,26 +220,6 @@
           prodContainer.appendChild(div);
         });
       }
-
-      // رندر سانس‌های مسدود شده
-      const slotsContainer = document.getElementById('disabledSlotsList');
-      slotsContainer.innerHTML = '';
-
-      if (disabledSlots.length === 0) {
-        slotsContainer.innerHTML = '<p class="text-xs text-slate-500 text-center py-2">هیچ سانسی مسدود نشده است (همه سانس‌ها آزادند).</p>';
-      } else {
-        disabledSlots.forEach((slotKey, index) => {
-          const div = document.createElement('div');
-          div.className = "flex items-center justify-between p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs";
-          div.innerHTML = `
-            <span class="text-slate-300 font-mono" dir="ltr">${slotKey}</span>
-            <button onclick="freeSlot(${index})" class="px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-white text-xs transition cursor-pointer">
-              آزاد کردن سانس
-            </button>
-          `;
-          slotsContainer.appendChild(div);
-        });
-      }
     }
 
     async function addService() {
@@ -233,7 +232,9 @@
         return;
       }
 
-      customServices.push({ name, price, duration, type: 'service' });
+      if (!Array.isArray(adminData.customServices)) adminData.customServices = [];
+      adminData.customServices.push({ name, price, duration });
+      
       document.getElementById('srvName').value = '';
       document.getElementById('srvPrice').value = '';
       document.getElementById('srvDuration').value = '';
@@ -243,7 +244,7 @@
 
     async function removeService(index) {
       if (confirm('آیا از حذف این خدمت اطمینان دارید؟')) {
-        customServices.splice(index, 1);
+        adminData.customServices.splice(index, 1);
         await saveData();
       }
     }
@@ -251,31 +252,42 @@
     async function addProduct() {
       const name = document.getElementById('prodName').value.trim();
       const price = document.getElementById('prodPrice').value.trim();
-      const image = document.getElementById('prodImage').value.trim();
+      const fileInput = document.getElementById('prodImageFile');
 
-      if (!name || !price || !image) {
-        alert('لطفاً تمام فیلدهای محصول را پر کنید.');
+      if (!name || !price || fileInput.files.length === 0) {
+        alert('لطفاً نام، قیمت و تصویر محصول را انتخاب کنید.');
         return;
       }
 
-      customProducts.push({ name, price, image, type: 'product' });
-      document.getElementById('prodName').value = '';
-      document.getElementById('prodPrice').value = '';
-      document.getElementById('prodImage').value = '';
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+      
+      reader.onload = async function(e) {
+        const base64Image = e.target.result;
+        if (!Array.isArray(adminData.customProducts)) adminData.customProducts = [];
+        
+        adminData.customProducts.push({ name, price, image: base64Image });
+        
+        document.getElementById('prodName').value = '';
+        document.getElementById('prodPrice').value = '';
+        fileInput.value = '';
 
-      await saveData();
+        await saveData();
+      };
+
+      reader.readAsDataURL(file);
     }
 
     async function removeProduct(index) {
       if (confirm('آیا از حذف این محصول اطمینان دارید؟')) {
-        customProducts.splice(index, 1);
+        adminData.customProducts.splice(index, 1);
         await saveData();
       }
     }
 
     async function freeSlot(index) {
       if (confirm('آیا می‌خواهید این سانس را آزاد کنید تا دوباره قابل رزرو باشد؟')) {
-        disabledSlots.splice(index, 1);
+        adminData.disabledSlots.splice(index, 1);
         await saveData();
       }
     }
