@@ -51,7 +51,6 @@
         <div>
           <label class="block text-xs text-emerald-400 mb-1.5 font-bold">✂️ خدمات:</label>
           <div id="servicesListContainer" class="space-y-2.5">
-            <!-- در حال بارگذاری اولیه -->
             <div class="p-3 text-center text-xs text-slate-400">در حال دریافت خدمات...</div>
           </div>
         </div>
@@ -115,17 +114,10 @@
  <script>
     const WORKER_URL = "https://bale-sender.salar1368yb.workers.dev";
     
-    // خدمات پیش‌فرض ایمن (اگر پنل ادمین موقتاً قطع بود، این موارد نمایش داده می‌شوند)
-    let defaultServices = [
-      { name: "اصلاح سر و ریش فید", type: "service", duration: 60, price: "۳۵۰,۰۰۰ تومان", icon: "fa-scissors" },
-      { name: "اصلاح سر کلاسیک", type: "service", duration: 45, price: "۲۵۰,۰۰۰ تومان", icon: "fa-scissors" }
-    ];
-
     let customServices = [];
     let customProducts = [];
     let disabledSlots = [];
     
-    // بازه کامل سانس‌ها از ۱۰ صبح تا ۱۰ شب
     const halfHourSlots = [
       { start: "۱۰:۰۰", end: "۱۰:۳۰" }, { start: "۱۰:۳۰", end: "۱۱:۰۰" }, 
       { start: "۱۱:۰۰", end: "۱۱:۳۰" }, { start: "۱۱:۳۰", end: "۱۲:۰۰" }, 
@@ -165,7 +157,7 @@
         customServices = Array.isArray(data.customServices) ? data.customServices : [];
         disabledSlots = Array.isArray(data.disabledSlots) ? data.disabledSlots : [];
       } catch(e) {
-        console.warn("استفاده از مقادیر پیش‌فرض به دلیل عدم دسترسی به سرور:", e);
+        console.warn("خطا در دریافت اطلاعات از سرور:", e);
       }
       renderCatalog();
     }
@@ -177,52 +169,47 @@
       servicesContainer.innerHTML = '';
       productsContainer.innerHTML = '';
 
-      const allServices = [...defaultServices, ...customServices.map(s => ({
-        name: s.name,
-        type: 'service',
-        duration: parseInt(s.duration) || 30,
-        price: s.price,
-        icon: 'fa-scissors'
-      }))];
-
-      allServices.forEach(item => {
-        const div = document.createElement('div');
-        div.className = "service-card p-3 rounded-xl bg-slate-800 border border-slate-700 hover:border-emerald-500 cursor-pointer flex items-center justify-between transition";
-        div.innerHTML = `
-          <div class="flex items-center gap-2.5">
-            <div class="w-8 h-8 rounded-lg bg-slate-700 flex items-center justify-center text-slate-300"><i class="fa-solid ${item.icon || 'fa-scissors'}"></i></div>
-            <div>
-              <h3 class="text-xs font-semibold text-white">${item.name}</h3>
-              <p class="text-[11px] text-slate-400 mt-0.5">مدت زمان: ${item.duration} دقیقه</p>
+      if (customServices.length === 0) {
+        servicesContainer.innerHTML = '<p class="text-xs text-slate-500 text-center py-2">خدمتی در حال حاضر تعریف نشده است.</p>';
+      } else {
+        customServices.forEach(item => {
+          const div = document.createElement('div');
+          div.className = "service-card p-3 rounded-xl bg-slate-800 border border-slate-700 hover:border-emerald-500 cursor-pointer flex items-center justify-between transition";
+          div.innerHTML = `
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-lg bg-slate-700 flex items-center justify-center text-slate-300"><i class="fa-solid fa-scissors"></i></div>
+              <div>
+                <h3 class="text-xs font-semibold text-white">${item.name}</h3>
+                <p class="text-[11px] text-slate-400 mt-0.5">مدت زمان: ${item.duration || 30} دقیقه</p>
+              </div>
             </div>
-          </div>
-          <span class="text-xs font-bold text-emerald-400">${item.price}</span>
-        `;
-        div.onclick = () => selectCatalogItem(div, item);
-        servicesContainer.appendChild(div);
-      });
+            <span class="text-xs font-bold text-emerald-400">${item.price}</span>
+          `;
+          div.onclick = () => selectCatalogItem(div, { ...item, type: 'service' });
+          servicesContainer.appendChild(div);
+        });
+      }
 
       if (customProducts.length === 0) {
         productsContainer.innerHTML = '<p class="text-xs text-slate-500 text-center py-2">محصولی در فروشگاه موجود نیست.</p>';
-        return;
-      }
-
-      customProducts.forEach(item => {
-        const div = document.createElement('div');
-        div.className = "service-card p-3 rounded-xl bg-slate-800 border border-slate-700 hover:border-amber-500 cursor-pointer flex items-center justify-between transition";
-        div.innerHTML = `
-          <div class="flex items-center gap-2.5">
-            <img src="${item.image}" class="w-10 h-10 rounded-lg object-cover border border-slate-700">
-            <div>
-              <h3 class="text-xs font-semibold text-white">${item.name}</h3>
-              <p class="text-[11px] text-slate-400 mt-0.5">تحویل حضوری در سالن</p>
+      } else {
+        customProducts.forEach(item => {
+          const div = document.createElement('div');
+          div.className = "service-card p-3 rounded-xl bg-slate-800 border border-slate-700 hover:border-amber-500 cursor-pointer flex items-center justify-between transition";
+          div.innerHTML = `
+            <div class="flex items-center gap-2.5">
+              <img src="${item.image}" class="w-10 h-10 rounded-lg object-cover border border-slate-700">
+              <div>
+                <h3 class="text-xs font-semibold text-white">${item.name}</h3>
+                <p class="text-[11px] text-slate-400 mt-0.5">تحویل حضوری در سالن</p>
+              </div>
             </div>
-          </div>
-          <span class="text-xs font-bold text-amber-400">${item.price}</span>
-        `;
-        div.onclick = () => selectCatalogItem(div, item);
-        productsContainer.appendChild(div);
-      });
+            <span class="text-xs font-bold text-amber-400">${item.price}</span>
+          `;
+          div.onclick = () => selectCatalogItem(div, { ...item, type: 'product' });
+          productsContainer.appendChild(div);
+        });
+      }
     }
 
     function selectCatalogItem(el, item) {
@@ -234,7 +221,7 @@
       }
       selectedItem = item;
       itemType = item.type || 'product';
-      serviceDuration = item.duration || 0;
+      serviceDuration = parseInt(item.duration) || 30;
 
       const btn = document.getElementById('nextBtn');
       btn.disabled = false;
