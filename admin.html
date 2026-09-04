@@ -5,12 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>پنل مدیریت پیرایش سالار</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- اضافه کردن کتابخانه تقویم شمسی -->
+  <script src="https://cdn.jsdelivr.net/npm/jalaali-js/dist/jalaali.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
   <style>
     body { font-family: 'Vazirmatn', sans-serif !important; background-color: #0f172a; color: #f8fafc; }
     .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    .horizontal-scroll::-webkit-scrollbar { height: 4px; }
+    .horizontal-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
   </style>
 </head>
 <body class="min-h-screen p-4 flex flex-col items-center justify-start">
@@ -33,17 +37,29 @@
       </button>
     </div>
 
-    <!-- بخش ۱: مدیریت سانس‌های رزرو شده (منتقل شده به بالا) -->
+    <!-- بخش ۱: مدیریت و قفل/آزادسازی سانس‌ها (کاروسل شمسی و ساعات ۸ صبح تا ۲۲ شب) -->
     <div class="space-y-4 bg-slate-800/40 p-4 rounded-2xl border border-slate-800">
       <h2 class="text-xs font-bold text-sky-400 flex items-center gap-2">
-        <i class="fa-solid fa-calendar-days"></i> مدیریت سانس‌های رزرو یا غیرفعال
+        <i class="fa-solid fa-calendar-days"></i> مدیریت سانس‌های کاری (قفل و آزاد کردن)
       </h2>
       <p class="text-[11px] text-slate-400 leading-relaxed">
-        اگر سانسی رزرو شده و می‌خواهید دوباره آن را برای مشتریان آزاد کنید، از لیست زیر آن را آزاد کنید.
+        روز مورد نظر را از کاروسل شمسی زیر انتخاب کنید (۸ صبح تا ۱۰ شب) و با کلیک روی هر سانس، آن را قفل یا آزاد کنید.
       </p>
-      <div class="mt-2">
-        <div id="disabledSlotsList" class="space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
-          <p class="text-xs text-slate-500 text-center py-2">در حال بارگذاری سانس‌ها...</p>
+      
+      <!-- کاروسل انتخاب تاریخ شمسی -->
+      <div class="relative">
+        <div id="dateCarousel" class="flex gap-2 overflow-x-auto horizontal-scroll py-2 px-1 scroll-smooth">
+          <!-- روزها به صورت دینامیک اینجا بارگذاری می‌شوند -->
+        </div>
+      </div>
+
+      <!-- لیست سانس‌های روز انتخاب شده -->
+      <div class="mt-2 pt-3 border-t border-slate-800">
+        <div class="flex justify-between items-center mb-2">
+          <span id="selectedDateLabel" class="text-xs font-bold text-slate-300">سانس‌های تاریخ: -</span>
+        </div>
+        <div id="timeSlotsGrid" class="grid grid-cols-2 gap-2 max-h-56 overflow-y-auto custom-scrollbar p-1">
+          <p class="text-xs text-slate-500 text-center col-span-2 py-2">لطفاً یک روز را انتخاب کنید.</p>
         </div>
       </div>
     </div>
@@ -81,7 +97,7 @@
       </div>
     </div>
 
-    <!-- بخش ۳: مدیریت محصولات (با قابلیت Choose File) -->
+    <!-- بخش ۳: مدیریت محصولات -->
     <div class="space-y-4 bg-slate-800/40 p-4 rounded-2xl border border-slate-800">
       <h2 class="text-xs font-bold text-amber-400 flex items-center gap-2">
         <i class="fa-solid fa-box"></i> افزودن محصول جدید (فروشگاه)
@@ -125,6 +141,68 @@
       customServices: []
     };
 
+    let selectedDateStr = "";
+
+    document.addEventListener("DOMContentLoaded", () => {
+      initJalaaliCarousel();
+      loadData();
+    });
+
+    // ساخت کاروسل تاریخ شمسی (۳۰ روز آینده)
+    function initJalaaliCarousel() {
+      const carousel = document.getElementById('dateCarousel');
+      carousel.innerHTML = '';
+
+      const persianDays = ['یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنج‌شنبه', 'جمعه', 'شنبه'];
+      const persianMonths = ['', 'فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
+      
+      const today = new Date();
+
+      for (let i = 0; i < 30; i++) {
+        const d = new Date();
+        d.setDate(today.getDate() + i);
+
+        // تبدیل تاریخ میلادی به شمسی با کتابخانه jalaali-js
+        const j = jalaali.toJalaali(d.getFullYear(), d.getMonth() + 1, d.getDate());
+        
+        const jy = j.jy;
+        const jm = String(j.jm).padStart(2, '0');
+        const jd = String(j.jd).padStart(2, '0');
+        const dateKey = `${jy}-${jm}-${jd}`; // فرمت استاندارد yyyy-mm-dd شمسی
+
+        const dayName = persianDays[d.getDay()];
+        const displayDate = `${j.jd} ${persianMonths[j.jm]}`;
+
+        if (i === 0) {
+          selectedDateStr = dateKey; // انتخاب پیش‌فرض امروز
+        }
+
+        const btn = document.createElement('button');
+        btn.className = `flex flex-col items-center justify-center min-w-[75px] py-2 px-3 rounded-2xl border transition cursor-pointer ${
+          dateKey === selectedDateStr 
+            ? 'bg-sky-500 border-sky-400 text-white shadow-lg shadow-sky-500/20' 
+            : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'
+        }`;
+        btn.onclick = () => selectDate(dateKey, btn);
+
+        btn.innerHTML = `
+          <span class="text-[10px] opacity-80">${dayName}</span>
+          <span class="text-xs font-bold mt-0.5">${displayDate}</span>
+        `;
+        carousel.appendChild(btn);
+      }
+    }
+
+    function selectDate(dateKey, btnElement) {
+      selectedDateStr = dateKey;
+      document.querySelectorAll('#dateCarousel button').forEach(b => {
+        b.className = "flex flex-col items-center justify-center min-w-[75px] py-2 px-3 rounded-2xl border transition cursor-pointer bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700";
+      });
+      btnElement.className = "flex flex-col items-center justify-center min-w-[75px] py-2 px-3 rounded-2xl border transition cursor-pointer bg-sky-500 border-sky-400 text-white shadow-lg shadow-sky-500/20";
+      
+      renderTimeSlots();
+    }
+
     async function loadData() {
       try {
         const res = await fetch(`${WORKER_URL}/admin-data`, { cache: 'no-store' });
@@ -134,7 +212,7 @@
         adminData.customServices = Array.isArray(data.customServices) ? data.customServices : [];
         renderUI();
       } catch (err) {
-        console.error("خطا در دریافت اطلاعات:", err);
+        console.error("خطا در ارتباط با سرور:", err);
         alert("خطا در ارتباط با سرور برای دریافت اطلاعات.");
       }
     }
@@ -155,71 +233,110 @@
     }
 
     function renderUI() {
-      // ۱. رندر سانس‌های مسدود شده
-      const slotsContainer = document.getElementById('disabledSlotsList');
+      renderTimeSlots();
+      renderServices();
+      renderProducts();
+    }
+
+    // بازه زمانی از ۸ صبح تا ۱۰ شب (۲۲:۰۰) با فاصله نیم ساعته
+    function renderTimeSlots() {
+      const slotsContainer = document.getElementById('timeSlotsGrid');
+      const dateLabel = document.getElementById('selectedDateLabel');
+      if (!slotsContainer) return;
+
+      dateLabel.innerText = `سانس‌های تاریخ: ${selectedDateStr}`;
       slotsContainer.innerHTML = '';
-      if (adminData.disabledSlots.length === 0) {
-        slotsContainer.innerHTML = '<p class="text-xs text-slate-500 text-center py-2">هیچ سانسی مسدود نشده است (همه سانس‌ها آزادند).</p>';
-      } else {
-        adminData.disabledSlots.forEach((slotKey, index) => {
-          const div = document.createElement('div');
-          div.className = "flex items-center justify-between p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-xs";
-          div.innerHTML = `
-            <span class="text-slate-300 font-mono" dir="ltr">${slotKey}</span>
-            <button onclick="freeSlot(${index})" class="px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-white text-xs transition cursor-pointer">
-              آزاد کردن سانس
-            </button>
-          `;
-          slotsContainer.appendChild(div);
+
+      const slots = [];
+      for (let hour = 8; hour < 22; hour++) {
+        ['00', '30'].forEach(minute => {
+          const timeStr = `${String(hour).padStart(2, '0')}:${minute}`;
+          slots.push(`${selectedDateStr}_${timeStr}`);
         });
       }
 
-      // ۲. رندر لیست خدمات
+      slots.forEach(slotKey => {
+        const timeOnly = slotKey.split('_')[1];
+        const isDisabled = adminData.disabledSlots.includes(slotKey);
+
+        const div = document.createElement('div');
+        div.className = `flex items-center justify-between p-2 rounded-xl border text-xs ${
+          isDisabled 
+            ? 'bg-rose-500/10 border-rose-500/30 text-rose-300' 
+            : 'bg-slate-800 border-slate-700 text-slate-200'
+        }`;
+        
+        div.innerHTML = `
+          <span class="font-mono font-bold">${timeOnly}</span>
+          <button onclick="toggleSlot('${slotKey}')" class="px-2 py-1 rounded-lg text-[11px] transition cursor-pointer ${
+            isDisabled 
+              ? 'bg-rose-500 text-white hover:bg-rose-600' 
+              : 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-white'
+          }">
+            ${isDisabled ? 'قفل شده (آزاد کردن)' : 'آزاد (قفل کردن)'}
+          </button>
+        `;
+        slotsContainer.appendChild(div);
+      });
+    }
+
+    async function toggleSlot(slotKey) {
+      const index = adminData.disabledSlots.indexOf(slotKey);
+      if (index > -1) {
+        adminData.disabledSlots.splice(index, 1);
+      } else {
+        adminData.disabledSlots.push(slotKey);
+      }
+      await saveData();
+    }
+
+    function renderServices() {
       const srvContainer = document.getElementById('servicesList');
       srvContainer.innerHTML = '';
       if (adminData.customServices.length === 0) {
         srvContainer.innerHTML = '<p class="text-xs text-slate-500 text-center py-2">هیچ خدمت سفارشی ثبت نشده است.</p>';
-      } else {
-        adminData.customServices.forEach((s, index) => {
-          const div = document.createElement('div');
-          div.className = "flex items-center justify-between p-2.5 bg-slate-800 border border-slate-700 rounded-xl";
-          div.innerHTML = `
-            <div>
-              <h4 class="text-xs font-bold text-white">${s.name}</h4>
-              <p class="text-[11px] text-slate-400 mt-0.5">${s.price} — ${s.duration} دقیقه</p>
-            </div>
-            <button onclick="removeService(${index})" class="px-2.5 py-1 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white text-xs transition cursor-pointer">
-              <i class="fa-solid fa-trash"></i>
-            </button>
-          `;
-          srvContainer.appendChild(div);
-        });
+        return;
       }
+      adminData.customServices.forEach((s, index) => {
+        const div = document.createElement('div');
+        div.className = "flex items-center justify-between p-2.5 bg-slate-800 border border-slate-700 rounded-xl";
+        div.innerHTML = `
+          <div>
+            <h4 class="text-xs font-bold text-white">${s.name}</h4>
+            <p class="text-[11px] text-slate-400 mt-0.5">${s.price} — ${s.duration} دقیقه</p>
+          </div>
+          <button onclick="removeService(${index})" class="px-2.5 py-1 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white text-xs transition cursor-pointer">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        `;
+        srvContainer.appendChild(div);
+      });
+    }
 
-      // ۳. رندر لیست محصولات
+    function renderProducts() {
       const prodContainer = document.getElementById('productsList');
       prodContainer.innerHTML = '';
       if (adminData.customProducts.length === 0) {
         prodContainer.innerHTML = '<p class="text-xs text-slate-500 text-center py-2">محصولی ثبت نشده است.</p>';
-      } else {
-        adminData.customProducts.forEach((p, index) => {
-          const div = document.createElement('div');
-          div.className = "flex items-center justify-between p-2.5 bg-slate-800 border border-slate-700 rounded-xl";
-          div.innerHTML = `
-            <div class="flex items-center gap-2.5">
-              <img src="${p.image}" class="w-8 h-8 rounded-lg object-cover border border-slate-700">
-              <div>
-                <h4 class="text-xs font-bold text-white">${p.name}</h4>
-                <p class="text-[11px] text-slate-400 mt-0.5">${p.price}</p>
-              </div>
-            </div>
-            <button onclick="removeProduct(${index})" class="px-2.5 py-1 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white text-xs transition cursor-pointer">
-              <i class="fa-solid fa-trash"></i>
-            </button>
-          `;
-          prodContainer.appendChild(div);
-        });
+        return;
       }
+      adminData.customProducts.forEach((p, index) => {
+        const div = document.createElement('div');
+        div.className = "flex items-center justify-between p-2.5 bg-slate-800 border border-slate-700 rounded-xl";
+        div.innerHTML = `
+          <div class="flex items-center gap-2.5">
+            <img src="${p.image}" class="w-8 h-8 rounded-lg object-cover border border-slate-700">
+            <div>
+              <h4 class="text-xs font-bold text-white">${p.name}</h4>
+              <p class="text-[11px] text-slate-400 mt-0.5">${p.price}</p>
+            </div>
+          </div>
+          <button onclick="removeProduct(${index})" class="px-2.5 py-1 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white text-xs transition cursor-pointer">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        `;
+        prodContainer.appendChild(div);
+      });
     }
 
     async function addService() {
@@ -284,15 +401,6 @@
         await saveData();
       }
     }
-
-    async function freeSlot(index) {
-      if (confirm('آیا می‌خواهید این سانس را آزاد کنید تا دوباره قابل رزرو باشد؟')) {
-        adminData.disabledSlots.splice(index, 1);
-        await saveData();
-      }
-    }
-
-    loadData();
   </script>
 </body>
 </html>
