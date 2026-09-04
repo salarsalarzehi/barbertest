@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>پنل مدیریت پیرایش سالار</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- اضافه کردن کتابخانه تقویم شمسی -->
+  <!-- کتابخانه تقویم شمسی -->
   <script src="https://cdn.jsdelivr.net/npm/jalaali-js/dist/jalaali.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
@@ -37,13 +37,13 @@
       </button>
     </div>
 
-    <!-- بخش ۱: مدیریت و قفل/آزادسازی سانس‌ها (کاروسل شمسی و ساعات ۸ صبح تا ۲۲ شب) -->
+    <!-- بخش ۱: مدیریت و قفل/آزادسازی سانس‌ها همراه با دکمه ذخیره -->
     <div class="space-y-4 bg-slate-800/40 p-4 rounded-2xl border border-slate-800">
       <h2 class="text-xs font-bold text-sky-400 flex items-center gap-2">
-        <i class="fa-solid fa-calendar-days"></i> مدیریت سانس‌های کاری (قفل و آزاد کردن)
+        <i class="fa-solid fa-calendar-days"></i> مدیریت سانس‌های کاری (۸ صبح تا ۱۰ شب)
       </h2>
       <p class="text-[11px] text-slate-400 leading-relaxed">
-        روز مورد نظر را از کاروسل شمسی زیر انتخاب کنید (۸ صبح تا ۱۰ شب) و با کلیک روی هر سانس، آن را قفل یا آزاد کنید.
+        روز مورد نظر را انتخاب کنید، سانس‌های دلخواه را قفل یا آزاد کنید و در نهایت روی دکمه ذخیره بزنید تا در اپلیکیشن اعمال شود.
       </p>
       
       <!-- کاروسل انتخاب تاریخ شمسی -->
@@ -54,13 +54,20 @@
       </div>
 
       <!-- لیست سانس‌های روز انتخاب شده -->
-      <div class="mt-2 pt-3 border-t border-slate-800">
-        <div class="flex justify-between items-center mb-2">
+      <div class="mt-2 pt-3 border-t border-slate-800 space-y-3">
+        <div class="flex justify-between items-center">
           <span id="selectedDateLabel" class="text-xs font-bold text-slate-300">سانس‌های تاریخ: -</span>
+          <span class="text-[10px] text-sky-400 bg-sky-500/10 px-2 py-1 rounded-lg">نیم ساعت به نیم ساعت</span>
         </div>
-        <div id="timeSlotsGrid" class="grid grid-cols-2 gap-2 max-h-56 overflow-y-auto custom-scrollbar p-1">
+        
+        <div id="timeSlotsGrid" class="grid grid-cols-2 gap-2 max-h-52 overflow-y-auto custom-scrollbar p-1">
           <p class="text-xs text-slate-500 text-center col-span-2 py-2">لطفاً یک روز را انتخاب کنید.</p>
         </div>
+
+        <!-- دکمه ذخیره تغییرات سانس‌ها -->
+        <button onclick="saveTimeSlotsChanges()" class="w-full py-2.5 rounded-xl bg-sky-500 hover:bg-sky-600 text-white text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-sky-500/20">
+          <i class="fa-solid fa-floppy-disk"></i> ذخیره تغییرات سانس‌های این روز
+        </button>
       </div>
     </div>
 
@@ -162,19 +169,18 @@
         const d = new Date();
         d.setDate(today.getDate() + i);
 
-        // تبدیل تاریخ میلادی به شمسی با کتابخانه jalaali-js
         const j = jalaali.toJalaali(d.getFullYear(), d.getMonth() + 1, d.getDate());
         
         const jy = j.jy;
         const jm = String(j.jm).padStart(2, '0');
         const jd = String(j.jd).padStart(2, '0');
-        const dateKey = `${jy}-${jm}-${jd}`; // فرمت استاندارد yyyy-mm-dd شمسی
+        const dateKey = `${jy}-${jm}-${jd}`;
 
         const dayName = persianDays[d.getDay()];
         const displayDate = `${j.jd} ${persianMonths[j.jm]}`;
 
         if (i === 0) {
-          selectedDateStr = dateKey; // انتخاب پیش‌فرض امروز
+          selectedDateStr = dateKey;
         }
 
         const btn = document.createElement('button');
@@ -225,6 +231,7 @@
           body: JSON.stringify(adminData)
         });
         if (!res.ok) throw new Error('خطا در ذخیره‌سازی سرور');
+        alert("تغییرات با موفقیت در اپلیکیشن ذخیره شد!");
         renderUI();
       } catch (err) {
         console.error(err);
@@ -265,10 +272,11 @@
             ? 'bg-rose-500/10 border-rose-500/30 text-rose-300' 
             : 'bg-slate-800 border-slate-700 text-slate-200'
         }`;
+        div.id = `slot_box_${slotKey}`;
         
         div.innerHTML = `
           <span class="font-mono font-bold">${timeOnly}</span>
-          <button onclick="toggleSlot('${slotKey}')" class="px-2 py-1 rounded-lg text-[11px] transition cursor-pointer ${
+          <button type="button" onclick="toggleSlotLocal('${slotKey}')" id="slot_btn_${slotKey}" class="px-2 py-1 rounded-lg text-[11px] transition cursor-pointer ${
             isDisabled 
               ? 'bg-rose-500 text-white hover:bg-rose-600' 
               : 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-white'
@@ -280,13 +288,29 @@
       });
     }
 
-    async function toggleSlot(slotKey) {
+    // تغییر وضعیت موقت روی صفحه (بدون ذخیره فوری در سرور)
+    function toggleSlotLocal(slotKey) {
       const index = adminData.disabledSlots.indexOf(slotKey);
+      const box = document.getElementById(`slot_box_${slotKey}`);
+      const btn = document.getElementById(`slot_btn_${slotKey}`);
+
       if (index > -1) {
+        // آزاد کردن
         adminData.disabledSlots.splice(index, 1);
+        box.className = "flex items-center justify-between p-2 rounded-xl border text-xs bg-slate-800 border-slate-700 text-slate-200";
+        btn.className = "px-2 py-1 rounded-lg text-[11px] transition cursor-pointer bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-white";
+        btn.innerText = "آزاد (قفل کردن)";
       } else {
+        // قفل کردن
         adminData.disabledSlots.push(slotKey);
+        box.className = "flex items-center justify-between p-2 rounded-xl border text-xs bg-rose-500/10 border-rose-500/30 text-rose-300";
+        btn.className = "px-2 py-1 rounded-lg text-[11px] transition cursor-pointer bg-rose-500 text-white hover:bg-rose-600";
+        btn.innerText = "قفل شده (آزاد کردن)";
       }
+    }
+
+    // دکمه نهایی ذخیره سانس‌ها
+    async function saveTimeSlotsChanges() {
       await saveData();
     }
 
