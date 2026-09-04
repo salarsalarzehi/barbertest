@@ -39,8 +39,13 @@
       </div>
 
       <div class="space-y-3">
-        <div class="flex items-center justify-between">
-          <span class="text-xs text-slate-400">برای بستن یا آزاد کردن هر سانس روی آن کلیک کنید:</span>
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <span class="text-xs text-slate-400">برای بستن یا آزاد کردن هر بازه روی آن کلیک کنید:</span>
+          <!-- کلید انتخاب نوع نمایش بازه‌ها در ادمین -->
+          <div class="flex bg-slate-800 p-1 rounded-xl border border-slate-700 text-xs">
+            <button onclick="setAdminSlotMode(30)" id="mode30Btn" class="px-3 py-1 rounded-lg font-bold transition bg-emerald-500 text-white">بازه‌های ۳۰ دقیقه‌ای</button>
+            <button onclick="setAdminSlotMode(60)" id="mode60Btn" class="px-3 py-1 rounded-lg font-bold transition text-slate-400">بازه‌های ۱ ساعته</button>
+          </div>
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5" id="adminTimeSlotsContainer">
           <div class="col-span-full text-center text-xs text-slate-500 py-4">در حال بارگذاری سانس‌ها...</div>
@@ -74,7 +79,7 @@
         </button>
       </div>
       <div id="adminProductsList" class="space-y-2">
-        <div class="text-xs text-slate-500 text-center py-2">در حال دریافت محصولات...</div>
+        <div class="text-xs text-slate-500 text-center py-2">در حال بارگذاری محصولات...</div>
       </div>
     </div>
 
@@ -142,6 +147,7 @@
     let customProducts = [];
     let disabledSlots = [];
     let selectedAdminDateKey = "";
+    let adminSlotStep = 30; // پیش‌فرض بازه‌های ۳۰ دقیقه‌ای
 
     document.addEventListener("DOMContentLoaded", () => {
       loadAdminData();
@@ -163,6 +169,20 @@
       renderAdminTimes();
       renderAdminServices();
       renderAdminProducts();
+    }
+
+    function setAdminSlotMode(minutes) {
+      adminSlotStep = minutes;
+      const btn30 = document.getElementById('mode30Btn');
+      const btn60 = document.getElementById('mode60Btn');
+      if (minutes === 30) {
+        btn30.className = "px-3 py-1 rounded-lg font-bold transition bg-emerald-500 text-white";
+        btn60.className = "px-3 py-1 rounded-lg font-bold transition text-slate-400";
+      } else {
+        btn30.className = "px-3 py-1 rounded-lg font-bold transition text-slate-400";
+        btn60.className = "px-3 py-1 rounded-lg font-bold transition bg-emerald-500 text-white";
+      }
+      renderAdminTimes();
     }
 
     // ساخت تقویم ۳۰ روزه برای ادمین
@@ -211,22 +231,46 @@
       }
     }
 
-    // رندر کردن سانس‌های ۱۰ صبح تا ۱۰ شب برای ادمین
+    // رندر کردن سانس‌ها مطابق ساختار جدید بازه‌های ربات مشتری
     function renderAdminTimes() {
       const container = document.getElementById('adminTimeSlotsContainer');
       container.innerHTML = '';
 
       const slots = [];
-      for (let hour = 10; hour < 22; hour++) {
-        ['00', '30'].forEach(minute => {
-          const timeStr = `${String(hour).padStart(2, '0')}:${minute}`;
-          slots.push(`${selectedAdminDateKey}_${timeStr}`);
-        });
+      let currentMinutes = 10 * 60; // شروع از ۱۰:۰۰ صبح
+      const endMinutes = 22 * 60;   // پایان در ۲۲:۰۰ شب
+
+      while (currentMinutes + adminSlotStep <= endMinutes) {
+        const startHour = Math.floor(currentMinutes / 60);
+        const startMin = currentMinutes % 60;
+        const startStr = `${String(startHour).padStart(2, '0')}:${String(startMin).padStart(2, '0')}`;
+        
+        const endTotalMin = currentMinutes + adminSlotStep;
+        const endHour = Math.floor(endTotalMin / 60);
+        const endMin = endTotalMin % 60;
+        const endStr = `${String(endHour).padStart(2, '0')}:${String(endMin).padStart(2, '0')}`;
+
+        const rangeStr = `${startStr}-${endStr}`;
+        slots.push({ key: `${selectedAdminDateKey}_${rangeStr}`, label: rangeStr, startMin: currentMinutes, endMin: endTotalMin });
+        
+        currentMinutes += adminSlotStep;
       }
 
-      slots.forEach(slotKey => {
-        const timeOnly = slotKey.split('_')[1];
-        const isLocked = disabledSlots.includes(slotKey);
+      slots.forEach(slot => {
+        // بررسی اینکه آیا این بازه بسته شده است یا خیر (هم کلید دقیق و هم پوشش‌دهی نیم‌ساعت‌ها)
+        let isLocked = disabledSlots.includes(slot.key);
+        if (!isLocked && adminSlotStep === 60) {
+          // اگر بازه ۱ ساعته است، بررسی کنیم شاید دو تا نیم‌ساعتِ تشکیل‌دهنده آن بسته شده باشند
+          const startH = Math.floor(slot.startMin / 60);
+          const startM = slot.startMin % 60;
+          const midM = slot.startMin + 30;
+          const midH = Math.floor(midM / 60);
+          const s1 = `${selectedAdminDateKey}_${String(startH).padStart(2,'0')}:${String(startM).padStart(2,'0')}-${String(midH).padStart(2,'0')}:${String(midM%60).padStart(2,'0')}`;
+          const s2 = `${selectedAdminDateKey}_${String(midH).padStart(2,'0')}:${String(midM%60).padStart(2,'0')}-${String(Math.floor(slot.endMin/60)).padStart(2,'0')}:${String(slot.endMin%60).padStart(2,'0')}`;
+          if (disabledSlots.includes(s1) && disabledSlots.includes(s2)) {
+            isLocked = true;
+          }
+        }
 
         const b = document.createElement('button');
         b.className = `p-3 rounded-xl border text-xs font-bold transition flex items-center justify-between cursor-pointer ${
@@ -235,16 +279,37 @@
             : 'bg-slate-800 border-slate-700 text-emerald-400 hover:border-slate-600'
         }`;
         b.innerHTML = `
-          <span dir="ltr">${timeOnly}</span>
+          <span dir="ltr">${slot.label}</span>
           <span class="text-[11px] px-2 py-0.5 rounded-lg ${isLocked ? 'bg-rose-500/20 text-rose-300' : 'bg-emerald-500/20 text-emerald-300'}">
             ${isLocked ? 'بسته (تکمیل)' : 'باز (آزاد)'}
           </span>
         `;
         b.onclick = () => {
           if (isLocked) {
-            disabledSlots = disabledSlots.filter(s => s !== slotKey);
+            // آزاد کردن بازه
+            disabledSlots = disabledSlots.filter(s => s !== slot.key);
+            if (adminSlotStep === 60) {
+              const startH = Math.floor(slot.startMin / 60);
+              const startM = slot.startMin % 60;
+              const midM = slot.startMin + 30;
+              const midH = Math.floor(midM / 60);
+              const s1 = `${selectedAdminDateKey}_${String(startH).padStart(2,'0')}:${String(startM).padStart(2,'0')}-${String(midH).padStart(2,'0')}:${String(midM%60).padStart(2,'0')}`;
+              const s2 = `${selectedAdminDateKey}_${String(midH).padStart(2,'0')}:${String(midM%60).padStart(2,'0')}-${String(Math.floor(slot.endMin/60)).padStart(2,'0')}:${String(slot.endMin%60).padStart(2,'0')}`;
+              disabledSlots = disabledSlots.filter(s => s !== s1 && s !== s2);
+            }
           } else {
-            disabledSlots.push(slotKey);
+            // بستن بازه
+            if (!disabledSlots.includes(slot.key)) disabledSlots.push(slot.key);
+            if (adminSlotStep === 60) {
+              const startH = Math.floor(slot.startMin / 60);
+              const startM = slot.startMin % 60;
+              const midM = slot.startMin + 30;
+              const midH = Math.floor(midM / 60);
+              const s1 = `${selectedAdminDateKey}_${String(startH).padStart(2,'0')}:${String(startM).padStart(2,'0')}-${String(midH).padStart(2,'0')}:${String(midM%60).padStart(2,'0')}`;
+              const s2 = `${selectedAdminDateKey}_${String(midH).padStart(2,'0')}:${String(midM%60).padStart(2,'0')}-${String(Math.floor(slot.endMin/60)).padStart(2,'0')}:${String(slot.endMin%60).padStart(2,'0')}`;
+              if (!disabledSlots.includes(s1)) disabledSlots.push(s1);
+              if (!disabledSlots.includes(s2)) disabledSlots.push(s2);
+            }
           }
           renderAdminTimes();
         };
