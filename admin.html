@@ -8,342 +8,278 @@
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
   <style>
-    body { font-family: 'Vazirmatn', sans-serif !important; background-color: #0f172a; color: #f8fafc; font-size: 14px; }
+    body { font-family: 'Vazirmatn', sans-serif !important; background-color: #0b0f19; color: #f8fafc; font-size: 14px; }
     .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
   </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-2 sm:p-4">
-  <div class="w-full max-w-md bg-slate-900 rounded-3xl overflow-hidden shadow-2xl border border-slate-800 flex flex-col h-[720px] relative">
-    
-    <!-- هدر پنل -->
-    <div class="bg-slate-800 px-4 py-3 flex items-center justify-between border-b border-slate-700 text-xs">
-      <span class="font-bold text-white text-sm">🛠️ پنل مدیریت پیرایش سالار</span>
-      <button onclick="loadAdminData()" class="bg-slate-700 hover:bg-slate-600 text-slate-300 px-2.5 py-1 rounded-lg transition cursor-pointer">بروزرسانی</button>
-    </div>
 
-    <!-- تب‌های بالای پنل (۴ تب کامل) -->
-    <div class="grid grid-cols-4 gap-1 bg-slate-800 p-1.5 border-b border-slate-700">
-      <button onclick="switchTab('slots')" id="tabSlotsBtn" class="py-2 text-[10px] font-bold rounded-lg bg-emerald-600 text-white transition cursor-pointer">سانس‌ها</button>
-      <button onclick="switchTab('services')" id="tabServicesBtn" class="py-2 text-[10px] font-bold rounded-lg text-slate-400 transition cursor-pointer">خدمات</button>
-      <button onclick="switchTab('products')" id="tabProductsBtn" class="py-2 text-[10px] font-bold rounded-lg text-slate-400 transition cursor-pointer">محصولات</button>
-      <button onclick="switchTab('bookings')" id="tabBookingsBtn" class="py-2 text-[10px] font-bold rounded-lg text-slate-400 transition cursor-pointer">رزروها</button>
-    </div>
+ <div class="w-full max-w-xl bg-slate-900 rounded-3xl overflow-hidden shadow-2xl border border-slate-800 flex flex-col h-[680px] relative">
+  
+   <!-- هدر پنل -->
+   <div class="bg-slate-800 px-4 py-3 flex items-center justify-between border-b border-slate-700 text-xs text-slate-300">
+      <div class="flex items-center space-x-2 space-x-reverse">
+        <div class="w-8 h-8 rounded-full overflow-hidden border-2 border-emerald-400 flex-shrink-0 shadow-sm">
+          <img src="https://raw.githubusercontent.com/salarsalarzehi/barbertest/main/profile.jpg" alt="سالار" class="w-full h-full object-cover">
+        </div>
+        <span class="font-bold text-white text-sm">پنل مدیریت پیرایش سالار 🛠️</span>
+      </div>
+      <button onclick="loadAdminData()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-1.5 rounded-xl transition cursor-pointer text-xs font-medium flex items-center gap-1.5">
+        <i class="fa-solid fa-rotate"></i> بروزرسانی
+      </button>
+   </div>
 
-    <!-- بدنه اصلی -->
-    <div class="flex-1 overflow-y-auto p-3.5 space-y-4 custom-scrollbar">
-      
-      <!-- ۱. مدیریت سانس‌ها (از ۱۰ صبح تا ۲۲ شب) -->
-      <div id="sectionSlots" class="space-y-3">
-        <h3 class="text-xs font-bold text-slate-300">مدیریت ظرفیت و سانس‌های امروز (۱۰ صبح تا ۱۰ شب)</h3>
-        <p class="text-[11px] text-slate-400 leading-relaxed">
-          سانس‌های سبز <span class="text-emerald-400 font-bold">«باز و قابل رزرو»</span> و سانس‌های قرمز <span class="text-rose-400 font-bold">«بسته / استراحت»</span> هستند. برای تغییر وضعیت کلیک کنید:
-        </p>
-        <div id="adminSlotsContainer" class="grid grid-cols-2 gap-2"></div>
+   <!-- تب‌های مدیریت -->
+   <div class="bg-slate-800/60 px-3 py-2 border-b border-slate-700/60 flex gap-2 overflow-x-auto custom-scrollbar">
+      <button onclick="switchTab('slots')" id="tab-slots" class="flex-1 min-w-[90px] py-2 rounded-xl text-xs font-bold transition bg-slate-700 text-slate-300 cursor-pointer text-center">سانس‌ها</button>
+      <button onclick="switchTab('services')" id="tab-services" class="flex-1 min-w-[90px] py-2 rounded-xl text-xs font-bold transition bg-emerald-500 text-white cursor-pointer text-center">خدمات</button>
+      <button onclick="switchTab('products')" id="tab-products" class="flex-1 min-w-[90px] py-2 rounded-xl text-xs font-bold transition bg-slate-700 text-slate-300 cursor-pointer text-center">محصولات</button>
+      <button onclick="switchTab('bookings')" id="tab-bookings" class="flex-1 min-w-[90px] py-2 rounded-xl text-xs font-bold transition bg-slate-700 text-slate-300 cursor-pointer text-center">رزروها</button>
+   </div>
+  
+   <!-- محتوای اصلی -->
+   <div class="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+
+      <!-- بخش سانس‌ها -->
+      <div id="section-slots" class="space-y-3 hidden">
+        <h3 class="text-xs font-bold text-slate-300">مدیریت سانس‌های کاری (غیرفعال کردن ساعت‌ها)</h3>
+        <div id="slotsContainer" class="space-y-2"></div>
       </div>
 
-      <!-- ۲. مدیریت خدمات و قیمت‌ها با مدت زمان -->
-      <div id="sectionServices" class="space-y-3 hidden">
-        <h3 class="text-xs font-bold text-slate-300">افزودن خدمت یا اصلاح جدید</h3>
-        <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 space-y-2.5">
+      <!-- بخش خدمات -->
+      <div id="section-services" class="space-y-4">
+        <div class="bg-slate-800/80 p-3.5 rounded-2xl border border-slate-700 space-y-3">
+          <h3 class="text-xs font-bold text-emerald-400">افزودن خدمت جدید</h3>
           <div>
-            <label class="block text-[11px] text-slate-300 mb-1">نام خدمت (مثلا: اصلاح مو و استایل):</label>
-            <input type="text" id="serviceName" placeholder="نام خدمت..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+            <label class="block text-[11px] text-slate-400 mb-1">نام خدمت (مثلا: اصلاح مو و استایل):</label>
+            <input type="text" id="newServiceName" placeholder="نام خدمت..." class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-emerald-500">
           </div>
           <div>
-            <label class="block text-[11px] text-slate-300 mb-1">قیمت (مثلا: ۱۵۰,۰۰۰ تومان):</label>
-            <input type="text" id="servicePrice" placeholder="قیمت خدمت..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+            <label class="block text-[11px] text-slate-400 mb-1">قیمت (مثلا: ۱۵۰,۰۰۰ تومان):</label>
+            <input type="text" id="newServicePrice" placeholder="قیمت خدمت..." class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-emerald-500">
           </div>
           <div>
-            <label class="block text-[11px] text-slate-300 mb-1">مدت زمان (مثلا: ۳۰ دقیقه):</label>
-            <input type="text" id="serviceDuration" placeholder="مدت زمان..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+            <label class="block text-[11px] text-slate-400 mb-1">مدت زمان (به دقیقه، مثلا: ۳۰):</label>
+            <input type="number" id="newServiceDuration" placeholder="مدت زمان..." class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-emerald-500">
           </div>
-          <button onclick="addService()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition cursor-pointer">افزودن خدمت به لیست</button>
+          <button onclick="addService()" class="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold transition cursor-pointer">افزودن خدمت به لیست</button>
         </div>
 
-        <h3 class="text-xs font-bold text-slate-300 mt-4">لیست خدمات فعلی</h3>
-        <div id="adminServicesList" class="space-y-2"></div>
-      </div>
-
-      <!-- ۳. مدیریت محصولات فروشگاه -->
-      <div id="sectionProducts" class="space-y-3 hidden">
-        <h3 class="text-xs font-bold text-slate-300">افزودن محصول جدید به فروشگاه</h3>
-        <div class="bg-slate-800 p-3 rounded-xl border border-slate-700 space-y-2.5">
-          <div>
-            <label class="block text-[11px] text-slate-300 mb-1">نام محصول:</label>
-            <input type="text" id="prodName" placeholder="مثلا: واکس موی مات" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-amber-500">
-          </div>
-          <div>
-            <label class="block text-[11px] text-slate-300 mb-1">قیمت:</label>
-            <input type="text" id="prodPrice" placeholder="مثلا: ۲۲۰,۰۰۰ تومان" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-amber-500">
-          </div>
-          <div>
-            <label class="block text-[11px] text-slate-300 mb-1">انتخاب عکس محصول:</label>
-            <input type="file" id="prodImageFile" accept="image/*" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-xs text-slate-300 file:mr-4 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-amber-600 file:text-white hover:file:bg-amber-700 cursor-pointer">
-          </div>
-          <button id="addProdBtn" onclick="addProduct()" class="w-full py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold transition cursor-pointer">ثبت و افزودن محصول</button>
-        </div>
-
-        <h3 class="text-xs font-bold text-slate-300 mt-4">محصولات فعلی فروشگاه</h3>
-        <div id="adminProductsList" class="space-y-2"></div>
-      </div>
-
-      <!-- ۴. لیست رزروهای مشتریان -->
-      <div id="sectionBookings" class="space-y-3 hidden">
-        <h3 class="text-xs font-bold text-slate-300">لیست رزروها و سفارشات ثبت شده</h3>
-        <div id="adminBookingsList" class="space-y-2">
-          <p class="text-xs text-slate-500 text-center py-4">در حال دریافت رزروها...</p>
+        <div>
+          <h3 class="text-xs font-bold text-slate-300 mb-2">لیست خدمات فعلی</h3>
+          <div id="servicesList" class="space-y-2"></div>
         </div>
       </div>
 
-    </div>
-  </div>
+      <!-- بخش محصولات -->
+      <div id="section-products" class="space-y-4 hidden">
+        <div class="bg-slate-800/80 p-3.5 rounded-2xl border border-slate-700 space-y-3">
+          <h3 class="text-xs font-bold text-amber-400">افزودن محصول جدید</h3>
+          <div>
+            <label class="block text-[11px] text-slate-400 mb-1">نام محصول:</label>
+            <input type="text" id="newProdName" placeholder="نام محصول..." class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-amber-500">
+          </div>
+          <div>
+            <label class="block text-[11px] text-slate-400 mb-1">قیمت محصول:</label>
+            <input type="text" id="newProdPrice" placeholder="قیمت..." class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-amber-500">
+          </div>
+          <div>
+            <label class="block text-[11px] text-slate-400 mb-1">لینک تصویر محصول:</label>
+            <input type="text" id="newProdImage" placeholder="https://..." class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-amber-500" dir="ltr">
+          </div>
+          <button onclick="addProduct()" class="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition cursor-pointer">افزودن محصول به فروشگاه</button>
+        </div>
 
-  <script>
+        <div>
+          <h3 class="text-xs font-bold text-slate-300 mb-2">محصولات فعلی</h3>
+          <div id="productsList" class="space-y-2"></div>
+        </div>
+      </div>
+
+      <!-- بخش رزروها -->
+      <div id="section-bookings" class="space-y-3 hidden">
+        <h3 class="text-xs font-bold text-slate-300">تاریخچه رزروها و سفارش‌ها</h3>
+        <div id="bookingsContainer" class="space-y-2">
+          <p class="text-xs text-slate-500 text-center py-4">هنوز رزرو یا سفارشی ثبت نشده است.</p>
+        </div>
+      </div>
+
+   </div>
+ </div>
+
+ <script>
     const WORKER_URL = "https://bale-sender.salar1368yb.workers.dev";
     
-    // سانس‌های کامل از ۱۰ صبح تا ۱۰ شب (بازه ۳۰ دقیقه‌ای)
-    const halfHourSlots = [
-      "۱۰:۰۰ - ۱۰:۳۰", "۱۰:۳۰ - ۱۱:۰۰", "۱۱:۰۰ - ۱۱:۳۰", "۱۱:۳۰ - ۱۲:۰۰", 
-      "۱۲:۰۰ - ۱۲:۳۰", "۱۲:۳۰ - ۱۳:۰۰", "۱۳:۰۰ - ۱۳:۳۰", "۱۳:۳۰ - ۱۴:۰۰", 
-      "۱۴:۰۰ - ۱۴:۳۰", "۱۴:۳۰ - ۱۵:۰۰", "۱۵:۰۰ - ۱۵:۳۰", "۱۵:۳۰ - ۱۶:۰۰", 
-      "۱۶:۰۰ - ۱۶:۳۰", "۱۶:۳۰ - ۱۷:۰۰", "۱۷:۰۰ - ۱۷:۳۰", "۱۷:۳۰ - ۱۸:۰۰", 
-      "۱۸:۰۰ - ۱۸:۳۰", "۱۸:۳۰ - ۱۹:۰۰", "۱۹:۰۰ - ۱۹:۳۰", "۱۹:۳۰ - ۲۰:۰۰",
-      "۲۰:۰۰ - ۲۰:۳۰", "۲۰:۳۰ - ۲۱:۰۰", "۲۱:۰۰ - ۲۱:۳۰", "۲۱:۳۰ - ۲۲:۰۰"
-    ];
-
-    let disabledSlots = [];
     let customServices = [];
     let customProducts = [];
-    let bookingsList = [];
-
-    function switchTab(tab) {
-      document.getElementById('sectionSlots').classList.add('hidden');
-      document.getElementById('sectionServices').classList.add('hidden');
-      document.getElementById('sectionProducts').classList.add('hidden');
-      document.getElementById('sectionBookings').classList.add('hidden');
-      
-      document.getElementById('tabSlotsBtn').className = "py-2 text-[10px] font-bold rounded-lg text-slate-400 transition cursor-pointer";
-      document.getElementById('tabServicesBtn').className = "py-2 text-[10px] font-bold rounded-lg text-slate-400 transition cursor-pointer";
-      document.getElementById('tabProductsBtn').className = "py-2 text-[10px] font-bold rounded-lg text-slate-400 transition cursor-pointer";
-      document.getElementById('tabBookingsBtn').className = "py-2 text-[10px] font-bold rounded-lg text-slate-400 transition cursor-pointer";
-
-      if (tab === 'slots') {
-        document.getElementById('sectionSlots').classList.remove('hidden');
-        document.getElementById('tabSlotsBtn').className = "py-2 text-[10px] font-bold rounded-lg bg-emerald-600 text-white transition cursor-pointer";
-      } else if (tab === 'services') {
-        document.getElementById('sectionServices').classList.remove('hidden');
-        document.getElementById('tabServicesBtn').className = "py-2 text-[10px] font-bold rounded-lg bg-emerald-600 text-white transition cursor-pointer";
-        renderAdminServices();
-      } else if (tab === 'products') {
-        document.getElementById('sectionProducts').classList.remove('hidden');
-        document.getElementById('tabProductsBtn').className = "py-2 text-[10px] font-bold rounded-lg bg-amber-600 text-white transition cursor-pointer";
-        renderAdminProducts();
-      } else if (tab === 'bookings') {
-        document.getElementById('sectionBookings').classList.remove('hidden');
-        document.getElementById('tabBookingsBtn').className = "py-2 text-[10px] font-bold rounded-lg bg-cyan-600 text-white transition cursor-pointer";
-        renderAdminBookings();
-      }
-    }
+    let disabledSlots = [];
+    let bookings = [];
 
     async function loadAdminData() {
       try {
         const res = await fetch(`${WORKER_URL}/admin-data`);
         const data = await res.json();
-        disabledSlots = data.disabledSlots || [];
         customServices = data.customServices || [];
         customProducts = data.customProducts || [];
-        bookingsList = data.bookingsList || [];
-        renderAdminSlots();
+        disabledSlots = data.disabledSlots || [];
+        bookings = data.bookings || [];
+        renderAll();
       } catch (e) {
         console.error("خطا در دریافت اطلاعات:", e);
+        alert("خطا در ارتباط با سرور!");
       }
     }
 
-    function renderAdminSlots() {
-      const container = document.getElementById('adminSlotsContainer');
-      container.innerHTML = '';
-      const todayStr = new Date().toLocaleDateString('fa-IR', { weekday: 'short', month: 'short', day: 'numeric' });
-
-      halfHourSlots.forEach(slot => {
-        const slotKey = `${todayStr}_${slot}`;
-        const isDisabled = disabledSlots.includes(slotKey);
-
-        const btn = document.createElement('button');
-        btn.className = `p-2.5 rounded-xl border text-xs flex items-center justify-between transition cursor-pointer ${
-          isDisabled ? 'border-rose-500/50 bg-rose-500/10 text-rose-400' : 'border-emerald-500/50 bg-emerald-500/10 text-emerald-400'
-        }`;
-        btn.innerHTML = `<span dir="ltr">${slot}</span><span class="font-bold">${isDisabled ? 'بسته' : 'آزاد'}</span>`;
-        
-        btn.onclick = async () => {
-          if (isDisabled) {
-            disabledSlots = disabledSlots.filter(s => s !== slotKey);
-          } else {
-            disabledSlots.push(slotKey);
-          }
-          await saveAdminData();
-          renderAdminSlots();
-        };
-        container.appendChild(btn);
-      });
+    async function saveDataToServer() {
+      try {
+        const res = await fetch(`${WORKER_URL}/admin-update`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ customServices, customProducts, disabledSlots })
+        });
+        if (!res.ok) throw new Error("خطا در ذخیره اطلاعات روی سرور");
+      } catch (e) {
+        console.error(e);
+        alert("ذخیره‌سازی با خطا مواجه شد.");
+      }
     }
 
-    function renderAdminServices() {
-      const container = document.getElementById('adminServicesList');
-      container.innerHTML = '';
-      if (customServices.length === 0) {
-        container.innerHTML = '<p class="text-xs text-slate-500 text-center py-2">خدمتی ثبت نشده است.</p>';
-        return;
-      }
-      customServices.forEach((srv, index) => {
-        const div = document.createElement('div');
-        div.className = "p-2.5 bg-slate-800 border border-slate-700 rounded-xl flex items-center justify-between";
-        div.innerHTML = `
-          <div>
-            <h4 class="text-xs font-bold text-white">${srv.name}</h4>
-            <div class="flex gap-3 mt-0.5">
-              <span class="text-[11px] text-emerald-400">${srv.price}</span>
-              <span class="text-[11px] text-slate-400">⏱️ ${srv.duration || 'نامشخص'}</span>
-            </div>
-          </div>
-          <button onclick="deleteService(${index})" class="text-rose-400 hover:text-rose-300 p-2 cursor-pointer"><i class="fa-solid fa-trash text-xs"></i></button>
-        `;
-        container.appendChild(div);
+    function switchTab(tab) {
+      ['slots', 'services', 'products', 'bookings'].forEach(t => {
+        document.getElementById(`section-${t}`).classList.add('hidden');
+        document.getElementById(`tab-${t}`).className = "flex-1 min-w-[90px] py-2 rounded-xl text-xs font-bold transition bg-slate-700 text-slate-300 cursor-pointer text-center";
       });
+      document.getElementById(`section-${tab}`).classList.remove('hidden');
+      const activeTabBtn = document.getElementById(`tab-${tab}`);
+      if (tab === 'services') activeTabBtn.className = "flex-1 min-w-[90px] py-2 rounded-xl text-xs font-bold transition bg-emerald-500 text-white cursor-pointer text-center";
+      else if (tab === 'products') activeTabBtn.className = "flex-1 min-w-[90px] py-2 rounded-xl text-xs font-bold transition bg-amber-500 text-white cursor-pointer text-center";
+      else activeTabBtn.className = "flex-1 min-w-[90px] py-2 rounded-xl text-xs font-bold transition bg-slate-600 text-white cursor-pointer text-center";
     }
 
     async function addService() {
-      const name = document.getElementById('serviceName').value.trim();
-      const price = document.getElementById('servicePrice').value.trim();
-      const duration = document.getElementById('serviceDuration').value.trim();
+      const name = document.getElementById('newServiceName').value.trim();
+      const price = document.getElementById('newServicePrice').value.trim();
+      const duration = document.getElementById('newServiceDuration').value.trim();
 
       if (!name || !price || !duration) {
-        alert('لطفاً نام، قیمت و مدت زمان خدمت را وارد کنید.');
+        alert("لطفاً تمامی فیلدهای خدمت را پر کنید.");
         return;
       }
-      customServices.push({ name, price, duration });
-      await saveAdminData();
-      document.getElementById('serviceName').value = '';
-      document.getElementById('servicePrice').value = '';
-      document.getElementById('serviceDuration').value = '';
-      renderAdminServices();
-      alert('خدمت با موفقیت افزوده شد!');
+
+      customServices.push({ name, price, duration: parseInt(duration) });
+      document.getElementById('newServiceName').value = '';
+      document.getElementById('newServicePrice').value = '';
+      document.getElementById('newServiceDuration').value = '';
+
+      await saveDataToServer();
+      renderServices();
+      alert("خدمت جدید با موفقیت اضافه شد!");
     }
 
     async function deleteService(index) {
       customServices.splice(index, 1);
-      await saveAdminData();
-      renderAdminServices();
-    }
-
-    function renderAdminProducts() {
-      const container = document.getElementById('adminProductsList');
-      container.innerHTML = '';
-      if (customProducts.length === 0) {
-        container.innerHTML = '<p class="text-xs text-slate-500 text-center py-2">محصولی ثبت نشده است.</p>';
-        return;
-      }
-      customProducts.forEach((prod, index) => {
-        const div = document.createElement('div');
-        div.className = "p-2.5 bg-slate-800 border border-slate-700 rounded-xl flex items-center justify-between";
-        div.innerHTML = `
-          <div class="flex items-center gap-2">
-            <img src="${prod.image}" class="w-10 h-10 rounded-lg object-cover border border-slate-700">
-            <div>
-              <h4 class="text-xs font-bold text-white">${prod.name}</h4>
-              <p class="text-[11px] text-amber-400">${prod.price}</p>
-            </div>
-          </div>
-          <button onclick="deleteProduct(${index})" class="text-rose-400 hover:text-rose-300 p-2 cursor-pointer"><i class="fa-solid fa-trash text-xs"></i></button>
-        `;
-        container.appendChild(div);
-      });
-    }
-
-    function renderAdminBookings() {
-      const container = document.getElementById('adminBookingsList');
-      container.innerHTML = '';
-      if (bookingsList.length === 0) {
-        container.innerHTML = '<p class="text-xs text-slate-500 text-center py-4">هنوز رزرو یا سفارشی ثبت نشده است.</p>';
-        return;
-      }
-      bookingsList.slice().reverse().forEach(b => {
-        const div = document.createElement('div');
-        div.className = "p-3 bg-slate-800 border border-slate-700 rounded-xl space-y-1";
-        div.innerHTML = `
-          <div class="flex justify-between items-center text-xs">
-            <span class="font-bold text-white">${b.name} (${b.phone})</span>
-            <span class="text-[10px] text-slate-400">${b.date || ''}</span>
-          </div>
-          <p class="text-xs text-emerald-400">${b.serviceOrProduct}</p>
-          <p class="text-[11px] text-slate-300">زمان/جزئیات: ${b.timeOrDetails}</p>
-        `;
-        container.appendChild(div);
-      });
+      await saveDataToServer();
+      renderServices();
     }
 
     async function addProduct() {
-      const name = document.getElementById('prodName').value.trim();
-      const price = document.getElementById('prodPrice').value.trim();
-      const fileInput = document.getElementById('prodImageFile');
-      const btn = document.getElementById('addProdBtn');
+      const name = document.getElementById('newProdName').value.trim();
+      const price = document.getElementById('newProdPrice').value.trim();
+      const image = document.getElementById('newProdImage').value.trim();
 
-      if (!name || !price || fileInput.files.length === 0) {
-        alert('لطفاً نام، قیمت و عکس محصول را وارد کنید.');
+      if (!name || !price || !image) {
+        alert("لطفاً تمامی فیلدهای محصول را پر کنید.");
         return;
       }
 
-      const file = fileInput.files[0];
-      btn.innerText = "در حال آپلود عکس...";
-      btn.disabled = true;
+      customProducts.push({ name, price, image });
+      document.getElementById('newProdName').value = '';
+      document.getElementById('newProdPrice').value = '';
+      document.getElementById('newProdImage').value = '';
 
-      try {
-        const formData = new FormData();
-        formData.append('image', file);
-
-        const uploadRes = await fetch('https://api.imgur.com/3/image', {
-          method: 'POST',
-          headers: { 'Authorization': 'Client-ID 56024987742d4cb' },
-          body: formData
-        });
-
-        const uploadData = await uploadRes.json();
-        if (!uploadData.success) throw new Error('خطا در آپلود عکس');
-
-        const imageUrl = uploadData.data.link;
-        customProducts.push({ name, price, image: imageUrl, type: 'product' });
-        await saveAdminData();
-
-        document.getElementById('prodName').value = '';
-        document.getElementById('prodPrice').value = '';
-        fileInput.value = '';
-        renderAdminProducts();
-        alert('محصول با موفقیت اضافه شد!');
-      } catch (e) {
-        console.error("خطا:", e);
-        alert('متأسفانه آپلود عکس ناموفق بود.');
-      } finally {
-        btn.innerText = "ثبت و افزودن محصول";
-        btn.disabled = false;
-      }
+      await saveDataToServer();
+      renderProducts();
+      alert("محصول جدید با موفقیت اضافه شد!");
     }
 
     async function deleteProduct(index) {
       customProducts.splice(index, 1);
-      await saveAdminData();
-      renderAdminProducts();
+      await saveDataToServer();
+      renderProducts();
     }
 
-    async function saveAdminData() {
-      try {
-        await fetch(`${WORKER_URL}/admin-update`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ disabledSlots, customServices, customProducts, bookingsList })
-        });
-      } catch (e) {
-        console.error("خطا در ذخیره اطلاعات:", e);
+    function renderServices() {
+      const container = document.getElementById('servicesList');
+      container.innerHTML = '';
+
+      // خدمات پیش‌فرض ثابت
+      const defaultServices = [
+        { name: "اصلاح سر و ریش فید", price: "۳۵۰,۰۰۰ تومان", duration: 60 },
+        { name: "اصلاح سر کلاسیک", price: "۲۵۰,۰۰۰ تومان", duration: 45 }
+      ];
+
+      defaultServices.forEach(s => {
+        const div = document.createElement('div');
+        div.className = "p-3 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-between text-xs";
+        div.innerHTML = `
+          <div>
+            <span class="font-bold text-white">${s.name}</span>
+            <span class="text-slate-400 mr-2">(${s.duration} دقیقه)</span>
+          </div>
+          <span class="text-emerald-400 font-bold">${s.price}</span>
+        `;
+        container.appendChild(div);
+      });
+
+      // خدمات سفارشی اضافه شده توسط ادمین
+      customServices.forEach((s, index) => {
+        const div = document.createElement('div');
+        div.className = "p-3 rounded-xl bg-slate-800 border border-emerald-500/40 flex items-center justify-between text-xs";
+        div.innerHTML = `
+          <div>
+            <span class="font-bold text-white">${s.name}</span>
+            <span class="text-slate-400 mr-2">(${s.duration} دقیقه)</span>
+            <span class="text-xs bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-md mr-2">سفارشی</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-emerald-400 font-bold">${s.price}</span>
+            <button onclick="deleteService(${index})" class="text-rose-400 hover:text-rose-300 cursor-pointer p-1"><i class="fa-solid fa-trash"></i></button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function renderProducts() {
+      const container = document.getElementById('productsList');
+      container.innerHTML = '';
+
+      if (customProducts.length === 0) {
+        container.innerHTML = '<p class="text-xs text-slate-500 text-center py-2">محصولی ثبت نشده است.</p>';
+        return;
       }
+
+      customProducts.forEach((p, index) => {
+        const div = document.createElement('div');
+        div.className = "p-3 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-between text-xs";
+        div.innerHTML = `
+          <div class="flex items-center gap-2.5">
+            <img src="${p.image}" class="w-9 h-9 rounded-lg object-cover border border-slate-700">
+            <div>
+              <span class="font-bold text-white">${p.name}</span>
+              <p class="text-[11px] text-amber-400 font-bold mt-0.5">${p.price}</p>
+            </div>
+          </div>
+          <button onclick="deleteProduct(${index})" class="text-rose-400 hover:text-rose-300 cursor-pointer p-1"><i class="fa-solid fa-trash"></i></button>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function renderAll() {
+      renderServices();
+      renderProducts();
     }
 
     loadAdminData();
