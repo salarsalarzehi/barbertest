@@ -3,18 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>رزرو آنلاین پیرایش سالار</title>
+  <title>رزرو آنلاین و فروشگاه پیرایش سالار</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
   <script src="https://tapi.bale.ai/miniapp.js?3"></script>
   <style>
-    body { 
-      font-family: 'Vazirmatn', sans-serif !important; 
-      background-color: #0f172a; 
-      color: #f8fafc;
-      font-size: 14px;
-    }
+    body { font-family: 'Vazirmatn', sans-serif !important; background-color: #0f172a; color: #f8fafc; font-size: 14px; }
     .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
   </style>
@@ -30,9 +25,7 @@
         </div>
         <span class="font-bold text-white text-sm">پیرایش سالار</span>
       </div>
-      <span class="text-[11px] bg-emerald-500/10 text-emerald-400 px-2.5 py-0.5 rounded-full border border-emerald-500/20 font-medium">
-        مینی‌اپ بله
-      </span>
+      <span class="text-[11px] bg-emerald-500/10 text-emerald-400 px-2.5 py-0.5 rounded-full border border-emerald-500/20 font-medium">مینی‌اپ بله</span>
     </div>
   
    <div class="flex-1 overflow-y-auto p-3.5 space-y-3.5 custom-scrollbar" id="mainContainer">
@@ -40,36 +33,29 @@
       <div id="stepHeaderBox" class="flex items-center justify-between px-3 bg-slate-800/40 p-2.5 rounded-2xl border border-slate-800">
         <div class="flex items-center gap-2">
           <div id="stepBadge" class="w-6 h-6 rounded-full bg-emerald-500 text-white font-bold flex items-center justify-center text-xs">۱</div>
-          <span id="stepTitle" class="text-xs font-bold text-slate-200">انتخاب خدمت و مشاهده نمونه کارها</span>
+          <span id="stepTitle" class="text-xs font-bold text-slate-200">انتخاب خدمت یا محصول و نمونه کارها</span>
         </div>
       </div>
   
-     <!-- مرحله اول: نمونه کارها (۴تایی ثابت) + لیست خدمات -->
       <div id="step1" class="space-y-3">
         <div>
           <label class="block text-xs text-slate-300 mb-1.5 font-medium">📸 نمونه کارها:</label>
           <div class="grid grid-cols-4 gap-2" id="portfolioContainer">
-            <!-- ۴ عکس ثابت بدون اسکرول با لینک‌های گیت‌هاب شما -->
-            <div class="h-16 rounded-xl overflow-hidden border border-slate-700 bg-slate-800 shadow-sm">
-              <img src="https://raw.githubusercontent.com/salarsalarzehi/barbertest/main/work%20(1).jpg" alt="نمونه کار" class="w-full h-full object-cover hover:scale-105 transition duration-300">
-            </div>
-            <div class="h-16 rounded-xl overflow-hidden border border-slate-700 bg-slate-800 shadow-sm">
-              <img src="https://raw.githubusercontent.com/salarsalarzehi/barbertest/main/work%20(2).jpg" alt="نمونه کار" class="w-full h-full object-cover hover:scale-105 transition duration-300">
-            </div>
-            <div class="h-16 rounded-xl overflow-hidden border border-slate-700 bg-slate-800 shadow-sm">
-              <img src="https://raw.githubusercontent.com/salarsalarzehi/barbertest/main/work%20(3).jpg" alt="نمونه کار" class="w-full h-full object-cover hover:scale-105 transition duration-300">
-            </div>
-            <div class="h-16 rounded-xl overflow-hidden border border-slate-700 bg-slate-800 shadow-sm">
-              <img src="https://raw.githubusercontent.com/salarsalarzehi/barbertest/main/work%20(4).jpg" alt="نمونه کار" class="w-full h-full object-cover hover:scale-105 transition duration-300">
-            </div>
+            <div class="h-16 rounded-xl overflow-hidden border border-slate-700 bg-slate-800 shadow-sm"><img src="https://raw.githubusercontent.com/salarsalarzehi/barbertest/main/work%20(1).jpg" alt="نمونه کار" class="w-full h-full object-cover hover:scale-105 transition duration-300"></div>
+            <div class="h-16 rounded-xl overflow-hidden border border-slate-700 bg-slate-800 shadow-sm"><img src="https://raw.githubusercontent.com/salarsalarzehi/barbertest/main/work%20(2).jpg" alt="نمونه کار" class="w-full h-full object-cover hover:scale-105 transition duration-300"></div>
+            <div class="h-16 rounded-xl overflow-hidden border border-slate-700 bg-slate-800 shadow-sm"><img src="https://raw.githubusercontent.com/salarsalarzehi/barbertest/main/work%20(3).jpg" alt="نمونه کار" class="w-full h-full object-cover hover:scale-105 transition duration-300"></div>
+            <div class="h-16 rounded-xl overflow-hidden border border-slate-700 bg-slate-800 shadow-sm"><img src="https://raw.githubusercontent.com/salarsalarzehi/barbertest/main/work%20(4).jpg" alt="نمونه کار" class="w-full h-full object-cover hover:scale-105 transition duration-300"></div>
           </div>
         </div>
 
         <div>
-          <label class="block text-xs text-slate-300 mb-1.5 font-medium">✂️ انتخاب خدمت:</label>
-          <div id="servicesListContainer" class="space-y-2.5">
-            <p class="text-xs text-slate-500 text-center py-4">در حال بارگذاری خدمات...</p>
-          </div>
+          <label class="block text-xs text-emerald-400 mb-1.5 font-bold">✂️ خدمات:</label>
+          <div id="servicesListContainer" class="space-y-2.5"></div>
+        </div>
+
+        <div>
+          <label class="block text-xs text-amber-400 mb-1.5 font-bold">🛍️ محصولات (تحویل در سالن):</label>
+          <div id="productsListContainer" class="space-y-2.5"></div>
         </div>
       </div>
   
@@ -92,7 +78,11 @@
         <div>
           <label class="block text-xs text-slate-300 mb-1 font-medium">شماره همراه (الزامی):</label>
           <input type="tel" id="custPhone" dir="ltr" placeholder="09123456789" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-white text-right focus:outline-none focus:border-emerald-500">
-          <p id="phoneError" class="text-xs text-rose-400 mt-1 hidden">لطفاً شماره موبایل معتبر وارد کنید (مثل 09123456789)</p>
+          <p id="phoneError" class="text-xs text-rose-400 mt-1 hidden">لطفاً شماره موبایل معتبر وارد کنید</p>
+       </div>
+       <div id="addressBox" class="hidden">
+          <label class="block text-xs text-slate-300 mb-1 font-medium">توضیح یا زمان مراجعه برای تحویل محصول در سالن:</label>
+          <textarea id="custAddress" rows="2" placeholder="مثلا: فردا عصر برای تحویل حضوری می‌آیم" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-emerald-500"></textarea>
        </div>
         <div>
           <label class="block text-xs text-slate-300 mb-1 font-medium">توضیحات (اختیاری):</label>
@@ -102,36 +92,31 @@
   
       <div id="successState" class="text-center py-8 space-y-3.5 hidden">
         <i class="fa-solid fa-circle-check text-emerald-400 text-5xl"></i>
-        <h2 class="text-sm font-bold text-white">نوبت شما با موفقیت ثبت شد</h2>
-        <p class="text-xs text-slate-400 leading-relaxed">اطلاعات برای آرایشگر ارسال گردید و ساعت مورد نظر قفل شد.</p>
-  
+        <h2 class="text-sm font-bold text-white" id="successTitle">سفارش شما با موفقیت ثبت شد</h2>
+        <p class="text-xs text-slate-400 leading-relaxed" id="successDesc">اطلاعات برای آرایشگر ارسال گردید.</p>
         <div class="mt-6 pt-4 border-t border-slate-800 text-center text-xs text-slate-400 space-y-2">
           <p>طراحی و توسعه:</p>
-          <div>
-            <a href="#" onclick="openSalarProfile(event)" class="inline-block bg-slate-800 border border-slate-700 px-4 py-1.5 rounded-xl text-emerald-400 font-bold hover:bg-slate-700 transition cursor-pointer" dir="ltr">@salarx8</a>
-          </div>
+          <div><a href="#" onclick="openSalarProfile(event)" class="inline-block bg-slate-800 border border-slate-700 px-4 py-1.5 rounded-xl text-emerald-400 font-bold hover:bg-slate-700 transition cursor-pointer" dir="ltr">@salarx8</a></div>
         </div>
       </div>
-  
    </div>
   
    <div id="bottomBar" class="p-3.5 bg-slate-900 border-t border-slate-800 flex gap-2">
       <button id="backBtn" onclick="prevStep()" class="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold hidden cursor-pointer hover:bg-slate-700 transition">بازگشت</button>
      <button id="nextBtn" onclick="nextStep()" disabled class="w-full py-2.5 rounded-xl bg-slate-800 text-slate-500 text-xs font-bold transition">ادامه</button>
    </div>
-  
  </div>
   
  <script>
     const WORKER_URL = "https://bale-sender.salar1368yb.workers.dev";
     
-    // خدمات اختصاصی شما
-    const customServices = [
-      { name: "اصلاح سر و ریش فید", duration: 60, price: "۳۵۰,۰۰۰ تومان" },
-      { name: "اصلاح سر کلاسیک", duration: 45, price: "۲۵۰,۰۰۰ تومان" },
-      { name: "اصلاح سر فید", duration: 45, price: "۲۸۰,۰۰۰ تومان" }
+    const staticServices = [
+      { name: "اصلاح سر و ریش فید", type: "service", duration: 60, price: "۳۵۰,۰۰۰ تومان", icon: "fa-scissors" },
+      { name: "اصلاح سر کلاسیک", type: "service", duration: 45, price: "۲۵۰,۰۰۰ تومان", icon: "fa-scissors" },
+      { name: "اصلاح سر فید", type: "service", duration: 45, price: "۲۸۰,۰۰۰ تومان", icon: "fa-scissors" }
     ];
 
+    let customProducts = [];
     const halfHourSlots = [
       { start: "۱۰:۰۰", end: "۱۰:۳۰" }, { start: "۱۰:۳۰", end: "۱۱:۰۰" }, 
       { start: "۱۱:۰۰", end: "۱۱:۳۰" }, { start: "۱۱:۳۰", end: "۱۲:۰۰" }, 
@@ -142,9 +127,8 @@
       { start: "۱۹:۰۰", end: "۱۹:۳۰" }, { start: "۱۹:۳۰", end: "۲۰:۰۰" }
     ];
 
-    let step = 1, service = "", serviceDuration = 60, servicePrice = "", date = "", time = "";
+    let step = 1, selectedItem = null, serviceDuration = 60, itemType = "service", date = "", time = "";
     let disabledSlots = [];
-    let servicesList = [];
     let userChatId = null;
   
     try {
@@ -156,39 +140,81 @@
           userChatId = webApp.initDataUnsafe.user.id;
         }
       }
-    } catch(e) {
-      console.error("Bale Init Error:", e);
-    }
+    } catch(e) { console.error(e); }
 
-    async function loadServices() {
+    async function loadCatalog() {
       try {
-        const res = await fetch(`${WORKER_URL}/services`);
+        const res = await fetch(`${WORKER_URL}/admin-data`);
         const data = await res.json();
-        servicesList = (data.services && data.services.length > 0) ? data.services : customServices;
-        renderServices();
+        customProducts = data.customProducts || [];
+        disabledSlots = data.disabledSlots || [];
       } catch(e) {
-        console.error("Error loading services:", e);
-        servicesList = customServices;
-        renderServices();
+        console.error("خطا در دریافت کاتالوگ:", e);
       }
+      renderCatalog();
     }
 
-    function renderServices() {
-      const container = document.getElementById('servicesListContainer');
-      container.innerHTML = '';
-      servicesList.forEach(s => {
+    function renderCatalog() {
+      const servicesContainer = document.getElementById('servicesListContainer');
+      const productsContainer = document.getElementById('productsListContainer');
+      
+      servicesContainer.innerHTML = '';
+      productsContainer.innerHTML = '';
+
+      staticServices.forEach(item => {
         const div = document.createElement('div');
-        div.className = "service-card p-3.5 rounded-xl bg-slate-800 border border-slate-700 hover:border-emerald-500 cursor-pointer flex items-center justify-between transition";
+        div.className = "service-card p-3 rounded-xl bg-slate-800 border border-slate-700 hover:border-emerald-500 cursor-pointer flex items-center justify-between transition";
         div.innerHTML = `
-          <div>
-            <h3 class="text-sm font-semibold text-white">${s.name}</h3>
-            <p class="text-xs text-slate-400 mt-1">مدت زمان: ${s.duration} دقیقه</p>
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-lg bg-slate-700 flex items-center justify-center text-slate-300"><i class="fa-solid ${item.icon}"></i></div>
+            <div>
+              <h3 class="text-xs font-semibold text-white">${item.name}</h3>
+              <p class="text-[11px] text-slate-400 mt-0.5">مدت زمان: ${item.duration} دقیقه</p>
+            </div>
           </div>
-          <span class="text-xs font-bold text-emerald-400">${s.price}</span>
+          <span class="text-xs font-bold text-emerald-400">${item.price}</span>
         `;
-        div.onclick = () => selectService(div, s.name, s.duration, s.price);
-        container.appendChild(div);
+        div.onclick = () => selectCatalogItem(div, item);
+        servicesContainer.appendChild(div);
       });
+
+      if (customProducts.length === 0) {
+        productsContainer.innerHTML = '<p class="text-xs text-slate-500 text-center py-2">محصولی در فروشگاه موجود نیست.</p>';
+        return;
+      }
+
+      customProducts.forEach(item => {
+        const div = document.createElement('div');
+        div.className = "service-card p-3 rounded-xl bg-slate-800 border border-slate-700 hover:border-amber-500 cursor-pointer flex items-center justify-between transition";
+        div.innerHTML = `
+          <div class="flex items-center gap-2.5">
+            <img src="${item.image}" class="w-10 h-10 rounded-lg object-cover border border-slate-700">
+            <div>
+              <h3 class="text-xs font-semibold text-white">${item.name}</h3>
+              <p class="text-[11px] text-slate-400 mt-0.5">تحویل حضوری در سالن</p>
+            </div>
+          </div>
+          <span class="text-xs font-bold text-amber-400">${item.price}</span>
+        `;
+        div.onclick = () => selectCatalogItem(div, item);
+        productsContainer.appendChild(div);
+      });
+    }
+
+    function selectCatalogItem(el, item) {
+      document.querySelectorAll('.service-card').forEach(e => e.classList.remove('border-emerald-500', 'bg-emerald-500/10', 'border-amber-500', 'bg-amber-500/10'));
+      if (item.type === 'service') {
+        el.classList.add('border-emerald-500', 'bg-emerald-500/10');
+      } else {
+        el.classList.add('border-amber-500', 'bg-amber-500/10');
+      }
+      selectedItem = item;
+      itemType = item.type || 'product';
+      serviceDuration = item.duration || 0;
+
+      const btn = document.getElementById('nextBtn');
+      btn.disabled = false;
+      btn.className = "w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold cursor-pointer transition";
     }
   
     function openSalarProfile(e) {
@@ -197,34 +223,8 @@
       try {
         if (window.Bale && window.Bale.WebApp && typeof window.Bale.WebApp.openExternalLink === 'function') {
           window.Bale.WebApp.openExternalLink(url);
-        } else {
-          window.open(url, '_blank');
-        }
-      } catch (err) {
-        window.open(url, '_blank');
-      }
-    }
-  
-    async function fetchDisabledSlots() {
-      try {
-        const res = await fetch(`${WORKER_URL}/disabled-slots`);
-        const data = await res.json();
-        disabledSlots = data.disabledSlots || [];
-      } catch(e) {
-        console.error("خطا در دریافت سانس‌ها:", e);
-      }
-    }
-  
-    function selectService(el, sName, duration, price) {
-      document.querySelectorAll('.service-card').forEach(e => e.classList.remove('border-emerald-500', 'bg-emerald-500/10'));
-      el.classList.add('border-emerald-500', 'bg-emerald-500/10');
-      service = sName;
-      serviceDuration = duration;
-      servicePrice = price;
-
-      const btn = document.getElementById('nextBtn');
-      btn.disabled = false;
-      btn.className = "w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold cursor-pointer transition";
+        } else { window.open(url, '_blank'); }
+      } catch (err) { window.open(url, '_blank'); }
     }
   
     function renderCalendar() {
@@ -255,9 +255,7 @@
     function timeToMinutes(tStr) {
       const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
       let englishStr = tStr;
-      persianDigits.forEach((p, i) => {
-        englishStr = englishStr.replace(new RegExp(p, 'g'), i);
-      });
+      persianDigits.forEach((p, i) => { englishStr = englishStr.replace(new RegExp(p, 'g'), i); });
       const parts = englishStr.split(':');
       return parseInt(parts[0]) * 60 + parseInt(parts[1]);
     }
@@ -265,13 +263,11 @@
     function renderTimes() {
       const container = document.getElementById('timeContainer');
       container.innerHTML = '';
-      
       const slotsNeeded = Math.ceil(serviceDuration / 30);
       const availableTimes = [];
       for (let i = 0; i <= halfHourSlots.length - slotsNeeded; i++) {
         const startSlot = halfHourSlots[i];
         const endSlot = halfHourSlots[i + slotsNeeded - 1];
-
         const startTimeVal = timeToMinutes(startSlot.start);
         const endTimeVal = timeToMinutes(endSlot.end);
         if (endTimeVal - startTimeVal < serviceDuration) continue;
@@ -279,14 +275,9 @@
         let isValidRange = true;
         for (let j = 0; j < slotsNeeded; j++) {
           const checkSlotKey = `${date}_${halfHourSlots[i + j].start} - ${halfHourSlots[i + j].end}`;
-          if (disabledSlots.includes(checkSlotKey)) {
-            isValidRange = false;
-            break;
-          }
+          if (disabledSlots.includes(checkSlotKey)) { isValidRange = false; break; }
         }
-
-        const tLabel = `${startSlot.start} - ${endSlot.end}`;
-        availableTimes.push({ label: tLabel, disabled: !isValidRange });
+        availableTimes.push({ label: `${startSlot.start} - ${endSlot.end}`, disabled: !isValidRange });
       }
 
       availableTimes.forEach(item => {
@@ -300,11 +291,7 @@
             time === item.label ? 'border-emerald-500 text-emerald-400 bg-slate-800 font-bold' : 'border-slate-700 bg-slate-800 text-white hover:border-slate-600'
           }`;
           b.innerHTML = `<span dir="ltr">${item.label}</span>`;
-          b.onclick = () => {
-            time = item.label;
-            renderTimes();
-            checkStep2();
-          };
+          b.onclick = () => { time = item.label; renderTimes(); checkStep2(); };
         }
         container.appendChild(b);
       });
@@ -319,60 +306,55 @@
     }
   
     function isValidIranianMobile(phone) {
-      const mobileRegex = /^(09[0-9]{9}|\+989[0-9]{9})$/;
-      return mobileRegex.test(phone);
+      return /^(09[0-9]{9}|\+989[0-9]{9})$/.test(phone);
     }
   
-    async function finalizeBooking(bookingObj, adminText, userText, slotsToDisable) {
+    async function finalizeOrder(adminText, userText, slotsToDisable) {
       try {
-        slotsToDisable.forEach(subKey => {
-          if (!disabledSlots.includes(subKey)) {
-            disabledSlots.push(subKey);
-          }
-        });
-  
+        if (itemType === 'service' && slotsToDisable.length > 0) {
+          slotsToDisable.forEach(subKey => { if (!disabledSlots.includes(subKey)) disabledSlots.push(subKey); });
+          await fetch(`${WORKER_URL}/admin-update`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ disabledSlots, customProducts })
+          });
+        }
         await fetch(`${WORKER_URL}/`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            adminText: adminText,
-            userChatId: userChatId,
-            userText: userText,
-            bookingInfo: bookingObj
-          })
+          body: JSON.stringify({ adminText, userChatId, userText, bookingInfo: selectedItem })
         });
-  
-        await fetch(`${WORKER_URL}/disabled-slots`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ disabledSlots })
-        });
-  
-      } catch (err) {
-        console.error("خطا در ثبت نهایی:", err);
-      } finally {
-        setTimeout(() => {
-          if (window.Bale && window.Bale.WebApp) {
-            window.Bale.WebApp.close();
-          }
-        }, 6000);
+      } catch (err) { console.error(err); }
+      finally {
+        setTimeout(() => { if (window.Bale && window.Bale.WebApp) window.Bale.WebApp.close(); }, 6000);
       }
     }
   
     async function nextStep() {
       if (step === 1) {
-        step = 2;
-        await fetchDisabledSlots();
-        document.getElementById('step1').classList.add('hidden');
-        document.getElementById('step2').classList.remove('hidden');
-        document.getElementById('backBtn').classList.remove('hidden');
-        document.getElementById('stepBadge').innerText = '۲';
-        document.getElementById('stepTitle').innerText = 'انتخاب زمان';
-        renderCalendar();
-        renderTimes();
-        const btn = document.getElementById('nextBtn');
-        btn.disabled = true;
-        btn.className = "w-full py-2.5 rounded-xl bg-slate-800 text-slate-500 text-xs font-bold";
+        if (itemType === 'service') {
+          step = 2;
+          document.getElementById('step1').classList.add('hidden');
+          document.getElementById('step2').classList.remove('hidden');
+          document.getElementById('backBtn').classList.remove('hidden');
+          document.getElementById('stepBadge').innerText = '۲';
+          document.getElementById('stepTitle').innerText = 'انتخاب زمان نوبت';
+          renderCalendar();
+          renderTimes();
+          document.getElementById('nextBtn').disabled = true;
+          document.getElementById('nextBtn').className = "w-full py-2.5 rounded-xl bg-slate-800 text-slate-500 text-xs font-bold";
+        } else {
+          step = 3;
+          document.getElementById('step1').classList.add('hidden');
+          document.getElementById('step3').classList.remove('hidden');
+          document.getElementById('addressBox').classList.remove('hidden');
+          document.getElementById('backBtn').classList.remove('hidden');
+          document.getElementById('stepBadge').innerText = '۲';
+          document.getElementById('stepTitle').innerText = 'زمان مراجعه برای تحویل محصول';
+          document.getElementById('nextBtn').innerText = 'ثبت نهایی سفارش';
+          document.getElementById('nextBtn').disabled = false;
+          document.getElementById('nextBtn').className = "w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold cursor-pointer transition";
+        }
       } 
       else if (step === 2) {
         step = 3;
@@ -387,6 +369,7 @@
       else if (step === 3) {
         const name = document.getElementById('custName').value.trim();
         const phone = document.getElementById('custPhone').value.trim();
+        const address = document.getElementById('custAddress').value.trim() || "تحویل حضوری در سالن";
         const note = document.getElementById('custNote').value.trim() || "ندارد";
         const phoneError = document.getElementById('phoneError');
         const phoneInput = document.getElementById('custPhone');
@@ -394,53 +377,42 @@
         phoneError.classList.add('hidden');
         phoneInput.classList.remove('border-rose-500');
   
-        if (!name) {
-          alert('لطفاً نام و نام خانوادگی خود را وارد کنید.');
-          return;
-        }
-  
+        if (!name) { alert('لطفاً نام و نام خانوادگی خود را وارد کنید.'); return; }
         if (!phone || !isValidIranianMobile(phone)) {
           phoneError.classList.remove('hidden');
           phoneInput.classList.add('border-rose-500');
           phoneInput.focus();
           return;
         }
-  
-        const bookingObj = { name, phone, service, date, time, note, price: servicePrice, id: Date.now() };
 
-        const slotsToDisable = [];
-        const parts = time.split(" - ");
-        if (parts.length === 2) {
-          const startMin = timeToMinutes(parts[0]);
-          const endMin = timeToMinutes(parts[1]);
+        let slotsToDisable = [], adminText = "", userText = "";
 
-          halfHourSlots.forEach(hs => {
-            const hsStart = timeToMinutes(hs.start);
-            const hsEnd = timeToMinutes(hs.end);
-            if (hsStart >= startMin && hsEnd < endMin) {
-              slotsToDisable.push(`${date}_${hs.start} - ${hs.end}`);
-            }
-          });
+        if (itemType === 'service') {
+          const parts = time.split(" - ");
+          if (parts.length === 2) {
+            const startMin = timeToMinutes(parts[0]);
+            const endMin = timeToMinutes(parts[1]);
+            halfHourSlots.forEach(hs => {
+              if (timeToMinutes(hs.start) >= startMin && timeToMinutes(hs.end) < endMin) {
+                slotsToDisable.push(`${date}_${hs.start} - ${hs.end}`);
+              }
+            });
+          }
+          adminText = `💈 **نوبت جدید در پیرایش سالار**\n\n👤 مشتری: ${name}\n📞 تلفن: ${phone}\n✂️ خدمت: ${selectedItem.name} (${selectedItem.price})\n⏰ زمان: ${date} (${time})\n📝 توضیحات: ${note}`;
+          userText = `✅ **رزرو شما با موفقیت ثبت شد!**\n\nسلام ${name} عزیز،\nنوبت شما برای خدمت **${selectedItem.name}** (${selectedItem.price}) در تاریخ **${date} ساعت ${time}** ثبت گردید.\n\nمنتظر حضور شما در پیرایش سالار هستیم!✂️`;
+        } else {
+          adminText = `🛍️ **سفارش محصول جدید (تحویل در سالن)**\n\n👤 مشتری: ${name}\n📞 تلفن: ${phone}\n📦 محصول: ${selectedItem.name} (${selectedItem.price})\n🕒 جزئیات تحویل: ${address}\n📝 توضیحات: ${note}`;
+          userText = `✅ **سفارش محصول شما ثبت شد!**\n\nسلام ${name} عزیز،\nسفارش خرید **${selectedItem.name}** (${selectedItem.price}) ثبت گردید. می‌توانید برای دریافت محصول به سالن مراجعه کنید.`;
+          document.getElementById('successTitle').innerText = 'سفارش محصول ثبت شد';
+          document.getElementById('successDesc').innerText = 'اطلاعات سفارش برای تحویل حضوری ارسال گردید.';
         }
-
-        const adminText = `💈 **نوبت جدید در پیرایش سالار**\n\n` +
-          `👤 مشتری: ${name}\n` +
-          `📞 تلفن: ${phone}\n` +
-          `✂️ خدمت: ${service} (${servicePrice})\n` +
-          `⏰ زمان: ${date} (${time})\n` +
-          `📝 توضیحات: ${note}`;
-  
-        const userText = `✅ **رزرو شما با موفقیت ثبت شد!**\n\n` +
-          `سلام ${name} عزیز،\n` +
-          `نوبت شما برای خدمت **${service}** (${servicePrice}) در تاریخ **${date} ساعت ${time}** ثبت گردید.\n\n` +
-          `منتظر حضور شما در پیرایش سالار هستیم!✂️`;
   
         document.getElementById('step3').classList.add('hidden');
         document.getElementById('stepHeaderBox').classList.add('hidden');
         document.getElementById('bottomBar').classList.add('hidden');
         document.getElementById('successState').classList.remove('hidden');
   
-        finalizeBooking(bookingObj, adminText, userText, slotsToDisable);
+        finalizeOrder(adminText, userText, slotsToDisable);
       }
     }
   
@@ -451,19 +423,30 @@
         document.getElementById('step1').classList.remove('hidden');
         document.getElementById('backBtn').classList.add('hidden');
         document.getElementById('stepBadge').innerText = '۱';
-        document.getElementById('stepTitle').innerText = 'انتخاب خدمت و مشاهده نمونه کارها';
+        document.getElementById('stepTitle').innerText = 'انتخاب خدمت یا محصول و نمونه کارها';
         document.getElementById('nextBtn').innerText = 'ادامه';
       } else if (step === 3) {
-        step = 2;
-        document.getElementById('step3').classList.add('hidden');
-        document.getElementById('step2').classList.remove('hidden');
-        document.getElementById('stepBadge').innerText = '۲';
-        document.getElementById('stepTitle').innerText = 'انتخاب زمان';
-        document.getElementById('nextBtn').innerText = 'ادامه';
+        if (itemType === 'product') {
+          step = 1;
+          document.getElementById('step3').classList.add('hidden');
+          document.getElementById('addressBox').classList.add('hidden');
+          document.getElementById('step1').classList.remove('hidden');
+          document.getElementById('backBtn').classList.add('hidden');
+          document.getElementById('stepBadge').innerText = '۱';
+          document.getElementById('stepTitle').innerText = 'انتخاب خدمت یا محصول و نمونه کارها';
+          document.getElementById('nextBtn').innerText = 'ادامه';
+        } else {
+          step = 2;
+          document.getElementById('step3').classList.add('hidden');
+          document.getElementById('step2').classList.remove('hidden');
+          document.getElementById('stepBadge').innerText = '۲';
+          document.getElementById('stepTitle').innerText = 'انتخاب زمان نوبت';
+          document.getElementById('nextBtn').innerText = 'ادامه';
+        }
       }
     }
 
-    loadServices();
+    loadCatalog();
   </script>
 </body>
 </html>
