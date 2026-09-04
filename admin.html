@@ -10,155 +10,79 @@
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
   <style>
-    body { font-family: 'Vazirmatn', sans-serif !important; background-color: #0f172a; color: #f8fafc; }
+    body { font-family: 'Vazirmatn', sans-serif !important; background-color: #0f172a; color: #f8fafc; font-size: 14px; }
     .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
     .horizontal-scroll::-webkit-scrollbar { height: 4px; }
     .horizontal-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
   </style>
 </head>
-<body class="min-h-screen p-4 flex flex-col items-center justify-start">
-  
-  <div class="w-full max-w-xl bg-slate-900 rounded-3xl overflow-hidden shadow-2xl border border-slate-800 p-6 space-y-6">
-    
-    <!-- هدر پنل -->
+<body class="min-h-screen p-4 sm:p-6 max-w-4xl mx-auto">
+
+  <div class="bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-6 shadow-2xl space-y-6">
     <div class="flex items-center justify-between border-b border-slate-800 pb-4">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-emerald-400">
-          <img src="https://raw.githubusercontent.com/salarsalarzehi/barbertest/main/profile.jpg" alt="سالار" class="w-full h-full object-cover">
-        </div>
-        <div>
-          <h1 class="text-sm font-bold text-white">مدیریت پیرایش سالار</h1>
-          <p class="text-[11px] text-slate-400">پنل کنترل سانس‌ها، خدمات و محصولات</p>
-        </div>
+      <h1 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+        <i class="fa-solid fa-gear text-emerald-400"></i> پنل مدیریت و بستن سانس‌ها
+      </h1>
+      <span class="text-xs bg-slate-800 text-slate-300 px-3 py-1 rounded-xl border border-slate-700">پیرایش سالار</span>
+    </div>
+
+    <!-- بخش انتخاب روز -->
+    <div class="space-y-2">
+      <label class="block text-xs font-bold text-slate-300">انتخاب روز برای مدیریت سانس‌ها:</label>
+      <div class="flex gap-2 overflow-x-auto pb-2 horizontal-scroll" id="adminDateContainer"></div>
+    </div>
+
+    <!-- بخش مدیریت سانس‌های ۱۰ صبح تا ۱۰ شب -->
+    <div class="space-y-3">
+      <div class="flex items-center justify-between">
+        <h2 class="text-xs font-bold text-emerald-400">مدیریت ساعت‌های کاری (۱۰:۰۰ الی ۲۲:۰۰ - نیم‌ساعته):</h2>
+        <span class="text-[11px] text-slate-400">برای بستن یا باز کردن هر سانس روی آن کلیک کنید</span>
       </div>
-      <button onclick="loadData()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 transition flex items-center gap-1.5 cursor-pointer">
-        <i class="fa-solid fa-rotate"></i> بروزرسانی
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5" id="adminTimeSlotsContainer">
+        <div class="col-span-full text-center text-xs text-slate-500 py-4">در حال بارگذاری سانس‌ها...</div>
+      </div>
+    </div>
+
+    <div class="pt-4 border-t border-slate-800 flex justify-end">
+      <button onclick="saveAdminChanges()" id="saveBtn" class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold px-6 py-3 rounded-xl transition shadow-lg shadow-emerald-500/20 cursor-pointer">
+        ذخیره تغییرات در سرور
       </button>
     </div>
-
-    <!-- بخش ۱: مدیریت و قفل/آزادسازی سانس‌ها همراه با دکمه ذخیره -->
-    <div class="space-y-4 bg-slate-800/40 p-4 rounded-2xl border border-slate-800">
-      <h2 class="text-xs font-bold text-sky-400 flex items-center gap-2">
-        <i class="fa-solid fa-calendar-days"></i> مدیریت سانس‌های کاری (۸ صبح تا ۱۰ شب)
-      </h2>
-      <p class="text-[11px] text-slate-400 leading-relaxed">
-        روز مورد نظر را انتخاب کنید، سانس‌های دلخواه را قفل یا آزاد کنید و در نهایت روی دکمه ذخیره بزنید تا در اپلیکیشن اعمال شود.
-      </p>
-      
-      <!-- کاروسل انتخاب تاریخ شمسی -->
-      <div class="relative">
-        <div id="dateCarousel" class="flex gap-2 overflow-x-auto horizontal-scroll py-2 px-1 scroll-smooth">
-          <!-- روزها به صورت دینامیک اینجا بارگذاری می‌شوند -->
-        </div>
-      </div>
-
-      <!-- لیست سانس‌های روز انتخاب شده -->
-      <div class="mt-2 pt-3 border-t border-slate-800 space-y-3">
-        <div class="flex justify-between items-center">
-          <span id="selectedDateLabel" class="text-xs font-bold text-slate-300">سانس‌های تاریخ: -</span>
-          <span class="text-[10px] text-sky-400 bg-sky-500/10 px-2 py-1 rounded-lg">نیم ساعت به نیم ساعت</span>
-        </div>
-        
-        <div id="timeSlotsGrid" class="grid grid-cols-2 gap-2 max-h-52 overflow-y-auto custom-scrollbar p-1">
-          <p class="text-xs text-slate-500 text-center col-span-2 py-2">لطفاً یک روز را انتخاب کنید.</p>
-        </div>
-
-        <!-- دکمه ذخیره تغییرات سانس‌ها -->
-        <button onclick="saveTimeSlotsChanges()" class="w-full py-2.5 rounded-xl bg-sky-500 hover:bg-sky-600 text-white text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-sky-500/20">
-          <i class="fa-solid fa-floppy-disk"></i> ذخیره تغییرات سانس‌های این روز
-        </button>
-      </div>
-    </div>
-
-    <!-- بخش ۲: مدیریت خدمات -->
-    <div class="space-y-4 bg-slate-800/40 p-4 rounded-2xl border border-slate-800">
-      <h2 class="text-xs font-bold text-emerald-400 flex items-center gap-2">
-        <i class="fa-solid fa-scissors"></i> افزودن خدمت جدید
-      </h2>
-      <div class="space-y-3">
-        <div>
-          <label class="block text-[11px] text-slate-300 mb-1">نام خدمت (مثلا: اصلاح سر و ریش فید):</label>
-          <input type="text" id="srvName" placeholder="نام خدمت..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-emerald-500">
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-[11px] text-slate-300 mb-1">قیمت (مثلا: ۳۵۰,۰۰۰ تومان):</label>
-            <input type="text" id="srvPrice" placeholder="قیمت خدمت..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-emerald-500">
-          </div>
-          <div>
-            <label class="block text-[11px] text-slate-300 mb-1">مدت زمان (به دقیقه، مثلا: 60):</label>
-            <input type="number" id="srvDuration" placeholder="مدت زمان..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-emerald-500">
-          </div>
-        </div>
-        <button onclick="addService()" class="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold transition cursor-pointer">
-          افزودن خدمت به لیست
-        </button>
-      </div>
-
-      <div class="mt-4 pt-4 border-t border-slate-800">
-        <h3 class="text-xs font-semibold text-slate-300 mb-2.5">لیست خدمات فعال:</h3>
-        <div id="servicesList" class="space-y-2">
-          <p class="text-xs text-slate-500 text-center py-2">در حال بارگذاری خدمات...</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- بخش ۳: مدیریت محصولات -->
-    <div class="space-y-4 bg-slate-800/40 p-4 rounded-2xl border border-slate-800">
-      <h2 class="text-xs font-bold text-amber-400 flex items-center gap-2">
-        <i class="fa-solid fa-box"></i> افزودن محصول جدید (فروشگاه)
-      </h2>
-      <div class="space-y-3">
-        <div>
-          <label class="block text-[11px] text-slate-300 mb-1">نام محصول:</label>
-          <input type="text" id="prodName" placeholder="نام محصول..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-amber-500">
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-[11px] text-slate-300 mb-1">قیمت محصول:</label>
-            <input type="text" id="prodPrice" placeholder="قیمت محصول..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-amber-500">
-          </div>
-          <div>
-            <label class="block text-[11px] text-slate-300 mb-1">انتخاب تصویر محصول (Choose File):</label>
-            <input type="file" id="prodImageFile" accept="image/*" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-1.5 text-[10px] text-slate-300 file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-[10px] file:font-semibold file:bg-amber-500 file:text-white hover:file:bg-amber-600 cursor-pointer">
-          </div>
-        </div>
-        <button onclick="addProduct()" class="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition cursor-pointer">
-          افزودن محصول به فروشگاه
-        </button>
-      </div>
-
-      <div class="mt-4 pt-4 border-t border-slate-800">
-        <h3 class="text-xs font-semibold text-slate-300 mb-2.5">لیست محصولات فعال:</h3>
-        <div id="productsList" class="space-y-2">
-          <p class="text-xs text-slate-500 text-center py-2">در حال بارگذاری محصولات...</p>
-        </div>
-      </div>
-    </div>
-
   </div>
 
   <script>
     const WORKER_URL = "https://bale-sender.salar1368yb.workers.dev";
     
-    let adminData = {
-      disabledSlots: [],
-      customProducts: [],
-      customServices: []
-    };
-
-    let selectedDateStr = "";
+    let customServices = [];
+    let customProducts = [];
+    let disabledSlots = [];
+    let selectedAdminDateKey = "";
 
     document.addEventListener("DOMContentLoaded", () => {
-      initJalaaliCarousel();
-      loadData();
+      loadAdminData();
     });
 
-    // ساخت کاروسل تاریخ شمسی (۳۰ روز آینده)
-    function initJalaaliCarousel() {
-      const carousel = document.getElementById('dateCarousel');
-      carousel.innerHTML = '';
+    async function loadAdminData() {
+      try {
+        const res = await fetch(`${WORKER_URL}/admin-data`, { cache: 'no-store' });
+        if (!res.ok) throw new Error('خطای شبکه');
+        const data = await res.json();
+        
+        customProducts = Array.isArray(data.customProducts) ? data.customProducts : [];
+        customServices = Array.isArray(data.customServices) ? data.customServices : [];
+        disabledSlots = Array.isArray(data.disabledSlots) ? data.disabledSlots : [];
+      } catch(e) {
+        console.warn("خطا در دریافت اطلاعات:", e);
+      }
+      renderAdminCalendar();
+      renderAdminTimes();
+    }
+
+    // ساخت تقویم ۳۰ روزه برای ادمین
+    function renderAdminCalendar() {
+      const container = document.getElementById('adminDateContainer');
+      container.innerHTML = '';
 
       const persianDays = ['یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنج‌شنبه', 'جمعه', 'شنبه'];
       const persianMonths = ['', 'فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
@@ -170,7 +94,6 @@
         d.setDate(today.getDate() + i);
 
         const j = jalaali.toJalaali(d.getFullYear(), d.getMonth() + 1, d.getDate());
-        
         const jy = j.jy;
         const jm = String(j.jm).padStart(2, '0');
         const jd = String(j.jd).padStart(2, '0');
@@ -179,250 +102,93 @@
         const dayName = persianDays[d.getDay()];
         const displayDate = `${j.jd} ${persianMonths[j.jm]}`;
 
-        if (i === 0) {
-          selectedDateStr = dateKey;
+        if (i === 0 && !selectedAdminDateKey) {
+          selectedAdminDateKey = dateKey;
         }
 
-        const btn = document.createElement('button');
-        btn.className = `flex flex-col items-center justify-center min-w-[75px] py-2 px-3 rounded-2xl border transition cursor-pointer ${
-          dateKey === selectedDateStr 
-            ? 'bg-sky-500 border-sky-400 text-white shadow-lg shadow-sky-500/20' 
+        const b = document.createElement('button');
+        b.className = `flex flex-col items-center justify-center min-w-[75px] py-2 px-3 rounded-2xl border transition cursor-pointer ${
+          dateKey === selectedAdminDateKey 
+            ? 'bg-sky-500 border-sky-400 text-white shadow-lg shadow-sky-500/20 font-bold' 
             : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'
         }`;
-        btn.onclick = () => selectDate(dateKey, btn);
-
-        btn.innerHTML = `
+        b.innerHTML = `
           <span class="text-[10px] opacity-80">${dayName}</span>
           <span class="text-xs font-bold mt-0.5">${displayDate}</span>
         `;
-        carousel.appendChild(btn);
+        b.onclick = () => {
+          selectedAdminDateKey = dateKey;
+          renderAdminCalendar();
+          renderAdminTimes();
+        };
+        container.appendChild(b);
       }
     }
 
-    function selectDate(dateKey, btnElement) {
-      selectedDateStr = dateKey;
-      document.querySelectorAll('#dateCarousel button').forEach(b => {
-        b.className = "flex flex-col items-center justify-center min-w-[75px] py-2 px-3 rounded-2xl border transition cursor-pointer bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700";
-      });
-      btnElement.className = "flex flex-col items-center justify-center min-w-[75px] py-2 px-3 rounded-2xl border transition cursor-pointer bg-sky-500 border-sky-400 text-white shadow-lg shadow-sky-500/20";
-      
-      renderTimeSlots();
-    }
-
-    async function loadData() {
-      try {
-        const res = await fetch(`${WORKER_URL}/admin-data`, { cache: 'no-store' });
-        const data = await res.json();
-        adminData.disabledSlots = Array.isArray(data.disabledSlots) ? data.disabledSlots : [];
-        adminData.customProducts = Array.isArray(data.customProducts) ? data.customProducts : [];
-        adminData.customServices = Array.isArray(data.customServices) ? data.customServices : [];
-        renderUI();
-      } catch (err) {
-        console.error("خطا در ارتباط با سرور:", err);
-        alert("خطا در ارتباط با سرور برای دریافت اطلاعات.");
-      }
-    }
-
-    async function saveData() {
-      try {
-        const res = await fetch(`${WORKER_URL}/admin-update`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(adminData)
-        });
-        if (!res.ok) throw new Error('خطا در ذخیره‌سازی سرور');
-        alert("تغییرات با موفقیت در اپلیکیشن ذخیره شد!");
-        renderUI();
-      } catch (err) {
-        console.error(err);
-        alert("ذخیره‌سازی با خطا مواجه شد.");
-      }
-    }
-
-    function renderUI() {
-      renderTimeSlots();
-      renderServices();
-      renderProducts();
-    }
-
-    // بازه زمانی از ۸ صبح تا ۱۰ شب (۲۲:۰۰) با فاصله نیم ساعته
-    function renderTimeSlots() {
-      const slotsContainer = document.getElementById('timeSlotsGrid');
-      const dateLabel = document.getElementById('selectedDateLabel');
-      if (!slotsContainer) return;
-
-      dateLabel.innerText = `سانس‌های تاریخ: ${selectedDateStr}`;
-      slotsContainer.innerHTML = '';
+    // رندر کردن سانس‌های ۱۰ صبح تا ۱۰ شب برای ادمین
+    function renderAdminTimes() {
+      const container = document.getElementById('adminTimeSlotsContainer');
+      container.innerHTML = '';
 
       const slots = [];
-      for (let hour = 8; hour < 22; hour++) {
+      for (let hour = 10; hour < 22; hour++) {
         ['00', '30'].forEach(minute => {
           const timeStr = `${String(hour).padStart(2, '0')}:${minute}`;
-          slots.push(`${selectedDateStr}_${timeStr}`);
+          slots.push(`${selectedAdminDateKey}_${timeStr}`);
         });
       }
 
       slots.forEach(slotKey => {
         const timeOnly = slotKey.split('_')[1];
-        const isDisabled = adminData.disabledSlots.includes(slotKey);
+        const isLocked = disabledSlots.includes(slotKey);
 
-        const div = document.createElement('div');
-        div.className = `flex items-center justify-between p-2 rounded-xl border text-xs ${
-          isDisabled 
-            ? 'bg-rose-500/10 border-rose-500/30 text-rose-300' 
-            : 'bg-slate-800 border-slate-700 text-slate-200'
+        const b = document.createElement('button');
+        b.className = `p-3 rounded-xl border text-xs font-bold transition flex items-center justify-between cursor-pointer ${
+          isLocked 
+            ? 'bg-rose-500/10 border-rose-500/30 text-rose-400 hover:bg-rose-500/20' 
+            : 'bg-slate-800 border-slate-700 text-emerald-400 hover:border-slate-600'
         }`;
-        div.id = `slot_box_${slotKey}`;
-        
-        div.innerHTML = `
-          <span class="font-mono font-bold">${timeOnly}</span>
-          <button type="button" onclick="toggleSlotLocal('${slotKey}')" id="slot_btn_${slotKey}" class="px-2 py-1 rounded-lg text-[11px] transition cursor-pointer ${
-            isDisabled 
-              ? 'bg-rose-500 text-white hover:bg-rose-600' 
-              : 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-white'
-          }">
-            ${isDisabled ? 'قفل شده (آزاد کردن)' : 'آزاد (قفل کردن)'}
-          </button>
+        b.innerHTML = `
+          <span dir="ltr">${timeOnly}</span>
+          <span class="text-[11px] px-2 py-0.5 rounded-lg ${isLocked ? 'bg-rose-500/20 text-rose-300' : 'bg-emerald-500/20 text-emerald-300'}">
+            ${isLocked ? 'بسته (تکمیل)' : 'باز (آزاد)'}
+          </span>
         `;
-        slotsContainer.appendChild(div);
+        b.onclick = () => {
+          if (isLocked) {
+            disabledSlots = disabledSlots.filter(s => s !== slotKey);
+          } else {
+            disabledSlots.push(slotKey);
+          }
+          renderAdminTimes();
+        };
+        container.appendChild(b);
       });
     }
 
-    // تغییر وضعیت موقت روی صفحه (بدون ذخیره فوری در سرور)
-    function toggleSlotLocal(slotKey) {
-      const index = adminData.disabledSlots.indexOf(slotKey);
-      const box = document.getElementById(`slot_box_${slotKey}`);
-      const btn = document.getElementById(`slot_btn_${slotKey}`);
+    async function saveAdminChanges() {
+      const btn = document.getElementById('saveBtn');
+      btn.disabled = true;
+      btn.innerText = 'در حال ذخیره‌سازی...';
 
-      if (index > -1) {
-        // آزاد کردن
-        adminData.disabledSlots.splice(index, 1);
-        box.className = "flex items-center justify-between p-2 rounded-xl border text-xs bg-slate-800 border-slate-700 text-slate-200";
-        btn.className = "px-2 py-1 rounded-lg text-[11px] transition cursor-pointer bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-white";
-        btn.innerText = "آزاد (قفل کردن)";
-      } else {
-        // قفل کردن
-        adminData.disabledSlots.push(slotKey);
-        box.className = "flex items-center justify-between p-2 rounded-xl border text-xs bg-rose-500/10 border-rose-500/30 text-rose-300";
-        btn.className = "px-2 py-1 rounded-lg text-[11px] transition cursor-pointer bg-rose-500 text-white hover:bg-rose-600";
-        btn.innerText = "قفل شده (آزاد کردن)";
-      }
-    }
+      try {
+        const res = await fetch(`${WORKER_URL}/admin-update`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ disabledSlots, customProducts, customServices })
+        });
 
-    // دکمه نهایی ذخیره سانس‌ها
-    async function saveTimeSlotsChanges() {
-      await saveData();
-    }
-
-    function renderServices() {
-      const srvContainer = document.getElementById('servicesList');
-      srvContainer.innerHTML = '';
-      if (adminData.customServices.length === 0) {
-        srvContainer.innerHTML = '<p class="text-xs text-slate-500 text-center py-2">هیچ خدمت سفارشی ثبت نشده است.</p>';
-        return;
-      }
-      adminData.customServices.forEach((s, index) => {
-        const div = document.createElement('div');
-        div.className = "flex items-center justify-between p-2.5 bg-slate-800 border border-slate-700 rounded-xl";
-        div.innerHTML = `
-          <div>
-            <h4 class="text-xs font-bold text-white">${s.name}</h4>
-            <p class="text-[11px] text-slate-400 mt-0.5">${s.price} — ${s.duration} دقیقه</p>
-          </div>
-          <button onclick="removeService(${index})" class="px-2.5 py-1 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white text-xs transition cursor-pointer">
-            <i class="fa-solid fa-trash"></i>
-          </button>
-        `;
-        srvContainer.appendChild(div);
-      });
-    }
-
-    function renderProducts() {
-      const prodContainer = document.getElementById('productsList');
-      prodContainer.innerHTML = '';
-      if (adminData.customProducts.length === 0) {
-        prodContainer.innerHTML = '<p class="text-xs text-slate-500 text-center py-2">محصولی ثبت نشده است.</p>';
-        return;
-      }
-      adminData.customProducts.forEach((p, index) => {
-        const div = document.createElement('div');
-        div.className = "flex items-center justify-between p-2.5 bg-slate-800 border border-slate-700 rounded-xl";
-        div.innerHTML = `
-          <div class="flex items-center gap-2.5">
-            <img src="${p.image}" class="w-8 h-8 rounded-lg object-cover border border-slate-700">
-            <div>
-              <h4 class="text-xs font-bold text-white">${p.name}</h4>
-              <p class="text-[11px] text-slate-400 mt-0.5">${p.price}</p>
-            </div>
-          </div>
-          <button onclick="removeProduct(${index})" class="px-2.5 py-1 rounded-lg bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white text-xs transition cursor-pointer">
-            <i class="fa-solid fa-trash"></i>
-          </button>
-        `;
-        prodContainer.appendChild(div);
-      });
-    }
-
-    async function addService() {
-      const name = document.getElementById('srvName').value.trim();
-      const price = document.getElementById('srvPrice').value.trim();
-      const duration = parseInt(document.getElementById('srvDuration').value.trim());
-
-      if (!name || !price || !duration) {
-        alert('لطفاً تمام فیلدهای خدمت را به دقت پر کنید.');
-        return;
-      }
-
-      if (!Array.isArray(adminData.customServices)) adminData.customServices = [];
-      adminData.customServices.push({ name, price, duration });
-      
-      document.getElementById('srvName').value = '';
-      document.getElementById('srvPrice').value = '';
-      document.getElementById('srvDuration').value = '';
-      
-      await saveData();
-    }
-
-    async function removeService(index) {
-      if (confirm('آیا از حذف این خدمت اطمینان دارید؟')) {
-        adminData.customServices.splice(index, 1);
-        await saveData();
-      }
-    }
-
-    async function addProduct() {
-      const name = document.getElementById('prodName').value.trim();
-      const price = document.getElementById('prodPrice').value.trim();
-      const fileInput = document.getElementById('prodImageFile');
-
-      if (!name || !price || fileInput.files.length === 0) {
-        alert('لطفاً نام، قیمت و تصویر محصول را انتخاب کنید.');
-        return;
-      }
-
-      const file = fileInput.files[0];
-      const reader = new FileReader();
-      
-      reader.onload = async function(e) {
-        const base64Image = e.target.result;
-        if (!Array.isArray(adminData.customProducts)) adminData.customProducts = [];
-        
-        adminData.customProducts.push({ name, price, image: base64Image });
-        
-        document.getElementById('prodName').value = '';
-        document.getElementById('prodPrice').value = '';
-        fileInput.value = '';
-
-        await saveData();
-      };
-
-      reader.readAsDataURL(file);
-    }
-
-    async function removeProduct(index) {
-      if (confirm('آیا از حذف این محصول اطمینان دارید؟')) {
-        adminData.customProducts.splice(index, 1);
-        await saveData();
+        if (res.ok) {
+          alert('تغییرات با موفقیت در سرور ذخیره شد!');
+        } else {
+          alert('خطا در ذخیره اطلاعات روی سرور.');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('خطای ارتباط با سرور.');
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'ذخیره تغییرات در سرور';
       }
     }
   </script>
