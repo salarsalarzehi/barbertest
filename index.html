@@ -15,7 +15,7 @@
       color: #f8fafc;
       font-size: 14px;
     }
-    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
   </style>
 </head>
@@ -40,13 +40,25 @@
       <div id="stepHeaderBox" class="flex items-center justify-between px-3 bg-slate-800/40 p-2.5 rounded-2xl border border-slate-800">
         <div class="flex items-center gap-2">
           <div id="stepBadge" class="w-6 h-6 rounded-full bg-emerald-500 text-white font-bold flex items-center justify-center text-xs">۱</div>
-          <span id="stepTitle" class="text-xs font-bold text-slate-200">انتخاب خدمت مورد نظر</span>
+          <span id="stepTitle" class="text-xs font-bold text-slate-200">انتخاب خدمت و مشاهده نمونه کارها</span>
         </div>
       </div>
   
-      <!-- لیست خدمات که به صورت پویا از سرور بارگذاری می‌شود -->
-      <div id="step1" class="space-y-2.5">
-        <p class="text-xs text-slate-500 text-center py-4">در حال بارگذاری خدمات...</p>
+      <!-- مرحله اول: نمونه کارها + لیست خدمات -->
+      <div id="step1" class="space-y-3">
+        <div>
+          <label class="block text-xs text-slate-300 mb-1.5 font-medium">📸 نمونه کارهای اخیر:</label>
+          <div class="flex gap-2 overflow-x-auto pb-1.5 custom-scrollbar" id="portfolioContainer">
+            <!-- تصاویر نمونه کار به صورت پویا یا ثابت قرار می‌گیرند -->
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs text-slate-300 mb-1.5 font-medium">✂️ انتخاب خدمت:</label>
+          <div id="servicesListContainer" class="space-y-2.5">
+            <p class="text-xs text-slate-500 text-center py-4">در حال بارگذاری خدمات...</p>
+          </div>
+        </div>
       </div>
   
       <div id="step2" class="space-y-3 hidden">
@@ -101,7 +113,14 @@
  <script>
     const WORKER_URL = "https://bale-sender.salar1368yb.workers.dev";
     
-    // پایه تمام سانس‌ها بر اساس بلوک‌های ۳۰ دقیقه‌ای چیده می‌شود
+    // لینک عکس‌های نمونه کار شما (می‌توانید عکس‌های خودتان را جایگزین این لینک‌ها کنید)
+    const portfolioImages = [
+      "https://images.unsplash.com/photo-1622286342621-4bd786c2447c?w=500&auto=format&fit=crop&q=60",
+      "https://images.unsplash.com/photo-1599351431202-1e0f0137899a?w=500&auto=format&fit=crop&q=60",
+      "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=500&auto=format&fit=crop&q=60",
+      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&auto=format&fit=crop&q=60"
+    ];
+
     const halfHourSlots = [
       { start: "۱۰:۰۰", end: "۱۰:۳۰" }, { start: "۱۰:۳۰", end: "۱۱:۰۰" }, 
       { start: "۱۱:۰۰", end: "۱۱:۳۰" }, { start: "۱۱:۳۰", end: "۱۲:۰۰" }, 
@@ -130,7 +149,19 @@
       console.error("Bale Init Error:", e);
     }
 
+    function renderPortfolio() {
+      const container = document.getElementById('portfolioContainer');
+      container.innerHTML = '';
+      portfolioImages.forEach(imgUrl => {
+        const imgDiv = document.createElement('div');
+        imgDiv.className = "w-20 h-20 rounded-xl overflow-hidden border border-slate-700 flex-shrink-0 bg-slate-800 shadow-sm";
+        imgDiv.innerHTML = `<img src="${imgUrl}" alt="نمونه کار پیرایش سالار" class="w-full h-full object-cover hover:scale-105 transition duration-300">`;
+        container.appendChild(imgDiv);
+      });
+    }
+
     async function loadServices() {
+      renderPortfolio();
       try {
         const res = await fetch(`${WORKER_URL}/services`);
         const data = await res.json();
@@ -152,7 +183,7 @@
     }
 
     function renderServices() {
-      const container = document.getElementById('step1');
+      const container = document.getElementById('servicesListContainer');
       container.innerHTML = '';
       servicesList.forEach(s => {
         const div = document.createElement('div');
@@ -244,21 +275,16 @@
       const container = document.getElementById('timeContainer');
       container.innerHTML = '';
       
-      // تعداد اسلات‌های ۳۰ دقیقه‌ای مورد نیاز بسته به زمان خدمت (مثلا ۶۰ دقیقه = ۲ اسلات)
       const slotsNeeded = serviceDuration / 30;
-
-      // ساخت لیست بازه‌های پویای قابل ارائه بر اساس مدت زمان خدمت
       const availableTimes = [];
       for (let i = 0; i <= halfHourSlots.length - slotsNeeded; i++) {
         const startSlot = halfHourSlots[i];
         const endSlot = halfHourSlots[i + slotsNeeded - 1];
 
-        // جلوگیری از ترکیب بازه‌هایی که متعلق به شیفت‌های جداگانه هستند (مثلاً بین ظهر و عصر)
         const startTimeVal = timeToMinutes(startSlot.start);
         const endTimeVal = timeToMinutes(endSlot.end);
         if (endTimeVal - startTimeVal !== serviceDuration) continue;
 
-        // بررسی اینکه آیا بین این بازه‌ها وقفه ناهار/استراحت افتاده یا نه
         let isValidRange = true;
         for (let j = 0; j < slotsNeeded; j++) {
           const checkSlotKey = `${date}_${halfHourSlots[i + j].start} - ${halfHourSlots[i + j].end}`;
@@ -391,7 +417,6 @@
   
         const bookingObj = { name, phone, service, date, time, note, price: servicePrice, id: Date.now() };
 
-        // استخراج و قفل کردن تمام بازه‌های ۳۰ دقیقه‌ای که این خدمت اشغال می‌کند
         const slotsToDisable = [];
         const parts = time.split(" - ");
         if (parts.length === 2) {
@@ -435,7 +460,7 @@
         document.getElementById('step1').classList.remove('hidden');
         document.getElementById('backBtn').classList.add('hidden');
         document.getElementById('stepBadge').innerText = '۱';
-        document.getElementById('stepTitle').innerText = 'انتخاب خدمت مورد نظر';
+        document.getElementById('stepTitle').innerText = 'انتخاب خدمت و مشاهده نمونه کارها';
         document.getElementById('nextBtn').innerText = 'ادامه';
       } else if (step === 3) {
         step = 2;
