@@ -26,7 +26,7 @@
         <span class="font-bold text-white text-sm">پیرایش سالار</span>
       </div>
       <span class="text-[11px] bg-emerald-500/10 text-emerald-400 px-2.5 py-0.5 rounded-full border border-emerald-500/20 font-medium">مینی‌اپ بله</span>
-    </div>
+   </div>
   
    <div class="flex-1 overflow-y-auto p-3.5 space-y-3.5 custom-scrollbar" id="mainContainer">
   
@@ -65,7 +65,7 @@
           <div class="flex gap-2 overflow-x-auto pb-1.5 custom-scrollbar" id="dateContainer"></div>
         </div>
         <div>
-          <label class="block text-xs text-slate-300 mb-1.5 font-medium">ساعت حضور:</label>
+          <label class="block text-xs text-slate-300 mb-1.5 font-medium">ساعت حضور (۱۰ صبح تا ۱۰ شب):</label>
           <div class="grid grid-cols-2 gap-2" id="timeContainer"></div>
         </div>
       </div>
@@ -110,21 +110,30 @@
  <script>
     const WORKER_URL = "https://bale-sender.salar1368yb.workers.dev";
     
-    const staticServices = [
+    // خدمات پیش‌فرض + خدمات سفارشی که ادمین اضافه می‌کند
+    let defaultServices = [
       { name: "اصلاح سر و ریش فید", type: "service", duration: 60, price: "۳۵۰,۰۰۰ تومان", icon: "fa-scissors" },
       { name: "اصلاح سر کلاسیک", type: "service", duration: 45, price: "۲۵۰,۰۰۰ تومان", icon: "fa-scissors" },
       { name: "اصلاح سر فید", type: "service", duration: 45, price: "۲۸۰,۰۰۰ تومان", icon: "fa-scissors" }
     ];
 
+    let customServices = [];
     let customProducts = [];
+    
+    // بازه کامل سانس‌ها از ۱۰ صبح تا ۱۰ شب (مطابق با پنل ادمین)
     const halfHourSlots = [
       { start: "۱۰:۰۰", end: "۱۰:۳۰" }, { start: "۱۰:۳۰", end: "۱۱:۰۰" }, 
       { start: "۱۱:۰۰", end: "۱۱:۳۰" }, { start: "۱۱:۳۰", end: "۱۲:۰۰" }, 
       { start: "۱۲:۰۰", end: "۱۲:۳۰" }, { start: "۱۲:۳۰", end: "۱۳:۰۰" }, 
+      { start: "۱۳:۰۰", end: "۱۳:۳۰" }, { start: "۱۳:۳۰", end: "۱۴:۰۰" }, 
+      { start: "۱۴:۰۰", end: "۱۴:۳۰" }, { start: "۱۴:۳۰", end: "۱۵:۰۰" }, 
+      { start: "۱۵:۰۰", end: "۱۵:۳۰" }, { start: "۱۵:۳۰", end: "۱۶:۰۰" }, 
       { start: "۱۶:۰۰", end: "۱۶:۳۰" }, { start: "۱۶:۳۰", end: "۱۷:۰۰" }, 
       { start: "۱۷:۰۰", end: "۱۷:۳۰" }, { start: "۱۷:۳۰", end: "۱۸:۰۰" }, 
       { start: "۱۸:۰۰", end: "۱۸:۳۰" }, { start: "۱۸:۳۰", end: "۱۹:۰۰" }, 
-      { start: "۱۹:۰۰", end: "۱۹:۳۰" }, { start: "۱۹:۳۰", end: "۲۰:۰۰" }
+      { start: "۱۹:۰۰", end: "۱۹:۳۰" }, { start: "۱۹:۳۰", end: "۲۰:۰۰" },
+      { start: "۲۰:۰۰", end: "۲۰:۳۰" }, { start: "۲۰:۳۰", end: "۲۱:۰۰" }, 
+      { start: "۲۱:۰۰", end: "۲۱:۳۰" }, { start: "۲۱:۳۰", end: "۲۲:۰۰" }
     ];
 
     let step = 1, selectedItem = null, serviceDuration = 60, itemType = "service", date = "", time = "";
@@ -147,6 +156,7 @@
         const res = await fetch(`${WORKER_URL}/admin-data`);
         const data = await res.json();
         customProducts = data.customProducts || [];
+        customServices = data.customServices || [];
         disabledSlots = data.disabledSlots || [];
       } catch(e) {
         console.error("خطا در دریافت کاتالوگ:", e);
@@ -161,7 +171,16 @@
       servicesContainer.innerHTML = '';
       productsContainer.innerHTML = '';
 
-      staticServices.forEach(item => {
+      // ترکیب خدمات پیش‌فرض و خدمات جدیدی که ادمین اضافه کرده است
+      const allServices = [...defaultServices, ...customServices.map(s => ({
+        name: s.name,
+        type: 'service',
+        duration: parseInt(s.duration) || 30,
+        price: s.price,
+        icon: 'fa-scissors'
+      }))];
+
+      allServices.forEach(item => {
         const div = document.createElement('div');
         div.className = "service-card p-3 rounded-xl bg-slate-800 border border-slate-700 hover:border-emerald-500 cursor-pointer flex items-center justify-between transition";
         div.innerHTML = `
@@ -316,7 +335,7 @@
           await fetch(`${WORKER_URL}/admin-update`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ disabledSlots, customProducts })
+            body: JSON.stringify({ disabledSlots, customProducts, customServices })
           });
         }
         await fetch(`${WORKER_URL}/`, {
