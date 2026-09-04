@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>رزرو آنلاین و فروشگاه پیرایش سالار</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- کتابخانه تقویم شمسی -->
+  <script src="https://cdn.jsdelivr.net/npm/jalaali-js/dist/jalaali.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700;800&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
   <script src="https://tapi.bale.ai/miniapp.js?3"></script>
@@ -12,6 +14,8 @@
     body { font-family: 'Vazirmatn', sans-serif !important; background-color: #0f172a; color: #f8fafc; font-size: 14px; }
     .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    .horizontal-scroll::-webkit-scrollbar { height: 4px; }
+    .horizontal-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
   </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-2 sm:p-4">
@@ -66,7 +70,7 @@
       <div id="step2" class="space-y-3 hidden">
         <div>
           <label class="block text-xs text-slate-300 mb-1.5 font-medium">روز مراجعه:</label>
-          <div class="flex gap-2 overflow-x-auto pb-1.5 custom-scrollbar" id="dateContainer"></div>
+          <div class="flex gap-2 overflow-x-auto pb-1.5 horizontal-scroll" id="dateContainer"></div>
         </div>
         <div>
           <label class="block text-xs text-slate-300 mb-1.5 font-medium">ساعت حضور (۱۰ صبح تا ۱۰ شب):</label>
@@ -118,22 +122,7 @@
     let customProducts = [];
     let disabledSlots = [];
     
-    const halfHourSlots = [
-      { start: "۱۰:۰۰", end: "۱۰:۳۰" }, { start: "۱۰:۳۰", end: "۱۱:۰۰" }, 
-      { start: "۱۱:۰۰", end: "۱۱:۳۰" }, { start: "۱۱:۳۰", end: "۱۲:۰۰" }, 
-      { start: "۱۲:۰۰", end: "۱۲:۳۰" }, { start: "۱۲:۳۰", end: "۱۳:۰۰" }, 
-      { start: "۱۳:۰۰", end: "۱۳:۳۰" }, { start: "۱۳:۳۰", end: "۱۴:۰۰" }, 
-      { start: "۱۴:۰۰", end: "۱۴:۳۰" }, { start: "۱۴:۳۰", end: "۱۵:۰۰" }, 
-      { start: "۱۵:۰۰", end: "۱۵:۳۰" }, { start: "۱۵:۳۰", end: "۱۶:۰۰" }, 
-      { start: "۱۶:۰۰", end: "۱۶:۳۰" }, { start: "۱۶:۳۰", end: "۱۷:۰۰" }, 
-      { start: "۱۷:۰۰", end: "۱۷:۳۰" }, { start: "۱۷:۳۰", end: "۱۸:۰۰" }, 
-      { start: "۱۸:۰۰", end: "۱۸:۳۰" }, { start: "۱۸:۳۰", end: "۱۹:۰۰" }, 
-      { start: "۱۹:۰۰", end: "۱۹:۳۰" }, { start: "۱۹:۳۰", end: "۲۰:۰۰" },
-      { start: "۲۰:۰۰", end: "۲۰:۳۰" }, { start: "۲۰:۳۰", end: "۲۱:۰۰" }, 
-      { start: "۲۱:۰۰", end: "۲۱:۳۰" }, { start: "۲۱:۳۰", end: "۲۲:۰۰" }
-    ];
-
-    let step = 1, selectedItem = null, serviceDuration = 60, itemType = "service", date = "", time = "";
+    let step = 1, selectedItem = null, serviceDuration = 60, itemType = "service", selectedDateKey = "", selectedTimeSlot = "";
     let userChatId = null;
   
     try {
@@ -146,6 +135,10 @@
         }
       }
     } catch(e) { console.error(e); }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      loadCatalog();
+    });
 
     async function loadCatalog() {
       try {
@@ -238,22 +231,46 @@
       } catch (err) { window.open(url, '_blank'); }
     }
   
+    // ساخت کاروسل تقویم شمسی ۳۰ روز آینده مطابق پنل ادمین
     function renderCalendar() {
       const container = document.getElementById('dateContainer');
       container.innerHTML = '';
-      for (let i = 0; i < 7; i++) {
+
+      const persianDays = ['یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنج‌شنبه', 'جمعه', 'شنبه'];
+      const persianMonths = ['', 'فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
+      
+      const today = new Date();
+
+      for (let i = 0; i < 30; i++) {
         const d = new Date();
-        d.setDate(d.getDate() + i);
-        const str = d.toLocaleDateString('fa-IR', { weekday: 'short', month: 'short', day: 'numeric' });
-        if (i === 0 && !date) date = str;
+        d.setDate(today.getDate() + i);
+
+        const j = jalaali.toJalaali(d.getFullYear(), d.getMonth() + 1, d.getDate());
+        const jy = j.jy;
+        const jm = String(j.jm).padStart(2, '0');
+        const jd = String(j.jd).padStart(2, '0');
+        const dateKey = `${jy}-${jm}-${jd}`;
+
+        const dayName = persianDays[d.getDay()];
+        const displayDate = `${j.jd} ${persianMonths[j.jm]}`;
+
+        if (i === 0 && !selectedDateKey) {
+          selectedDateKey = dateKey;
+        }
+
         const b = document.createElement('button');
-        b.className = `date-btn flex-shrink-0 p-2.5 rounded-xl border text-xs min-w-[75px] cursor-pointer transition ${
-          date === str ? 'border-emerald-500 text-emerald-400 bg-slate-800 font-bold' : 'border-slate-700 bg-slate-800 text-white hover:border-slate-600'
+        b.className = `flex flex-col items-center justify-center min-w-[75px] py-2 px-3 rounded-2xl border transition cursor-pointer ${
+          dateKey === selectedDateKey 
+            ? 'bg-sky-500 border-sky-400 text-white shadow-lg shadow-sky-500/20 font-bold' 
+            : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'
         }`;
-        b.innerText = str;
+        b.innerHTML = `
+          <span class="text-[10px] opacity-80">${dayName}</span>
+          <span class="text-xs font-bold mt-0.5">${displayDate}</span>
+        `;
         b.onclick = () => {
-          date = str;
-          time = "";
+          selectedDateKey = dateKey;
+          selectedTimeSlot = "";
           renderCalendar();
           renderTimes();
           document.getElementById('nextBtn').disabled = true;
@@ -263,53 +280,45 @@
       }
     }
   
-    function timeToMinutes(tStr) {
-      const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-      let englishStr = tStr;
-      persianDigits.forEach((p, i) => { englishStr = englishStr.replace(new RegExp(p, 'g'), i); });
-      const parts = englishStr.split(':');
-      return parseInt(parts[0]) * 60 + parseInt(parts[1]);
-    }
-
+    // تولید سانس‌های ۱۰ صبح تا ۱۰ شب (۲۲:۰۰) به صورت نیم ساعت به نیم ساعت
     function renderTimes() {
       const container = document.getElementById('timeContainer');
       container.innerHTML = '';
-      const slotsNeeded = Math.ceil(serviceDuration / 30);
-      const availableTimes = [];
-      for (let i = 0; i <= halfHourSlots.length - slotsNeeded; i++) {
-        const startSlot = halfHourSlots[i];
-        const endSlot = halfHourSlots[i + slotsNeeded - 1];
-        const startTimeVal = timeToMinutes(startSlot.start);
-        const endTimeVal = timeToMinutes(endSlot.end);
-        if (endTimeVal - startTimeVal < serviceDuration) continue;
 
-        let isValidRange = true;
-        for (let j = 0; j < slotsNeeded; j++) {
-          const checkSlotKey = `${date}_${halfHourSlots[i + j].start} - ${halfHourSlots[i + j].end}`;
-          if (disabledSlots.includes(checkSlotKey)) { isValidRange = false; break; }
-        }
-        availableTimes.push({ label: `${startSlot.start} - ${endSlot.end}`, disabled: !isValidRange });
+      const slots = [];
+      for (let hour = 10; hour < 22; hour++) {
+        ['00', '30'].forEach(minute => {
+          const timeStr = `${String(hour).padStart(2, '0')}:${minute}`;
+          slots.push(`${selectedDateKey}_${timeStr}`);
+        });
       }
 
-      availableTimes.forEach(item => {
+      slots.forEach(slotKey => {
+        const timeOnly = slotKey.split('_')[1];
+        const isLocked = disabledSlots.includes(slotKey);
+
         const b = document.createElement('button');
-        if (item.disabled) {
-          b.className = "time-btn p-2.5 rounded-xl border border-slate-800 bg-slate-900/50 text-xs text-slate-600 cursor-not-allowed flex items-center justify-between";
-          b.innerHTML = `<span dir="ltr">${item.label}</span><span>(تکمیل)</span>`;
+        if (isLocked) {
+          b.className = "p-2.5 rounded-xl border border-slate-800 bg-slate-900/50 text-xs text-slate-600 cursor-not-allowed flex items-center justify-between";
+          b.innerHTML = `<span dir="ltr">${timeOnly}</span><span>(تکمیل)</span>`;
           b.disabled = true;
         } else {
-          b.className = `time-btn p-2.5 rounded-xl border text-xs cursor-pointer transition flex items-center justify-center ${
-            time === item.label ? 'border-emerald-500 text-emerald-400 bg-slate-800 font-bold' : 'border-slate-700 bg-slate-800 text-white hover:border-slate-600'
+          b.className = `p-2.5 rounded-xl border text-xs cursor-pointer transition flex items-center justify-center ${
+            selectedTimeSlot === timeOnly ? 'border-emerald-500 text-emerald-400 bg-slate-800 font-bold' : 'border-slate-700 bg-slate-800 text-white hover:border-slate-600'
           }`;
-          b.innerHTML = `<span dir="ltr">${item.label}</span>`;
-          b.onclick = () => { time = item.label; renderTimes(); checkStep2(); };
+          b.innerHTML = `<span dir="ltr">${timeOnly}</span>`;
+          b.onclick = () => {
+            selectedTimeSlot = timeOnly;
+            renderTimes();
+            checkStep2();
+          };
         }
         container.appendChild(b);
       });
     }
   
     function checkStep2() {
-      if (date && time) {
+      if (selectedDateKey && selectedTimeSlot) {
         const btn = document.getElementById('nextBtn');
         btn.disabled = false;
         btn.className = "w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold cursor-pointer transition";
@@ -399,18 +408,9 @@
         let slotsToDisable = [], adminText = "", userText = "";
 
         if (itemType === 'service') {
-          const parts = time.split(" - ");
-          if (parts.length === 2) {
-            const startMin = timeToMinutes(parts[0]);
-            const endMin = timeToMinutes(parts[1]);
-            halfHourSlots.forEach(hs => {
-              if (timeToMinutes(hs.start) >= startMin && timeToMinutes(hs.end) < endMin) {
-                slotsToDisable.push(`${date}_${hs.start} - ${hs.end}`);
-              }
-            });
-          }
-          adminText = `💈 **نوبت جدید در پیرایش سالار**\n\n👤 مشتری: ${name}\n📞 تلفن: ${phone}\n✂️ خدمت: ${selectedItem.name} (${selectedItem.price})\n⏰ زمان: ${date} (${time})\n📝 توضیحات: ${note}`;
-          userText = `✅ **رزرو شما با موفقیت ثبت شد!**\n\nسلام ${name} عزیز،\nنوبت شما برای خدمت **${selectedItem.name}** (${selectedItem.price}) در تاریخ **${date} ساعت ${time}** ثبت گردید.\n\nمنتظر حضور شما در پیرایش سالار هستیم!✂️`;
+          slotsToDisable.push(`${selectedDateKey}_${selectedTimeSlot}`);
+          adminText = `💈 **نوبت جدید در پیرایش سالار**\n\n👤 مشتری: ${name}\n📞 تلفن: ${phone}\n✂️ خدمت: ${selectedItem.name} (${selectedItem.price})\n⏰ زمان: ${selectedDateKey} ساعت ${selectedTimeSlot}\n📝 توضیحات: ${note}`;
+          userText = `✅ **رزرو شما با موفقیت ثبت شد!**\n\nسلام ${name} عزیز،\nنوبت شما برای خدمت **${selectedItem.name}** (${selectedItem.price}) در تاریخ **${selectedDateKey} ساعت ${selectedTimeSlot}** ثبت گردید.\n\nمنتظر حضور شما در پیرایش سالار هستیم!✂️`;
         } else {
           adminText = `🛍️ **سفارش محصول جدید (تحویل در سالن)**\n\n👤 مشتری: ${name}\n📞 تلفن: ${phone}\n📦 محصول: ${selectedItem.name} (${selectedItem.price})\n🕒 جزئیات تحویل: ${address}\n📝 توضیحات: ${note}`;
           userText = `✅ **سفارش محصول شما ثبت شد!**\n\nسلام ${name} عزیز،\nسفارش خرید **${selectedItem.name}** (${selectedItem.price}) ثبت گردید. می‌توانید برای دریافت محصول به سالن مراجعه کنید.`;
@@ -456,8 +456,6 @@
         }
       }
     }
-
-    loadCatalog();
   </script>
 </body>
 </html>
