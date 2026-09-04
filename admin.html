@@ -73,7 +73,7 @@
     ];
 
     const halfHourTimes = [
-      "۱۰:۰۰ - ۱۰:۳۰", "۱۰:۳۰ - ۱1:۰۰", 
+      "۱۰:۰۰ - ۱۰:۳۰", "۱۰:۳۰ - ۱۱:۰۰", 
       "۱۱:۰۰ - ۱۱:۳۰", "۱۱:۳۰ - ۱۲:۰۰", 
       "۱۲:۰۰ - ۱۲:۳۰", "۱۲:۳۰ - ۱۳:۰۰", 
       "۱۶:۰۰ - ۱۶:۳۰", "۱۶:۳۰ - ۱۷:۰۰", 
@@ -218,7 +218,8 @@
             timeBtn.className = `p-2.5 rounded-xl border text-xs flex items-center justify-between cursor-pointer transition ${
                 isFullDisabled ? 'border-red-500/50 bg-red-500/10 text-red-400' : 'border-slate-700 bg-slate-800 text-slate-200 hover:border-slate-600'
             }`;
-            timeBtn.innerHTML = `<span class="font-medium">${t}</span> <i class="fa-solid ${isFullDisabled ? 'fa-ban text-red-400' : 'fa-check text-emerald-400'}"></i>`;
+            // اضافه شدن dir="ltr" برای نمایش صحیح و منظم ساعت‌ها
+            timeBtn.innerHTML = `<span class="font-medium" dir="ltr">${t}</span> <i class="fa-solid ${isFullDisabled ? 'fa-ban text-red-400' : 'fa-check text-emerald-400'}"></i>`;
             
             timeBtn.onclick = () => {
                 if (isFullDisabled) {
@@ -262,7 +263,7 @@
             div.innerHTML = `
                 <div class="space-y-1">
                     <div class="font-bold text-white">${item.name} (<a href="tel:${item.phone}" class="text-emerald-400">${item.phone}</a>)</div>
-                    <div class="text-slate-400">${item.service} (${item.price || ''}) - <span class="text-emerald-400">${item.date} (${item.time})</span></div>
+                    <div class="text-slate-400">${item.service} (${item.price || ''}) - <span class="text-emerald-400" dir="ltr">${item.date} (${item.time})</span></div>
                     ${item.note && item.note !== 'ندارد' ? `<div class="text-[10px] text-slate-500">توضیحات: ${item.note}</div>` : ''}
                 </div>
                 <button type="button" onclick="deleteBooking(${item.id})" class="text-red-400 p-2 cursor-pointer hover:text-red-300 transition"><i class="fa-solid fa-trash-can"></i></button>
