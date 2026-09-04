@@ -93,7 +93,6 @@
         }
 
         try {
-            // دریافت خدمات و قیمت‌ها
             const resServ = await fetch(`${WORKER_URL}/services`);
             const dataServ = await resServ.json();
             servicesList = dataServ.services || [
@@ -103,7 +102,6 @@
             ];
             renderAdminServices();
 
-            // دریافت سانس‌های بسته
             const resSlots = await fetch(`${WORKER_URL}/disabled-slots`);
             const dataSlots = await resSlots.json();
             disabledSlots = dataSlots.disabledSlots || [];
@@ -111,7 +109,6 @@
             renderAdminCalendar();
             renderAdminTimes();
 
-            // دریافت رزروها
             const resBookings = await fetch(`${WORKER_URL}/bookings`);
             const dataBookings = await resBookings.json();
             renderBookings(dataBookings.bookings || []);
@@ -202,8 +199,11 @@
             const key = `${selectedAdminDate}_${t}`;
             
             const parts = t.split(" - ");
-            const startMinutes = timeToMinutes(parts[0]);
-            const endMinutes = timeToMinutes(parts[1]);
+            const startTime = parts[0];
+            const endTime = parts[1];
+
+            const startMinutes = timeToMinutes(startTime);
+            const endMinutes = timeToMinutes(endTime);
             
             const subSlots = halfHourTimes.filter(hs => {
               const hsParts = hs.split(" - ");
@@ -218,8 +218,16 @@
             timeBtn.className = `p-2.5 rounded-xl border text-xs flex items-center justify-between cursor-pointer transition ${
                 isFullDisabled ? 'border-red-500/50 bg-red-500/10 text-red-400' : 'border-slate-700 bg-slate-800 text-slate-200 hover:border-slate-600'
             }`;
-            // اضافه شدن dir="ltr" برای نمایش صحیح و منظم ساعت‌ها
-            timeBtn.innerHTML = `<span class="font-medium" dir="ltr">${t}</span> <i class="fa-solid ${isFullDisabled ? 'fa-ban text-red-400' : 'fa-check text-emerald-400'}"></i>`;
+            
+            // تفکیک دقیق ساعت شروع و پایان بدون تداخل راست به چپ مرورگر
+            timeBtn.innerHTML = `
+                <div class="flex items-center gap-1.5 font-medium">
+                    <span>${startTime}</span>
+                    <span class="text-slate-500">-</span>
+                    <span>${endTime}</span>
+                </div>
+                <i class="fa-solid ${isFullDisabled ? 'fa-ban text-red-400' : 'fa-check text-emerald-400'}"></i>
+            `;
             
             timeBtn.onclick = () => {
                 if (isFullDisabled) {
@@ -263,7 +271,7 @@
             div.innerHTML = `
                 <div class="space-y-1">
                     <div class="font-bold text-white">${item.name} (<a href="tel:${item.phone}" class="text-emerald-400">${item.phone}</a>)</div>
-                    <div class="text-slate-400">${item.service} (${item.price || ''}) - <span class="text-emerald-400" dir="ltr">${item.date} (${item.time})</span></div>
+                    <div class="text-slate-400">${item.service} (${item.price || ''}) - <span class="text-emerald-400">${item.date} (${item.time})</span></div>
                     ${item.note && item.note !== 'ندارد' ? `<div class="text-[10px] text-slate-500">توضیحات: ${item.note}</div>` : ''}
                 </div>
                 <button type="button" onclick="deleteBooking(${item.id})" class="text-red-400 p-2 cursor-pointer hover:text-red-300 transition"><i class="fa-solid fa-trash-can"></i></button>
