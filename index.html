@@ -73,7 +73,7 @@
           <div class="flex gap-2 overflow-x-auto pb-1.5 horizontal-scroll" id="dateContainer"></div>
         </div>
         <div>
-          <label class="block text-xs text-slate-300 mb-1.5 font-medium">ساعت حضور (۱۰ صبح تا ۱۰ شب):</label>
+          <label class="block text-xs text-slate-300 mb-1.5 font-medium" id="timeLabel">ساعت حضور:</label>
           <div class="grid grid-cols-2 gap-2" id="timeContainer"></div>
         </div>
       </div>
@@ -122,7 +122,7 @@
     let customProducts = [];
     let disabledSlots = [];
     
-    let step = 1, selectedItem = null, serviceDuration = 60, itemType = "service", selectedDateKey = "", selectedTimeSlot = "";
+    let step = 1, selectedItem = null, serviceDuration = 30, slotStepMinutes = 30, itemType = "service", selectedDateKey = "", selectedTimeSlot = "";
     let userChatId = null;
   
     try {
@@ -214,7 +214,10 @@
       }
       selectedItem = item;
       itemType = item.type || 'product';
+      
       serviceDuration = parseInt(item.duration) || 30;
+      // اگر خدمت ۴۵ دقیقه‌ای یا ۶۰ دقیقه‌ای باشد، بازه زمانی آن معادل ۶۰ دقیقه کامل (یک ساعت) در نظر گرفته می‌شود
+      slotStepMinutes = (serviceDuration >= 45) ? 60 : 30;
 
       const btn = document.getElementById('nextBtn');
       btn.disabled = false;
@@ -231,7 +234,7 @@
       } catch (err) { window.open(url, '_blank'); }
     }
   
-    // ساخت کاروسل تقویم شمسی ۳۰ روز آینده مطابق پنل ادمین
+    // ساخت کاروسل تقویم شمسی ۳۰ روز آینده
     function renderCalendar() {
       const container = document.getElementById('dateContainer');
       container.innerHTML = '';
@@ -280,35 +283,54 @@
       }
     }
   
-    // تولید سانس‌های ۱۰ صبح تا ۱۰ شب (۲۲:۰۰) به صورت نیم ساعت به نیم ساعت
+    // تولید سانس‌ها به شکل بازه کامل (مثلا 13:00-13:30 یا 13:00-14:00)
     function renderTimes() {
       const container = document.getElementById('timeContainer');
       container.innerHTML = '';
 
+      const labelText = slotStepMinutes === 60 ? 'بازه‌های ۱ ساعته (۱۰ صبح تا ۱۰ شب):' : 'بازه‌های ۳۰ دقیقه‌ای (۱۰ صبح تا ۱۰ شب):';
+      document.getElementById('timeLabel').innerText = labelText;
+
       const slots = [];
-      for (let hour = 10; hour < 22; hour++) {
-        ['00', '30'].forEach(minute => {
-          const timeStr = `${String(hour).padStart(2, '0')}:${minute}`;
-          slots.push(`${selectedDateKey}_${timeStr}`);
-        });
+      let currentMinutes = 10 * 60; // شروع از ۱۰:۰۰ صبح
+      const endMinutes = 22 * 60;   // پایان در ۲۲:۰۰ شب
+
+      while (currentMinutes + slotStepMinutes <= endMinutes) {
+        const startHour = Math.floor(currentMinutes / 60);
+        const startMin = currentMinutes % 60;
+        const startStr = `${String(startHour).padStart(2, '0')}:${String(startMin).padStart(2, '0')}`;
+        
+        const endTotalMin = currentMinutes + slotStepMinutes;
+        const endHour = Math.floor(endTotalMin / 60);
+        const endMin = endTotalMin % 60;
+        const endStr = `${String(endHour).padStart(2, '0')}:${String(endMin).padStart(2, '0')}`;
+
+        const rangeStr = `${startStr}-${endStr}`;
+        slots.push({ key: `${selectedDateKey}_${rangeStr}`, label: rangeStr });
+        
+        currentMinutes += slotStepMinutes;
       }
 
-      slots.forEach(slotKey => {
-        const timeOnly = slotKey.split('_')[1];
-        const isLocked = disabledSlots.includes(slotKey);
+      if (slots.length === 0) {
+        container.innerHTML = '<p class="col-span-2 text-xs text-rose-400 text-center py-2">بازه خالی در این روز وجود ندارد.</p>';
+        return;
+      }
+
+      slots.forEach(slot => {
+        const isLocked = disabledSlots.includes(slot.key);
 
         const b = document.createElement('button');
         if (isLocked) {
           b.className = "p-2.5 rounded-xl border border-slate-800 bg-slate-900/50 text-xs text-slate-600 cursor-not-allowed flex items-center justify-between";
-          b.innerHTML = `<span dir="ltr">${timeOnly}</span><span>(تکمیل)</span>`;
+          b.innerHTML = `<span dir="ltr">${slot.label}</span><span>(تکمیل)</span>`;
           b.disabled = true;
         } else {
           b.className = `p-2.5 rounded-xl border text-xs cursor-pointer transition flex items-center justify-center ${
-            selectedTimeSlot === timeOnly ? 'border-emerald-500 text-emerald-400 bg-slate-800 font-bold' : 'border-slate-700 bg-slate-800 text-white hover:border-slate-600'
+            selectedTimeSlot === slot.label ? 'border-emerald-500 text-emerald-400 bg-slate-800 font-bold' : 'border-slate-700 bg-slate-800 text-white hover:border-slate-600'
           }`;
-          b.innerHTML = `<span dir="ltr">${timeOnly}</span>`;
+          b.innerHTML = `<span dir="ltr">${slot.label}</span>`;
           b.onclick = () => {
-            selectedTimeSlot = timeOnly;
+            selectedTimeSlot = slot.label;
             renderTimes();
             checkStep2();
           };
@@ -409,7 +431,7 @@
 
         if (itemType === 'service') {
           slotsToDisable.push(`${selectedDateKey}_${selectedTimeSlot}`);
-          adminText = `💈 **نوبت جدید در پیرایش سالار**\n\n👤 مشتری: ${name}\n📞 تلفن: ${phone}\n✂️ خدمت: ${selectedItem.name} (${selectedItem.price})\n⏰ زمان: ${selectedDateKey} ساعت ${selectedTimeSlot}\n📝 توضیحات: ${note}`;
+          adminText = `💈 **نوبت جدید در پیرایش سالار**\n\n👤 مشتری: ${name}\n📞 تلفن: ${phone}\n✂️ خدمت: ${selectedItem.name} (${selectedItem.price})\n⏰ زمان: ${selectedDateKey} ساعت ${selectedTimeSlot} (مدت: ${serviceDuration} دقیقه)\n📝 توضیحات: ${note}`;
           userText = `✅ **رزرو شما با موفقیت ثبت شد!**\n\nسلام ${name} عزیز،\nنوبت شما برای خدمت **${selectedItem.name}** (${selectedItem.price}) در تاریخ **${selectedDateKey} ساعت ${selectedTimeSlot}** ثبت گردید.\n\nمنتظر حضور شما در پیرایش سالار هستیم!✂️`;
         } else {
           adminText = `🛍️ **سفارش محصول جدید (تحویل در سالن)**\n\n👤 مشتری: ${name}\n📞 تلفن: ${phone}\n📦 محصول: ${selectedItem.name} (${selectedItem.price})\n🕒 جزئیات تحویل: ${address}\n📝 توضیحات: ${note}`;
