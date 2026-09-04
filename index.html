@@ -37,19 +37,19 @@
   
    <div class="flex-1 overflow-y-auto p-3.5 space-y-3.5 custom-scrollbar" id="mainContainer">
   
-     <div id="stepHeaderBox" class="flex items-center justify-between px-3 bg-slate-800/40 p-2.5 rounded-2xl border border-slate-800">
+      <div id="stepHeaderBox" class="flex items-center justify-between px-3 bg-slate-800/40 p-2.5 rounded-2xl border border-slate-800">
         <div class="flex items-center gap-2">
           <div id="stepBadge" class="w-6 h-6 rounded-full bg-emerald-500 text-white font-bold flex items-center justify-center text-xs">۱</div>
           <span id="stepTitle" class="text-xs font-bold text-slate-200">انتخاب خدمت مورد نظر</span>
-       </div>
-     </div>
+        </div>
+      </div>
   
-     <!-- لیست خدمات که به صورت پویا از سرور بارگذاری می‌شود -->
-     <div id="step1" class="space-y-2.5">
+      <!-- لیست خدمات که به صورت پویا از سرور بارگذاری می‌شود -->
+      <div id="step1" class="space-y-2.5">
         <p class="text-xs text-slate-500 text-center py-4">در حال بارگذاری خدمات...</p>
-     </div>
+      </div>
   
-     <div id="step2" class="space-y-3 hidden">
+      <div id="step2" class="space-y-3 hidden">
         <div>
           <label class="block text-xs text-slate-300 mb-1.5 font-medium">روز مراجعه:</label>
           <div class="flex gap-2 overflow-x-auto pb-1.5 custom-scrollbar" id="dateContainer"></div>
@@ -58,9 +58,9 @@
           <label class="block text-xs text-slate-300 mb-1.5 font-medium">ساعت حضور:</label>
           <div class="grid grid-cols-2 gap-2" id="timeContainer"></div>
         </div>
-     </div>
+      </div>
   
-     <div id="step3" class="space-y-3 hidden">
+      <div id="step3" class="space-y-3 hidden">
         <div>
           <label class="block text-xs text-slate-300 mb-1 font-medium">نام و نام خانوادگی:</label>
           <input type="text" id="custName" placeholder="مثلا: علی محمدی" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-emerald-500">
@@ -74,20 +74,20 @@
           <label class="block text-xs text-slate-300 mb-1 font-medium">توضیحات (اختیاری):</label>
           <textarea id="custNote" rows="2" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-emerald-500"></textarea>
         </div>
-     </div>
+      </div>
   
-     <div id="successState" class="text-center py-8 space-y-3.5 hidden">
+      <div id="successState" class="text-center py-8 space-y-3.5 hidden">
         <i class="fa-solid fa-circle-check text-emerald-400 text-5xl"></i>
         <h2 class="text-sm font-bold text-white">نوبت شما با موفقیت ثبت شد</h2>
-       <p class="text-xs text-slate-400 leading-relaxed">اطلاعات برای آرایشگر ارسال گردید و ساعت مورد نظر قفل شد.</p>
+        <p class="text-xs text-slate-400 leading-relaxed">اطلاعات برای آرایشگر ارسال گردید و ساعت مورد نظر قفل شد.</p>
   
-       <div class="mt-6 pt-4 border-t border-slate-800 text-center text-xs text-slate-400 space-y-2">
+        <div class="mt-6 pt-4 border-t border-slate-800 text-center text-xs text-slate-400 space-y-2">
           <p>طراحی و توسعه:</p>
           <div>
             <a href="#" onclick="openSalarProfile(event)" class="inline-block bg-slate-800 border border-slate-700 px-4 py-1.5 rounded-xl text-emerald-400 font-bold hover:bg-slate-700 transition cursor-pointer" dir="ltr">@salarx8</a>
           </div>
         </div>
-     </div>
+      </div>
   
    </div>
   
@@ -101,22 +101,17 @@
  <script>
     const WORKER_URL = "https://bale-sender.salar1368yb.workers.dev";
     
-    const oneHourTimes = [
-      "۱۰:۰۰ - ۱۱:۰۰", "۱۱:۰۰ - ۱۲:۰۰", "۱۲:۰۰ - ۱۳:۰۰", 
-      "۱۶:۰۰ - ۱۷:۰۰", "۱۷:۰۰ - ۱۸:۰۰", "۱۸:۰۰ - ۱۹:۰۰", "۱۹:۰۰ - ۲۰:۰۰"
+    // پایه تمام سانس‌ها بر اساس بلوک‌های ۳۰ دقیقه‌ای چیده می‌شود
+    const halfHourSlots = [
+      { start: "۱۰:۰۰", end: "۱۰:۳۰" }, { start: "۱۰:۳۰", end: "۱۱:۰۰" }, 
+      { start: "۱۱:۰۰", end: "۱۱:۳۰" }, { start: "۱۱:۳۰", end: "۱۲:۰۰" }, 
+      { start: "۱۲:۰۰", end: "۱۲:۳۰" }, { start: "۱۲:۳۰", end: "۱۳:۰۰" }, 
+      { start: "۱۶:۰۰", end: "۱۶:۳۰" }, { start: "۱۶:۳۰", end: "۱۷:۰۰" }, 
+      { start: "۱۷:۰۰", end: "۱۷:۳۰" }, { start: "۱۷:۳۰", end: "۱۸:۰۰" }, 
+      { start: "۱۸:۰۰", end: "۱۸:۳۰" }, { start: "۱۸:۳۰", end: "۱۹:۰۰" }, 
+      { start: "۱۹:۰۰", end: "۱۹:۳۰" }, { start: "۱۹:۳۰", end: "۲۰:۰۰" }
     ];
 
-    const halfHourTimes = [
-      "۱۰:۰۰ - ۱۰:۳۰", "۱۰:۳۰ - ۱۱:۰۰", 
-      "۱۱:۰۰ - ۱۱:۳۰", "۱۱:۳۰ - ۱۲:۰۰", 
-      "۱۲:۰۰ - ۱۲:۳۰", "۱۲:۳۰ - ۱۳:۰۰", 
-      "۱۶:۰۰ - ۱۶:۳۰", "۱۶:۳۰ - ۱۷:۰۰", 
-      "۱۷:۰۰ - ۱۷:۳۰", "۱۷:۳۰ - ۱۸:۰۰", 
-      "۱۸:۰۰ - ۱۸:۳۰", "۱۸:۳۰ - ۱۹:۰۰", 
-      "۱۹:۰۰ - ۱۹:۳۰", "۱۹:۳۰ - ۲۰:۰۰"
-    ];
-
-    let times = oneHourTimes;
     let step = 1, service = "", serviceDuration = 60, servicePrice = "", date = "", time = "";
     let disabledSlots = [];
     let servicesList = [];
@@ -147,7 +142,6 @@
         renderServices();
       } catch(e) {
         console.error("Error loading services:", e);
-        // مقادیر پیش‌فرض در صورت خطا
         servicesList = [
           { name: "اصلاح و استایل مو", duration: 60, price: "۲۵۰,۰۰۰ تومان" },
           { name: "اصلاح کامل سر و صورت", duration: 60, price: "۳۵۰,۰۰۰ تومان" },
@@ -206,12 +200,6 @@
       serviceDuration = duration;
       servicePrice = price;
 
-      if (duration <= 30) {
-        times = halfHourTimes;
-      } else {
-        times = oneHourTimes;
-      }
-
       const btn = document.getElementById('nextBtn');
       btn.disabled = false;
       btn.className = "w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold cursor-pointer transition";
@@ -256,42 +244,47 @@
       const container = document.getElementById('timeContainer');
       container.innerHTML = '';
       
-      times.forEach(t => {
-        let isDisabled = false;
-        
-        if (serviceDuration > 30) {
-          const parts = t.split(" - ");
-          if (parts.length === 2) {
-            const startMinutes = timeToMinutes(parts[0]);
-            const endMinutes = timeToMinutes(parts[1]);
-            
-            const subSlots = halfHourTimes.filter(hs => {
-              const hsParts = hs.split(" - ");
-              const hsStart = timeToMinutes(hsParts[0]);
-              return hsStart >= startMinutes && hsStart < endMinutes;
-            });
-            
-            const isAnySubSlotDisabled = subSlots.some(sub => disabledSlots.includes(`${date}_${sub}`));
-            const isDirectDisabled = disabledSlots.includes(`${date}_${t}`);
-            
-            isDisabled = isDirectDisabled || isAnySubSlotDisabled;
+      // تعداد اسلات‌های ۳۰ دقیقه‌ای مورد نیاز بسته به زمان خدمت (مثلا ۶۰ دقیقه = ۲ اسلات)
+      const slotsNeeded = serviceDuration / 30;
+
+      // ساخت لیست بازه‌های پویای قابل ارائه بر اساس مدت زمان خدمت
+      const availableTimes = [];
+      for (let i = 0; i <= halfHourSlots.length - slotsNeeded; i++) {
+        const startSlot = halfHourSlots[i];
+        const endSlot = halfHourSlots[i + slotsNeeded - 1];
+
+        // جلوگیری از ترکیب بازه‌هایی که متعلق به شیفت‌های جداگانه هستند (مثلاً بین ظهر و عصر)
+        const startTimeVal = timeToMinutes(startSlot.start);
+        const endTimeVal = timeToMinutes(endSlot.end);
+        if (endTimeVal - startTimeVal !== serviceDuration) continue;
+
+        // بررسی اینکه آیا بین این بازه‌ها وقفه ناهار/استراحت افتاده یا نه
+        let isValidRange = true;
+        for (let j = 0; j < slotsNeeded; j++) {
+          const checkSlotKey = `${date}_${halfHourSlots[i + j].start} - ${halfHourSlots[i + j].end}`;
+          if (disabledSlots.includes(checkSlotKey)) {
+            isValidRange = false;
+            break;
           }
-        } else {
-          isDisabled = disabledSlots.includes(`${date}_${t}`);
         }
 
+        const tLabel = `${startSlot.start} - ${endSlot.end}`;
+        availableTimes.push({ label: tLabel, disabled: !isValidRange });
+      }
+
+      availableTimes.forEach(item => {
         const b = document.createElement('button');
-        if (isDisabled) {
-          b.className = "time-btn p-2.5 rounded-xl border border-slate-800 bg-slate-900/50 text-xs text-slate-600 cursor-not-allowed";
-          b.innerText = `${t} (تکمیل)`;
+        if (item.disabled) {
+          b.className = "time-btn p-2.5 rounded-xl border border-slate-800 bg-slate-900/50 text-xs text-slate-600 cursor-not-allowed flex items-center justify-between";
+          b.innerHTML = `<span dir="ltr">${item.label}</span><span>(تکمیل)</span>`;
           b.disabled = true;
         } else {
-          b.className = `time-btn p-2.5 rounded-xl border text-xs cursor-pointer transition ${
-            time === t ? 'border-emerald-500 text-emerald-400 bg-slate-800 font-bold' : 'border-slate-700 bg-slate-800 text-white hover:border-slate-600'
+          b.className = `time-btn p-2.5 rounded-xl border text-xs cursor-pointer transition flex items-center justify-center ${
+            time === item.label ? 'border-emerald-500 text-emerald-400 bg-slate-800 font-bold' : 'border-slate-700 bg-slate-800 text-white hover:border-slate-600'
           }`;
-          b.innerText = t;
+          b.innerHTML = `<span dir="ltr">${item.label}</span>`;
           b.onclick = () => {
-            time = t;
+            time = item.label;
             renderTimes();
             checkStep2();
           };
@@ -313,11 +306,13 @@
       return mobileRegex.test(phone);
     }
   
-    async function finalizeBooking(bookingObj, adminText, userText, currentSlotKey) {
+    async function finalizeBooking(bookingObj, adminText, userText, slotsToDisable) {
       try {
-        if (!disabledSlots.includes(currentSlotKey)) {
-          disabledSlots.push(currentSlotKey);
-        }
+        slotsToDisable.forEach(subKey => {
+          if (!disabledSlots.includes(subKey)) {
+            disabledSlots.push(subKey);
+          }
+        });
   
         await fetch(`${WORKER_URL}/`, {
           method: 'POST',
@@ -394,26 +389,22 @@
           return;
         }
   
-        let currentSlotKey = `${date}_${time}`;
         const bookingObj = { name, phone, service, date, time, note, price: servicePrice, id: Date.now() };
-  
-        if (serviceDuration > 30) {
-          const parts = time.split(" - ");
-          if (parts.length === 2) {
-            const startMinutes = timeToMinutes(parts[0]);
-            const endMinutes = timeToMinutes(parts[1]);
-            halfHourTimes.forEach(hs => {
-              const hsParts = hs.split(" - ");
-              const hsStart = timeToMinutes(hsParts[0]);
-              if (hsStart >= startMinutes && hsStart < endMinutes) {
-                const subKey = `${date}_${hs}`;
-                if (!disabledSlots.includes(subKey)) disabledSlots.push(subKey);
-              }
-            });
-          }
-        }
-        if (!disabledSlots.includes(currentSlotKey)) {
-          disabledSlots.push(currentSlotKey);
+
+        // استخراج و قفل کردن تمام بازه‌های ۳۰ دقیقه‌ای که این خدمت اشغال می‌کند
+        const slotsToDisable = [];
+        const parts = time.split(" - ");
+        if (parts.length === 2) {
+          const startMin = timeToMinutes(parts[0]);
+          const endMin = timeToMinutes(parts[1]);
+
+          halfHourSlots.forEach(hs => {
+            const hsStart = timeToMinutes(hs.start);
+            const hsEnd = timeToMinutes(hs.end);
+            if (hsStart >= startMin && hsEnd <= endMin) {
+              slotsToDisable.push(`${date}_${hs.start} - ${hs.end}`);
+            }
+          });
         }
 
         const adminText = `💈 **نوبت جدید در پیرایش سالار**\n\n` +
@@ -433,7 +424,7 @@
         document.getElementById('bottomBar').classList.add('hidden');
         document.getElementById('successState').classList.remove('hidden');
   
-        finalizeBooking(bookingObj, adminText, userText, currentSlotKey);
+        finalizeBooking(bookingObj, adminText, userText, slotsToDisable);
       }
     }
   
