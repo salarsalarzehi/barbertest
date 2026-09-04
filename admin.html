@@ -17,37 +17,120 @@
     .horizontal-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
   </style>
 </head>
-<body class="min-h-screen p-4 sm:p-6 max-w-4xl mx-auto">
+<body class="min-h-screen p-4 sm:p-6 max-w-4xl mx-auto space-y-6">
 
   <div class="bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-6 shadow-2xl space-y-6">
     <div class="flex items-center justify-between border-b border-slate-800 pb-4">
       <h1 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-        <i class="fa-solid fa-gear text-emerald-400"></i> پنل مدیریت و بستن سانس‌ها
+        <i class="fa-solid fa-gear text-emerald-400"></i> پنل مدیریت پیرایش سالار
       </h1>
-      <span class="text-xs bg-slate-800 text-slate-300 px-3 py-1 rounded-xl border border-slate-700">پیرایش سالار</span>
+      <span class="text-xs bg-slate-800 text-slate-300 px-3 py-1 rounded-xl border border-slate-700">نسخه کامل ادمین</span>
     </div>
 
-    <!-- بخش انتخاب روز -->
-    <div class="space-y-2">
-      <label class="block text-xs font-bold text-slate-300">انتخاب روز برای مدیریت سانس‌ها:</label>
-      <div class="flex gap-2 overflow-x-auto pb-2 horizontal-scroll" id="adminDateContainer"></div>
+    <!-- بخش اول: مدیریت سانس‌ها -->
+    <div class="space-y-4 border-b border-slate-800 pb-6">
+      <h2 class="text-sm font-bold text-emerald-400 flex items-center gap-2">
+        <i class="fa-solid fa-calendar-days"></i> مدیریت تقویم و بستن سانس‌ها (۱۰ صبح تا ۱۰ شب)
+      </h2>
+      
+      <div class="space-y-2">
+        <label class="block text-xs font-bold text-slate-300">انتخاب روز:</label>
+        <div class="flex gap-2 overflow-x-auto pb-2 horizontal-scroll" id="adminDateContainer"></div>
+      </div>
+
+      <div class="space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-xs text-slate-400">برای بستن یا آزاد کردن هر سانس روی آن کلیک کنید:</span>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5" id="adminTimeSlotsContainer">
+          <div class="col-span-full text-center text-xs text-slate-500 py-4">در حال بارگذاری سانس‌ها...</div>
+        </div>
+      </div>
     </div>
 
-    <!-- بخش مدیریت سانس‌های ۱۰ صبح تا ۱۰ شب -->
-    <div class="space-y-3">
+    <!-- بخش دوم: مدیریت خدمات -->
+    <div class="space-y-4 border-b border-slate-800 pb-6">
       <div class="flex items-center justify-between">
-        <h2 class="text-xs font-bold text-emerald-400">مدیریت ساعت‌های کاری (۱۰:۰۰ الی ۲۲:۰۰ - نیم‌ساعته):</h2>
-        <span class="text-[11px] text-slate-400">برای بستن یا باز کردن هر سانس روی آن کلیک کنید</span>
+        <h2 class="text-sm font-bold text-emerald-400 flex items-center gap-2">
+          <i class="fa-solid fa-scissors"></i> مدیریت خدمات سالن
+        </h2>
+        <button onclick="openServiceModal()" class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 text-xs px-3 py-1.5 rounded-xl font-bold transition cursor-pointer">
+          + افزودن خدمت جدید
+        </button>
       </div>
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5" id="adminTimeSlotsContainer">
-        <div class="col-span-full text-center text-xs text-slate-500 py-4">در حال بارگذاری سانس‌ها...</div>
+      <div id="adminServicesList" class="space-y-2">
+        <div class="text-xs text-slate-500 text-center py-2">در حال دریافت خدمات...</div>
       </div>
     </div>
 
+    <!-- بخش سوم: مدیریت محصولات -->
+    <div class="space-y-4 pb-2">
+      <div class="flex items-center justify-between">
+        <h2 class="text-sm font-bold text-amber-400 flex items-center gap-2">
+          <i class="fa-solid fa-store"></i> مدیریت محصولات فروشگاه
+        </h2>
+        <button onclick="openProductModal()" class="bg-amber-500/10 text-amber-400 border border-amber-500/20 hover:bg-amber-500/20 text-xs px-3 py-1.5 rounded-xl font-bold transition cursor-pointer">
+          + افزودن محصول جدید
+        </button>
+      </div>
+      <div id="adminProductsList" class="space-y-2">
+        <div class="text-xs text-slate-500 text-center py-2">در حال دریافت محصولات...</div>
+      </div>
+    </div>
+
+    <!-- دکمه ذخیره نهایی کل تغییرات -->
     <div class="pt-4 border-t border-slate-800 flex justify-end">
-      <button onclick="saveAdminChanges()" id="saveBtn" class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold px-6 py-3 rounded-xl transition shadow-lg shadow-emerald-500/20 cursor-pointer">
-        ذخیره تغییرات در سرور
+      <button onclick="saveAdminChanges()" id="saveBtn" class="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold px-8 py-3 rounded-xl transition shadow-lg shadow-emerald-500/20 cursor-pointer">
+        ذخیره کلیه تغییرات در سرور
       </button>
+    </div>
+  </div>
+
+  <!-- مودال افزودن/ویرایش خدمت -->
+  <div id="serviceModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 max-w-sm w-full space-y-4">
+      <h3 class="text-sm font-bold text-white" id="serviceModalTitle">افزودن خدمت جدید</h3>
+      <input type="hidden" id="serviceEditIndex" value="-1">
+      <div class="space-y-1">
+        <label class="text-xs text-slate-300">عنوان خدمت:</label>
+        <input type="text" id="modalServiceName" placeholder="مثلا: اصلاح سر و صورت" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-emerald-500">
+      </div>
+      <div class="space-y-1">
+        <label class="text-xs text-slate-300">قیمت (تومان):</label>
+        <input type="text" id="modalServicePrice" placeholder="مثلا: ۱۵۰,۰۰۰ تومان" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-emerald-500">
+      </div>
+      <div class="space-y-1">
+        <label class="text-xs text-slate-300">مدت زمان (دقیقه):</label>
+        <input type="number" id="modalServiceDuration" value="30" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-emerald-500">
+      </div>
+      <div class="flex gap-2 pt-2">
+        <button onclick="closeServiceModal()" class="w-1/2 bg-slate-800 text-slate-300 py-2.5 rounded-xl text-xs font-bold hover:bg-slate-700 cursor-pointer">انصراف</button>
+        <button onclick="saveServiceModal()" class="w-1/2 bg-emerald-500 text-white py-2.5 rounded-xl text-xs font-bold hover:bg-emerald-600 cursor-pointer">تایید</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- مودال افزودن/ویرایش محصول -->
+  <div id="productModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 max-w-sm w-full space-y-4">
+      <h3 class="text-sm font-bold text-white" id="productModalTitle">افزودن محصول جدید</h3>
+      <input type="hidden" id="productEditIndex" value="-1">
+      <div class="space-y-1">
+        <label class="text-xs text-slate-300">نام محصول:</label>
+        <input type="text" id="modalProductName" placeholder="مثلا: واکس مو حالت دهنده" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-amber-500">
+      </div>
+      <div class="space-y-1">
+        <label class="text-xs text-slate-300">قیمت:</label>
+        <input type="text" id="modalProductPrice" placeholder="مثلا: ۲۲۰,۰۰۰ تومان" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-amber-500">
+      </div>
+      <div class="space-y-1">
+        <label class="text-xs text-slate-300">لینک تصویر محصول:</label>
+        <input type="text" id="modalProductImage" placeholder="https://..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-amber-500" dir="ltr">
+      </div>
+      <div class="flex gap-2 pt-2">
+        <button onclick="closeProductModal()" class="w-1/2 bg-slate-800 text-slate-300 py-2.5 rounded-xl text-xs font-bold hover:bg-slate-700 cursor-pointer">انصراف</button>
+        <button onclick="saveProductModal()" class="w-1/2 bg-amber-500 text-white py-2.5 rounded-xl text-xs font-bold hover:bg-amber-600 cursor-pointer">تایید</button>
+      </div>
     </div>
   </div>
 
@@ -77,6 +160,8 @@
       }
       renderAdminCalendar();
       renderAdminTimes();
+      renderAdminServices();
+      renderAdminProducts();
     }
 
     // ساخت تقویم ۳۰ روزه برای ادمین
@@ -166,6 +251,171 @@
       });
     }
 
+    // مدیریت خدمات در ادمین
+    function renderAdminServices() {
+      const container = document.getElementById('adminServicesList');
+      container.innerHTML = '';
+
+      if (customServices.length === 0) {
+        container.innerHTML = '<div class="text-xs text-slate-500 text-center py-2">هیچ خدمتی ثبت نشده است.</div>';
+        return;
+      }
+
+      customServices.forEach((service, index) => {
+        const div = document.createElement('div');
+        div.className = "flex items-center justify-between p-3 bg-slate-800 border border-slate-700 rounded-xl text-xs";
+        div.innerHTML = `
+          <div class="flex items-center gap-3">
+            <span class="font-bold text-white">${service.name}</span>
+            <span class="text-emerald-400">${service.price}</span>
+            <span class="text-slate-400">(${service.duration || 30} دقیقه)</span>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="editService(${index})" class="bg-slate-700 text-slate-200 px-2.5 py-1 rounded-lg hover:bg-slate-600 cursor-pointer">ویرایش</button>
+            <button onclick="deleteService(${index})" class="bg-rose-500/20 text-rose-400 px-2.5 py-1 rounded-lg hover:bg-rose-500/30 cursor-pointer">حذف</button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function openServiceModal(index = -1) {
+      document.getElementById('serviceEditIndex').value = index;
+      if (index > -1) {
+        document.getElementById('serviceModalTitle').innerText = 'ویرایش خدمت';
+        document.getElementById('modalServiceName').value = customServices[index].name;
+        document.getElementById('modalServicePrice').value = customServices[index].price;
+        document.getElementById('modalServiceDuration').value = customServices[index].duration || 30;
+      } else {
+        document.getElementById('serviceModalTitle').innerText = 'افزودن خدمت جدید';
+        document.getElementById('modalServiceName').value = '';
+        document.getElementById('modalServicePrice').value = '';
+        document.getElementById('modalServiceDuration').value = '30';
+      }
+      document.getElementById('serviceModal').classList.remove('hidden');
+      document.getElementById('serviceModal').classList.add('flex');
+    }
+
+    function closeServiceModal() {
+      document.getElementById('serviceModal').classList.remove('flex');
+      document.getElementById('serviceModal').classList.add('hidden');
+    }
+
+    function saveServiceModal() {
+      const index = parseInt(document.getElementById('serviceEditIndex').value);
+      const name = document.getElementById('modalServiceName').value.trim();
+      const price = document.getElementById('modalServicePrice').value.trim();
+      const duration = parseInt(document.getElementById('modalServiceDuration').value) || 30;
+
+      if (!name || !price) {
+        alert('لطفاً عنوان و قیمت خدمت را وارد کنید.');
+        return;
+      }
+
+      if (index > -1) {
+        customServices[index] = { name, price, duration };
+      } else {
+        customServices.push({ name, price, duration });
+      }
+
+      closeServiceModal();
+      renderAdminServices();
+    }
+
+    function editService(index) {
+      openServiceModal(index);
+    }
+
+    function deleteService(index) {
+      if (confirm('آیا از حذف این خدمت مطمئن هستید؟')) {
+        customServices.splice(index, 1);
+        renderAdminServices();
+      }
+    }
+
+    // مدیریت محصولات در ادمین
+    function renderAdminProducts() {
+      const container = document.getElementById('adminProductsList');
+      container.innerHTML = '';
+
+      if (customProducts.length === 0) {
+        container.innerHTML = '<div class="text-xs text-slate-500 text-center py-2">هیچ محصولی ثبت نشده است.</div>';
+        return;
+      }
+
+      customProducts.forEach((product, index) => {
+        const div = document.createElement('div');
+        div.className = "flex items-center justify-between p-3 bg-slate-800 border border-slate-700 rounded-xl text-xs";
+        div.innerHTML = `
+          <div class="flex items-center gap-3">
+            <img src="${product.image}" class="w-8 h-8 rounded-lg object-cover border border-slate-700">
+            <span class="font-bold text-white">${product.name}</span>
+            <span class="text-amber-400">${product.price}</span>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="editProduct(${index})" class="bg-slate-700 text-slate-200 px-2.5 py-1 rounded-lg hover:bg-slate-600 cursor-pointer">ویرایش</button>
+            <button onclick="deleteProduct(${index})" class="bg-rose-500/20 text-rose-400 px-2.5 py-1 rounded-lg hover:bg-rose-500/30 cursor-pointer">حذف</button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function openProductModal(index = -1) {
+      document.getElementById('productEditIndex').value = index;
+      if (index > -1) {
+        document.getElementById('productModalTitle').innerText = 'ویرایش محصول';
+        document.getElementById('modalProductName').value = customProducts[index].name;
+        document.getElementById('modalProductPrice').value = customProducts[index].price;
+        document.getElementById('modalProductImage').value = customProducts[index].image;
+      } else {
+        document.getElementById('productModalTitle').innerText = 'افزودن محصول جدید';
+        document.getElementById('modalProductName').value = '';
+        document.getElementById('modalProductPrice').value = '';
+        document.getElementById('modalProductImage').value = '';
+      }
+      document.getElementById('productModal').classList.remove('hidden');
+      document.getElementById('productModal').classList.add('flex');
+    }
+
+    function closeProductModal() {
+      document.getElementById('productModal').classList.remove('flex');
+      document.getElementById('productModal').classList.add('hidden');
+    }
+
+    function saveProductModal() {
+      const index = parseInt(document.getElementById('productEditIndex').value);
+      const name = document.getElementById('modalProductName').value.trim();
+      const price = document.getElementById('modalProductPrice').value.trim();
+      const image = document.getElementById('modalProductImage').value.trim();
+
+      if (!name || !price || !image) {
+        alert('لطفاً تمام فیلدهای محصول را کامل پر کنید.');
+        return;
+      }
+
+      if (index > -1) {
+        customProducts[index] = { name, price, image };
+      } else {
+        customProducts.push({ name, price, image });
+      }
+
+      closeProductModal();
+      renderAdminProducts();
+    }
+
+    function editProduct(index) {
+      openProductModal(index);
+    }
+
+    function deleteProduct(index) {
+      if (confirm('آیا از حذف این محصول مطمئن هستید؟')) {
+        customProducts.splice(index, 1);
+        renderAdminProducts();
+      }
+    }
+
+    // ذخیره نهایی تمامی تغییرات روی کلودفلر ورکر
     async function saveAdminChanges() {
       const btn = document.getElementById('saveBtn');
       btn.disabled = true;
@@ -179,7 +429,7 @@
         });
 
         if (res.ok) {
-          alert('تغییرات با موفقیت در سرور ذخیره شد!');
+          alert('کلیه تغییرات (ساعت‌ها، خدمات و محصولات) با موفقیت در سرور ذخیره شد!');
         } else {
           alert('خطا در ذخیره اطلاعات روی سرور.');
         }
@@ -188,7 +438,7 @@
         alert('خطای ارتباط با سرور.');
       } finally {
         btn.disabled = false;
-        btn.innerText = 'ذخیره تغییرات در سرور';
+        btn.innerText = 'ذخیره کلیه تغییرات در سرور';
       }
     }
   </script>
