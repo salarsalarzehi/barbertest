@@ -115,6 +115,7 @@
     <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 max-w-sm w-full space-y-4">
       <h3 class="text-sm font-bold text-white" id="productModalTitle">افزودن محصول جدید</h3>
       <input type="hidden" id="productEditIndex" value="-1">
+      <input type="hidden" id="modalProductImageBase64" value="">
       <div class="space-y-1">
         <label class="text-xs text-slate-300">نام محصول:</label>
         <input type="text" id="modalProductName" placeholder="مثلا: واکس مو حالت دهنده" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-amber-500">
@@ -124,8 +125,8 @@
         <input type="text" id="modalProductPrice" placeholder="مثلا: ۲۲۰,۰۰۰ تومان" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-amber-500">
       </div>
       <div class="space-y-1">
-        <label class="text-xs text-slate-300">لینک تصویر محصول:</label>
-        <input type="text" id="modalProductImage" placeholder="https://..." class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-amber-500" dir="ltr">
+        <label class="text-xs text-slate-300">تصویر محصول:</label>
+        <input type="file" id="modalProductFile" accept="image/*" onchange="handleImageUpload(event)" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-2 text-xs text-slate-300 file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-amber-500/20 file:text-amber-400 hover:file:bg-amber-500/30 cursor-pointer">
       </div>
       <div class="flex gap-2 pt-2">
         <button onclick="closeProductModal()" class="w-1/2 bg-slate-800 text-slate-300 py-2.5 rounded-xl text-xs font-bold hover:bg-slate-700 cursor-pointer">انصراف</button>
@@ -361,18 +362,30 @@
       });
     }
 
+    function handleImageUpload(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          document.getElementById('modalProductImageBase64').value = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
     function openProductModal(index = -1) {
       document.getElementById('productEditIndex').value = index;
+      document.getElementById('modalProductFile').value = '';
       if (index > -1) {
         document.getElementById('productModalTitle').innerText = 'ویرایش محصول';
         document.getElementById('modalProductName').value = customProducts[index].name;
         document.getElementById('modalProductPrice').value = customProducts[index].price;
-        document.getElementById('modalProductImage').value = customProducts[index].image;
+        document.getElementById('modalProductImageBase64').value = customProducts[index].image;
       } else {
         document.getElementById('productModalTitle').innerText = 'افزودن محصول جدید';
         document.getElementById('modalProductName').value = '';
         document.getElementById('modalProductPrice').value = '';
-        document.getElementById('modalProductImage').value = '';
+        document.getElementById('modalProductImageBase64').value = '';
       }
       document.getElementById('productModal').classList.remove('hidden');
       document.getElementById('productModal').classList.add('flex');
@@ -387,10 +400,10 @@
       const index = parseInt(document.getElementById('productEditIndex').value);
       const name = document.getElementById('modalProductName').value.trim();
       const price = document.getElementById('modalProductPrice').value.trim();
-      const image = document.getElementById('modalProductImage').value.trim();
+      const image = document.getElementById('modalProductImageBase64').value.trim();
 
       if (!name || !price || !image) {
-        alert('لطفاً تمام فیلدهای محصول را کامل پر کنید.');
+        alert('لطفاً اطلاعات محصول و تصویر آن را کامل انتخاب کنید.');
         return;
       }
 
