@@ -110,17 +110,16 @@
  <script>
     const WORKER_URL = "https://bale-sender.salar1368yb.workers.dev";
     
-    // خدمات پیش‌فرض + خدمات سفارشی که ادمین اضافه می‌کند
+    // خدمات پیش‌فرض اصلی (هماهنگ با پنل ادمین)
     let defaultServices = [
       { name: "اصلاح سر و ریش فید", type: "service", duration: 60, price: "۳۵۰,۰۰۰ تومان", icon: "fa-scissors" },
-      { name: "اصلاح سر کلاسیک", type: "service", duration: 45, price: "۲۵۰,۰۰۰ تومان", icon: "fa-scissors" },
-      { name: "اصلاح سر فید", type: "service", duration: 45, price: "۲۸۰,۰۰۰ تومان", icon: "fa-scissors" }
+      { name: "اصلاح سر کلاسیک", type: "service", duration: 45, price: "۲۵۰,۰۰۰ تومان", icon: "fa-scissors" }
     ];
 
     let customServices = [];
     let customProducts = [];
     
-    // بازه کامل سانس‌ها از ۱۰ صبح تا ۱۰ شب (مطابق با پنل ادمین)
+    // بازه کامل سانس‌ها از ۱۰ صبح تا ۱۰ شب
     const halfHourSlots = [
       { start: "۱۰:۰۰", end: "۱۰:۳۰" }, { start: "۱۰:۳۰", end: "۱۱:۰۰" }, 
       { start: "۱۱:۰۰", end: "۱۱:۳۰" }, { start: "۱۱:۳۰", end: "۱۲:۰۰" }, 
