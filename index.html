@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>رزرو آنلاین و فروشگاه پیرایش سالار</title>
+  <script src="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.2/dist/tailwind.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- کتابخانه تقویم شمسی -->
   <script src="https://cdn.jsdelivr.net/npm/jalaali-js/dist/jalaali.js"></script>
@@ -37,7 +38,7 @@
       </div>
    </div>
   
-   <div class="flex-1 overflow-y-auto p-3.5 space-y-3.5 custom-scrollbar" id="mainContainer">
+   <div class="flex-1 overflow-y-auto p-3.5 space-y-3.5 custom-scrollbar relative" id="mainContainer">
   
       <div id="stepHeaderBox" class="flex items-center justify-between px-3 bg-slate-800/40 p-2.5 rounded-2xl border border-slate-800">
         <div class="flex items-center gap-2">
@@ -112,6 +113,20 @@
           <div><a href="#" onclick="openSalarProfile(event)" class="inline-block bg-slate-800 border border-slate-700 px-4 py-1.5 rounded-xl text-emerald-400 font-bold hover:bg-slate-700 transition cursor-pointer" dir="ltr">@salarx8</a></div>
         </div>
       </div>
+
+      <!-- پاپ‌آپ اختصاصی تأیید لغو (بدون متن نامربوط مرورگر) -->
+      <div id="customConfirmModal" class="absolute inset-0 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-slate-900 border border-slate-700 p-4 rounded-2xl w-full max-w-xs text-center space-y-3 shadow-2xl">
+          <i class="fa-solid fa-triangle-exclamation text-amber-400 text-3xl"></i>
+          <h3 class="text-xs font-bold text-white" id="confirmText">آیا مطمئن هستید؟</h3>
+          <p class="text-[11px] text-slate-400">زمان نوبت شما بعد از لغو آزاد خواهد شد.</p>
+          <div class="flex gap-2 pt-2">
+            <button onclick="closeConfirmModal(false)" class="w-1/2 py-2 bg-slate-800 text-slate-300 rounded-xl text-xs font-semibold cursor-pointer hover:bg-slate-700">انصراف</button>
+            <button onclick="closeConfirmModal(true)" class="w-1/2 py-2 bg-rose-500 text-white rounded-xl text-xs font-semibold cursor-pointer hover:bg-rose-600">بله، لغو شود</button>
+          </div>
+        </div>
+      </div>
+
    </div>
   
    <div id="bottomBar" class="p-3.5 bg-slate-900 border-t border-slate-800 flex gap-2">
@@ -129,6 +144,8 @@
     
     let step = 1, selectedItem = null, serviceDuration = 30, slotStepMinutes = 30, itemType = "service", selectedDateKey = "", selectedTimeSlot = "";
     let userChatId = null;
+    let pendingCancelKey = null;
+    let confirmCallback = null;
   
     try {
       if (window.Bale && window.Bale.WebApp) {
@@ -492,7 +509,7 @@
       }
     }
 
-    // بخش مدیریت و لغو نوبت‌های من
+    // بخش مدیریت و لغو نوبت‌های من با بررسی قانون ۴ ساعت فاصله
     async function openMyBookings() {
       if (!userChatId) {
         alert("شناسه کاربری شما از طریق بله شناسایی نشد. لطفاً مینی‌اپ را یک‌بار ببندید و دوباره از داخل ربات باز کنید.");
@@ -532,15 +549,38 @@
         let html = '<h3 class="text-xs font-bold text-white mb-2">📅 نوبت‌های فعال شما:</h3><div class="space-y-2.5">';
         bookings.forEach(b => {
           const safeKey = b.slotKey || "";
+          
+          // بررسی فاصله زمانی تا ۴ ساعت قبل از نوبت
+          let canCancel = true;
+          if (b.date && b.time) {
+            try {
+              const parts = b.date.split('-'); // [YYYY, MM, DD]
+              const timeParts = b.time.split('-')[0].split(':'); // شروع بازه مثل [12, 00]
+              const g = jalaali.toGregorian(parseInt(parts[0]), parseInt(parts[1]), parseInt(parts[2]));
+              const appointmentTime = new Date(g.gy, g.gm - 1, g.gd, parseInt(timeParts[0]), parseInt(timeParts[1]));
+              const now = new Date();
+              const diffHours = (appointmentTime - now) / (1000 * 60 * 60);
+
+              if (diffHours < 4) {
+                canCancel = false;
+              }
+            } catch(e) { console.error(e); }
+          }
+
           html += `
             <div class="p-3 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-between">
               <div>
                 <h4 class="text-xs font-bold text-white">${b.serviceName} (${b.price})</h4>
                 <p class="text-[11px] text-slate-400 mt-1">تاریخ: ${b.date} | ساعت: ${b.time}</p>
+                ${!canCancel ? '<p class="text-[10px] text-rose-400 mt-1">کمتر از ۴ ساعت مانده (غیرقابل لغو)</p>' : ''}
               </div>
-              <button onclick="cancelMyBooking('${safeKey}')" class="px-3 py-1.5 bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white border border-rose-500/20 rounded-lg text-xs font-semibold transition cursor-pointer">
-                لغو نوبت
-              </button>
+              ${canCancel ? `
+                <button onclick="confirmCancel('${safeKey}')" class="px-3 py-1.5 bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white border border-rose-500/20 rounded-lg text-xs font-semibold transition cursor-pointer">
+                  لغو نوبت
+                </button>` : `
+                <button disabled class="px-3 py-1.5 bg-slate-800 text-slate-600 border border-slate-700 rounded-lg text-xs font-semibold cursor-not-allowed">
+                  غیرقابل لغو
+                </button>`}
             </div>`;
         });
         html += '</div><button onclick="location.reload()" class="w-full mt-4 py-2.5 bg-slate-800 text-slate-300 rounded-xl text-xs font-semibold cursor-pointer">بازگشت</button>';
@@ -551,14 +591,24 @@
       }
     }
 
-    async function cancelMyBooking(slotKey) {
+    function confirmCancel(slotKey) {
       if (!slotKey) {
         alert("این نوبت قدیمی است و کلید شناسایی ندارد. لطفاً یک نوبت جدید ثبت کنید.");
         return;
       }
-      
-      if (!confirm("آیا از لغو این نوبت اطمینان دارید؟ زمان نوبت شما آزاد خواهد شد.")) return;
+      pendingCancelKey = slotKey;
+      document.getElementById('customConfirmModal').classList.remove('hidden');
+    }
 
+    function closeConfirmModal(result) {
+      document.getElementById('customConfirmModal').classList.add('hidden');
+      if (result && pendingCancelKey) {
+        executeCancel(pendingCancelKey);
+      }
+      pendingCancelKey = null;
+    }
+
+    async function executeCancel(slotKey) {
       try {
         const res = await fetch(`${WORKER_URL}/cancel-booking`, {
           method: "POST",
