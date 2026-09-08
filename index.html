@@ -566,8 +566,14 @@
           return;
         }
 
-        let html = '<h3 class="text-xs font-bold text-white mb-2">📅 نوبت‌های فعال شما:</h3><div class="space-y-2.5">';
-        activeBookings.forEach(b => {
+let html = `
+  <div class="mb-3 p-2.5 bg-amber-500/10 border border-amber-500/20 rounded-xl text-[11px] text-amber-400 flex items-center gap-2">
+    <i class="fa-solid fa-triangle-exclamation flex-shrink-0"></i>
+    <span>تا ۴ ساعت قبل از وقت رزرو امکان لغو نوبت وجود دارد.</span>
+  </div>
+  <h3 class="text-xs font-bold text-white mb-2">📅 نوبت‌های فعال شما:</h3>
+  <div class="space-y-2.5">
+`;        activeBookings.forEach(b => {
           const safeKey = b.slotKey || "";
           
           let canCancel = true;
