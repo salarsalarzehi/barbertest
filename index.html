@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>رزرو آنلاین و فروشگاه پیرایش سالار</title>
-  <script src="https://cdn.jsdelivr.net/npm/tailwindcss@3.3.2/dist/tailwind.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- کتابخانه تقویم شمسی -->
   <script src="https://cdn.jsdelivr.net/npm/jalaali-js/dist/jalaali.js"></script>
@@ -114,7 +113,7 @@
         </div>
       </div>
 
-      <!-- پاپ‌آپ اختصاصی تأیید لغو (بدون متن نامربوط مرورگر) -->
+      <!-- پاپ‌آپ اختصاصی تأیید لغو -->
       <div id="customConfirmModal" class="absolute inset-0 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-4 hidden z-50">
         <div class="bg-slate-900 border border-slate-700 p-4 rounded-2xl w-full max-w-xs text-center space-y-3 shadow-2xl">
           <i class="fa-solid fa-triangle-exclamation text-amber-400 text-3xl"></i>
@@ -145,7 +144,6 @@
     let step = 1, selectedItem = null, serviceDuration = 30, slotStepMinutes = 30, itemType = "service", selectedDateKey = "", selectedTimeSlot = "";
     let userChatId = null;
     let pendingCancelKey = null;
-    let confirmCallback = null;
   
     try {
       if (window.Bale && window.Bale.WebApp) {
@@ -509,7 +507,7 @@
       }
     }
 
-    // بخش مدیریت و لغو نوبت‌های من با بررسی قانون ۴ ساعت فاصله
+    // بخش مدیریت نوبت‌ها (فیلتر کردن نوبت‌های منقضی شده)
     async function openMyBookings() {
       if (!userChatId) {
         alert("شناسه کاربری شما از طریق بله شناسایی نشد. لطفاً مینی‌اپ را یک‌بار ببندید و دوباره از داخل ربات باز کنید.");
@@ -537,34 +535,54 @@
         const bookings = await res.json();
 
         if (!Array.isArray(bookings) || bookings.length === 0) {
-          myBookingsContainer.innerHTML = `
-            <div class="text-center py-8 space-y-3">
-              <i class="fa-solid fa-calendar-xmark text-slate-500 text-4xl"></i>
-              <p class="text-xs text-slate-400">شما هیچ نوبت فعالی ندارید.</p>
-              <button onclick="location.reload()" class="px-4 py-2 bg-slate-800 text-slate-200 rounded-xl text-xs font-semibold cursor-pointer">بازگشت به صفحه اصلی</button>
-            </div>`;
+          showNoActiveBookings(myBookingsContainer);
+          return;
+        }
+
+        const now = new Date();
+        const activeBookings = [];
+
+        // بررسی و جدا کردن نوبت‌های فعال از منقضی شده‌ها
+        bookings.forEach(b => {
+          if (!b.date || !b.time) return;
+          try {
+            const parts = b.date.split('-'); 
+            const timeParts = b.time.split('-')[0].split(':'); 
+            const g = jalaali.toGregorian(parseInt(parts[0]), parseInt(parts[1]), parseInt(parts[2]));
+            const appointmentEndTime = new Date(g.gy, g.gm - 1, g.gd, parseInt(timeParts[0]), parseInt(timeParts[1]));
+            
+            // اگر زمان نوبت هنوز نگذشته باشد (یا کمتر از زمان حال باشد) نگهش دار
+            if (appointmentEndTime > now) {
+              activeBookings.push(b);
+            }
+          } catch(e) {
+            // اگر تاریخ فرمت خاصی داشت و ارور داد، امنیتی نگهش دار
+            activeBookings.push(b);
+          }
+        });
+
+        if (activeBookings.length === 0) {
+          showNoActiveBookings(myBookingsContainer);
           return;
         }
 
         let html = '<h3 class="text-xs font-bold text-white mb-2">📅 نوبت‌های فعال شما:</h3><div class="space-y-2.5">';
-        bookings.forEach(b => {
+        activeBookings.forEach(b => {
           const safeKey = b.slotKey || "";
           
-          // بررسی فاصله زمانی تا ۴ ساعت قبل از نوبت
           let canCancel = true;
           if (b.date && b.time) {
             try {
-              const parts = b.date.split('-'); // [YYYY, MM, DD]
-              const timeParts = b.time.split('-')[0].split(':'); // شروع بازه مثل [12, 00]
+              const parts = b.date.split('-'); 
+              const timeParts = b.time.split('-')[0].split(':'); 
               const g = jalaali.toGregorian(parseInt(parts[0]), parseInt(parts[1]), parseInt(parts[2]));
               const appointmentTime = new Date(g.gy, g.gm - 1, g.gd, parseInt(timeParts[0]), parseInt(timeParts[1]));
-              const now = new Date();
               const diffHours = (appointmentTime - now) / (1000 * 60 * 60);
 
               if (diffHours < 4) {
                 canCancel = false;
               }
-            } catch(e) { console.error(e); }
+            } catch(e) {}
           }
 
           html += `
@@ -589,6 +607,15 @@
       } catch (err) {
         myBookingsContainer.innerHTML = '<p class="text-xs text-rose-400 text-center py-4">خطا در دریافت اطلاعات نوبت‌ها.</p>';
       }
+    }
+
+    function showNoActiveBookings(container) {
+      container.innerHTML = `
+        <div class="text-center py-8 space-y-3">
+          <i class="fa-solid fa-calendar-xmark text-slate-500 text-4xl"></i>
+          <p class="text-xs text-slate-400">شما هیچ نوبت فعالی ندارید.</p>
+          <button onclick="location.reload()" class="px-4 py-2 bg-slate-800 text-slate-200 rounded-xl text-xs font-semibold cursor-pointer">بازگشت به صفحه اصلی</button>
+        </div>`;
     }
 
     function confirmCancel(slotKey) {
