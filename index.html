@@ -492,7 +492,7 @@
       }
     }
 
-    // توابع بخش مدیریت و لغو نوبت‌های من
+    // بخش مدیریت و لغو نوبت‌های من
     async function openMyBookings() {
       if (!userChatId) {
         alert("شناسه کاربری شما از طریق بله شناسایی نشد. لطفاً مینی‌اپ را یک‌بار ببندید و دوباره از داخل ربات باز کنید.");
@@ -531,13 +531,14 @@
 
         let html = '<h3 class="text-xs font-bold text-white mb-2">📅 نوبت‌های فعال شما:</h3><div class="space-y-2.5">';
         bookings.forEach(b => {
+          const safeKey = b.slotKey || "";
           html += `
             <div class="p-3 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-between">
               <div>
                 <h4 class="text-xs font-bold text-white">${b.serviceName} (${b.price})</h4>
                 <p class="text-[11px] text-slate-400 mt-1">تاریخ: ${b.date} | ساعت: ${b.time}</p>
               </div>
-              <button onclick="cancelMyBooking('${b.slotKey}')" class="px-3 py-1.5 bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white border border-rose-500/20 rounded-lg text-xs font-semibold transition cursor-pointer">
+              <button onclick="cancelMyBooking('${safeKey}')" class="px-3 py-1.5 bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white border border-rose-500/20 rounded-lg text-xs font-semibold transition cursor-pointer">
                 لغو نوبت
               </button>
             </div>`;
@@ -551,6 +552,11 @@
     }
 
     async function cancelMyBooking(slotKey) {
+      if (!slotKey) {
+        alert("این نوبت قدیمی است و کلید شناسایی ندارد. لطفاً یک نوبت جدید ثبت کنید.");
+        return;
+      }
+      
       if (!confirm("آیا از لغو این نوبت اطمینان دارید؟ زمان نوبت شما آزاد خواهد شد.")) return;
 
       try {
