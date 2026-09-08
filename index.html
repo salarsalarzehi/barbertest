@@ -507,7 +507,7 @@
       }
     }
 
-    // بخش مدیریت نوبت‌ها (فیلتر کردن نوبت‌های منقضی شده)
+    // بخش مدیریت نوبت‌ها (فیلتر کردن نوبت‌های منقضی شده + اخطار ۴ ساعت)
     async function openMyBookings() {
       if (!userChatId) {
         alert("شناسه کاربری شما از طریق بله شناسایی نشد. لطفاً مینی‌اپ را یک‌بار ببندید و دوباره از داخل ربات باز کنید.");
@@ -551,12 +551,11 @@
             const g = jalaali.toGregorian(parseInt(parts[0]), parseInt(parts[1]), parseInt(parts[2]));
             const appointmentEndTime = new Date(g.gy, g.gm - 1, g.gd, parseInt(timeParts[0]), parseInt(timeParts[1]));
             
-            // اگر زمان نوبت هنوز نگذشته باشد (یا کمتر از زمان حال باشد) نگهش دار
+            // اگر زمان نوبت هنوز نگذشته باشد
             if (appointmentEndTime > now) {
               activeBookings.push(b);
             }
           } catch(e) {
-            // اگر تاریخ فرمت خاصی داشت و ارور داد، امنیتی نگهش دار
             activeBookings.push(b);
           }
         });
@@ -566,14 +565,16 @@
           return;
         }
 
-let html = `
-  <div class="mb-3 p-2.5 bg-amber-500/10 border border-amber-500/20 rounded-xl text-[11px] text-amber-400 flex items-center gap-2">
-    <i class="fa-solid fa-triangle-exclamation flex-shrink-0"></i>
-    <span>تا ۴ ساعت قبل از وقت رزرو امکان لغو نوبت وجود دارد.</span>
-  </div>
-  <h3 class="text-xs font-bold text-white mb-2">📅 نوبت‌های فعال شما:</h3>
-  <div class="space-y-2.5">
-`;        activeBookings.forEach(b => {
+        let html = `
+          <div class="mb-3 p-2.5 bg-amber-500/10 border border-amber-500/20 rounded-xl text-[11px] text-amber-400 flex items-center gap-2">
+            <i class="fa-solid fa-triangle-exclamation flex-shrink-0"></i>
+            <span>تا ۴ ساعت قبل از وقت رزرو امکان لغو نوبت وجود دارد.</span>
+          </div>
+          <h3 class="text-xs font-bold text-white mb-2">📅 نوبت‌های فعال شما:</h3>
+          <div class="space-y-2.5">
+        `;
+
+        activeBookings.forEach(b => {
           const safeKey = b.slotKey || "";
           
           let canCancel = true;
