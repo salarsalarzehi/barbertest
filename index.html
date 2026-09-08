@@ -29,7 +29,12 @@
         </div>
         <span class="font-bold text-white text-sm">پیرایش سالار</span>
       </div>
-      <span class="text-[11px] bg-emerald-500/10 text-emerald-400 px-2.5 py-0.5 rounded-full border border-emerald-500/20 font-medium">مینی‌اپ بله</span>
+      <div class="flex items-center gap-2">
+        <button onclick="openMyBookings()" class="text-[11px] bg-sky-500/10 text-sky-400 px-2.5 py-1 rounded-full border border-sky-500/20 font-medium cursor-pointer transition hover:bg-sky-500/20">
+          <i class="fa-solid fa-calendar-check ml-1"></i> نوبت‌های من
+        </button>
+        <span class="text-[11px] bg-emerald-500/10 text-emerald-400 px-2.5 py-0.5 rounded-full border border-emerald-500/20 font-medium">مینی‌اپ بله</span>
+      </div>
    </div>
   
    <div class="flex-1 overflow-y-auto p-3.5 space-y-3.5 custom-scrollbar" id="mainContainer">
@@ -216,7 +221,6 @@
       itemType = item.type || 'product';
       
       serviceDuration = parseInt(item.duration) || 30;
-      // اگر خدمت ۴۵ دقیقه‌ای یا ۶۰ دقیقه‌ای باشد، بازه زمانی آن معادل ۶۰ دقیقه کامل (یک ساعت) در نظر گرفته می‌شود
       slotStepMinutes = (serviceDuration >= 45) ? 60 : 30;
 
       const btn = document.getElementById('nextBtn');
@@ -234,7 +238,6 @@
       } catch (err) { window.open(url, '_blank'); }
     }
   
-    // ساخت کاروسل تقویم شمسی ۳۰ روز آینده
     function renderCalendar() {
       const container = document.getElementById('dateContainer');
       container.innerHTML = '';
@@ -283,7 +286,6 @@
       }
     }
   
-    // تولید سانس‌ها به شکل بازه کامل (مثلا 13:00-13:30 یا 13:00-14:00)
     function renderTimes() {
       const container = document.getElementById('timeContainer');
       container.innerHTML = '';
@@ -292,8 +294,8 @@
       document.getElementById('timeLabel').innerText = labelText;
 
       const slots = [];
-      let currentMinutes = 10 * 60; // شروع از ۱۰:۰۰ صبح
-      const endMinutes = 22 * 60;   // پایان در ۲۲:۰۰ شب
+      let currentMinutes = 10 * 60; 
+      const endMinutes = 22 * 60;   
 
       while (currentMinutes + slotStepMinutes <= endMinutes) {
         const startHour = Math.floor(currentMinutes / 60);
@@ -351,7 +353,7 @@
       return /^(09[0-9]{9}|\+989[0-9]{9})$/.test(phone);
     }
   
-    async function finalizeOrder(adminText, userText, slotsToDisable) {
+    async function finalizeOrder(adminText, userText, slotsToDisable, slotKeyExtra, dateExtra, timeExtra) {
       try {
         if (itemType === 'service' && slotsToDisable.length > 0) {
           slotsToDisable.forEach(subKey => { if (!disabledSlots.includes(subKey)) disabledSlots.push(subKey); });
@@ -364,7 +366,15 @@
         await fetch(`${WORKER_URL}/`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ adminText, userChatId, userText, bookingInfo: selectedItem })
+          body: JSON.stringify({ 
+            adminText, 
+            userChatId, 
+            userText, 
+            bookingInfo: selectedItem,
+            slotKey: slotKeyExtra,
+            dateStr: dateExtra,
+            timeStr: timeExtra
+          })
         });
       } catch (err) { console.error(err); }
       finally {
@@ -427,10 +437,13 @@
           return;
         }
 
-        let slotsToDisable = [], adminText = "", userText = "";
+        let slotsToDisable = [], adminText = "", userText = "", slotKeyExtra = "", dateExtra = "", timeExtra = "";
 
         if (itemType === 'service') {
-          slotsToDisable.push(`${selectedDateKey}_${selectedTimeSlot}`);
+          slotKeyExtra = `${selectedDateKey}_${selectedTimeSlot}`;
+          dateExtra = selectedDateKey;
+          timeExtra = selectedTimeSlot;
+          slotsToDisable.push(slotKeyExtra);
           adminText = `💈 **نوبت جدید در پیرایش سالار**\n\n👤 مشتری: ${name}\n📞 تلفن: ${phone}\n✂️ خدمت: ${selectedItem.name} (${selectedItem.price})\n⏰ زمان: ${selectedDateKey} ساعت ${selectedTimeSlot} (مدت: ${serviceDuration} دقیقه)\n📝 توضیحات: ${note}`;
           userText = `✅ **رزرو شما با موفقیت ثبت شد!**\n\nسلام ${name} عزیز،\nنوبت شما برای خدمت **${selectedItem.name}** (${selectedItem.price}) در تاریخ **${selectedDateKey} ساعت ${selectedTimeSlot}** ثبت گردید.\n\nمنتظر حضور شما در پیرایش سالار هستیم!✂️`;
         } else {
@@ -445,7 +458,7 @@
         document.getElementById('bottomBar').classList.add('hidden');
         document.getElementById('successState').classList.remove('hidden');
   
-        finalizeOrder(adminText, userText, slotsToDisable);
+        finalizeOrder(adminText, userText, slotsToDisable, slotKeyExtra, dateExtra, timeExtra);
       }
     }
   
@@ -476,6 +489,85 @@
           document.getElementById('stepTitle').innerText = 'انتخاب زمان نوبت';
           document.getElementById('nextBtn').innerText = 'ادامه';
         }
+      }
+    }
+
+    // توابع بخش مدیریت و لغو نوبت‌های من
+    async function openMyBookings() {
+      if (!userChatId) {
+        alert("شناسه کاربری شما از طریق بله شناسایی نشد. لطفاً مینی‌اپ را یک‌بار ببندید و دوباره از داخل ربات باز کنید.");
+        return;
+      }
+
+      document.getElementById('stepHeaderBox').classList.add('hidden');
+      document.getElementById('step1').classList.add('hidden');
+      document.getElementById('step2').classList.add('hidden');
+      document.getElementById('step3').classList.add('hidden');
+      document.getElementById('bottomBar').classList.add('hidden');
+
+      let myBookingsContainer = document.getElementById('myBookingsState');
+      if (!myBookingsContainer) {
+        myBookingsContainer = document.createElement('div');
+        myBookingsContainer.id = 'myBookingsState';
+        myBookingsContainer.className = "space-y-3 py-2";
+        document.getElementById('mainContainer').appendChild(myBookingsContainer);
+      }
+      myBookingsContainer.classList.remove('hidden');
+      myBookingsContainer.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">در حال بررسی نوبت‌های شما...</p>';
+
+      try {
+        const res = await fetch(`${WORKER_URL}/my-bookings?chatId=${userChatId}`);
+        const bookings = await res.json();
+
+        if (!Array.isArray(bookings) || bookings.length === 0) {
+          myBookingsContainer.innerHTML = `
+            <div class="text-center py-8 space-y-3">
+              <i class="fa-solid fa-calendar-xmark text-slate-500 text-4xl"></i>
+              <p class="text-xs text-slate-400">شما هیچ نوبت فعالی ندارید.</p>
+              <button onclick="location.reload()" class="px-4 py-2 bg-slate-800 text-slate-200 rounded-xl text-xs font-semibold cursor-pointer">بازگشت به صفحه اصلی</button>
+            </div>`;
+          return;
+        }
+
+        let html = '<h3 class="text-xs font-bold text-white mb-2">📅 نوبت‌های فعال شما:</h3><div class="space-y-2.5">';
+        bookings.forEach(b => {
+          html += `
+            <div class="p-3 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-between">
+              <div>
+                <h4 class="text-xs font-bold text-white">${b.serviceName} (${b.price})</h4>
+                <p class="text-[11px] text-slate-400 mt-1">تاریخ: ${b.date} | ساعت: ${b.time}</p>
+              </div>
+              <button onclick="cancelMyBooking('${b.slotKey}')" class="px-3 py-1.5 bg-rose-500/10 text-rose-400 hover:bg-rose-500 hover:text-white border border-rose-500/20 rounded-lg text-xs font-semibold transition cursor-pointer">
+                لغو نوبت
+              </button>
+            </div>`;
+        });
+        html += '</div><button onclick="location.reload()" class="w-full mt-4 py-2.5 bg-slate-800 text-slate-300 rounded-xl text-xs font-semibold cursor-pointer">بازگشت</button>';
+        myBookingsContainer.innerHTML = html;
+
+      } catch (err) {
+        myBookingsContainer.innerHTML = '<p class="text-xs text-rose-400 text-center py-4">خطا در دریافت اطلاعات نوبت‌ها.</p>';
+      }
+    }
+
+    async function cancelMyBooking(slotKey) {
+      if (!confirm("آیا از لغو این نوبت اطمینان دارید؟ زمان نوبت شما آزاد خواهد شد.")) return;
+
+      try {
+        const res = await fetch(`${WORKER_URL}/cancel-booking`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ chatId: userChatId, slotKey })
+        });
+        const result = await res.json();
+        if (result.success) {
+          alert("نوبت شما با موفقیت لغو شد.");
+          openMyBookings(); 
+        } else {
+          alert("خطایی در لغو نوبت رخ داد.");
+        }
+      } catch (err) {
+        alert("خطای ارتباط با سرور.");
       }
     }
   </script>
